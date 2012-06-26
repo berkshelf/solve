@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-require File.expand_path('../lib/solve/version', __FILE__)
+require File.expand_path('../lib/solve/gem_version', __FILE__)
 
 Gem::Specification.new do |s|
   s.authors       = ["Jamie Winsor"]
