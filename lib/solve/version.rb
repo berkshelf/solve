@@ -6,7 +6,7 @@ module Solve
     attr_reader :minor
     attr_reader :patch
 
-    # @param [String] string
+    # @param [#to_s] ver_str
     def initialize(ver_str = String.new)
       @major, @minor, @patch = parse(ver_str)
     end

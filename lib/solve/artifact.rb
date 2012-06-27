@@ -4,47 +4,96 @@ module Solve
     attr_reader :name
     attr_reader :version
 
+    # @param [Solve::Graph] graph
     # @param [#to_s] name
-    # @param [#to_s] version
+    # @param [Solve::Version, #to_s] version
     def initialize(graph, name, version)
       @graph = graph
       @name = name
       @version = Version.new(version)
-      @dependencies = Array.new
+      @dependencies = Hash.new
     end
 
     # @overload dependencies(name, constraint)
+    #   Return the Solve::Dependency from the collection of
+    #   dependencies with the given name and constraint.
+    #
     #   @param [#to_s]
-    #   @param [#to_s]
+    #   @param [Solve::Constraint, #to_s]
     #
     #   @return [Solve::Dependency]
-    # @overload dependencies()
+    # @overload dependencies
+    #   Return the collection of dependencies
+    #
     #   @return [Array<Solve::Dependency>]
     def dependencies(*args)
-
-    end
-
-    # @param [#to_s] name
-    # @param [#to_s] constraint
-    #
-    # @return [Array<Solve::Dependency>]
-    def depends(name, constraint)
-      dependency = Dependency.new(self, constraint)
-
-      unless @dependencies.include?(dependency)
-        @dependencies << dependency
+      if args.empty?
+        return dependency_collection
+      end
+      unless args.length == 2
+        raise ArgumentError, "Unexpected number of arguments. You gave: #{args.length}. Expected: 0 or 2."
       end
 
-      @dependencies
+      name, constraint = args
+
+      if name.nil? || constraint.nil?
+        raise ArgumentError, "A name and constraint must be specified. You gave: #{args}."
+      end
+
+      dependency = Dependency.new(self, name, constraint)
+      add_dependency(dependency)
+    end
+    alias_method :depends, :dependencies
+
+    # Add a Solve::Dependency to the collection of dependencies 
+    # and return the added Solve::Dependency. No change will be
+    # made if the dependency is already a member of the collection.
+    #
+    # @param [Solve::Dependency] dependency
+    #
+    # @return [Solve::Dependency]
+    def add_dependency(dependency)
+      unless has_dependency?(dependency)
+        @dependencies[dependency.to_s] = dependency
+      end
+
+      dependency
     end
 
-    # @return [Solve::Artifact]
+    # @param [Solve::Dependency] dependency
+    #
+    # @return [Solve::Dependency, nil]
+    def remove_dependency(dependency)
+      if has_dependency?(dependency)
+        @dependencies.delete(dependency.to_s)
+      end
+    end
+
+    # @param [Solve::Dependency] dependency
+    #
+    # @return [Boolean]
+    def has_dependency?(dependency)
+      @dependencies.has_key?(dependency.to_s)
+    end
+
+    # @return [Solve::Artifact, nil]
     def delete
-      @graph = nil
+      unless graph.nil?
+        result = graph.remove_artifact(self)
+        @graph = nil
+        result
+      end
     end
 
     def to_s
       "#{name}-#{version}"
     end
+
+    private
+
+      # @return [Array<Solve::Dependency>]
+      def dependency_collection
+        @dependencies.collect { |name, dependency| dependency }
+      end
   end
 end

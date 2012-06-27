@@ -4,13 +4,15 @@ describe Solve do
   describe "ClassMethods" do
     subject { Solve }
 
+    let(:graph) { double('graph') }
+
     describe "#it" do
-      pending
+      it "returns nil if a solution does not exist" do
+        subject.it(graph).should be_nil
+      end
     end
 
-    describe "#it!" do
-      let(:graph) { double('graph') }
-      
+    describe "#it!" do      
       it "raises NoSolutionError if a solution does not exist" do
         lambda {
           subject.it!(graph)

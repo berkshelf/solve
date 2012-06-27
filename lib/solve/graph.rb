@@ -35,7 +35,7 @@ module Solve
       add_artifact(artifact)
     end
 
-    # Add a Solve::Artifact the collection of artifacts and
+    # Add a Solve::Artifact to the collection of artifacts and
     # return the added Solve::Artifact. No change will be made
     # if the artifact is already a member of the collection.
     #
@@ -50,7 +50,7 @@ module Solve
       artifact
     end
 
-    # @param [Solve::Artifact] artifact
+    # @param [Solve::Artifact, nil] artifact
     def remove_artifact(artifact)
       if has_artifact?(artifact)
         @artifacts.delete(artifact.to_s)
@@ -58,6 +58,8 @@ module Solve
     end
 
     # @param [Solve::Artifact] artifact
+    #
+    # @return [Boolean]
     def has_artifact?(artifact)
       @artifacts.has_key?(artifact.to_s)
     end
@@ -106,8 +108,9 @@ module Solve
 
       demand
     end
+    alias_method :demand, :add_demand
 
-    # @param [Solve::Demand] demand
+    # @param [Solve::Demand, nil] demand
     def remove_demand(demand)
       if has_demand?(demand)
         @demands.delete(demand.to_s)
@@ -115,6 +118,8 @@ module Solve
     end
 
     # @param [Solve::Demand] demand
+    #
+    # @return [Boolean]
     def has_demand?(demand)
       @demands.has_key?(demand.to_s)
     end

@@ -9,16 +9,16 @@ TODO: Write a gem description
 ## Usage
 
     graph = Graph.new
-    graph.aritfact("nginx", "1.0.0").depends("nginx", "~> 1.0.0")
-    graph.demand('nginx', '>= 0.100.0')
+    graph.aritfacts("nginx", "1.0.0").depends("nginx", "~> 1.0.0")
+    graph.demands('nginx', '>= 0.100.0')
 
     Solve.it!(graph)
 
 ### Removing an artifact, demand, or dependency
 
-    graph.aritfact("nginx", "1.0.0").delete
+    graph.aritfacts("nginx", "1.0.0").delete
 
-    graph.demand('nginx', '>= 0.100.0').delete
+    graph.demands('nginx', '>= 0.100.0').delete
 
     artifact.dependencies("nginx", "~> 1.0.0").delete
 

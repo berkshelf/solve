@@ -13,7 +13,9 @@ module Solve
     #
     # @return [Hash]
     def it(graph)
-      #
+      it!(graph)
+    rescue NoSolutionError
+      nil
     end
 
     # @param [Solve::Graph] graph
