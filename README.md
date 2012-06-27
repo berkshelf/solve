@@ -24,6 +24,12 @@ TODO: Write a gem description
 
 ### Removing an artifact
 
+## Neckbeard Usage
+
+  graph = Graph.new
+  artifact = Artifact.new(graph)
+  graph.add_artifact(artifact)
+
 ## Authors
 
 Author:: Jamie Winsor (<jamie@vialstudios.com>)
