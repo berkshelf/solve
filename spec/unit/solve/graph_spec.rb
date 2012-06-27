@@ -3,56 +3,78 @@ require 'spec_helper'
 describe Solve::Graph do
   subject { Solve::Graph.new }
 
-  describe "#artifact" do
-    let(:name) { "nginx" }
-    let(:version) { "0.101.5" }
+  describe "#artifacts" do
+    context "given a name and version argument" do
+      let(:name) { "nginx" }
+      let(:version) { "0.101.5" }
 
-    context "given the artifact of the given name and version does not exist" do
-      it "returns a Solve::Artifact" do
-        subject.artifact(name, version).should be_a(Solve::Artifact)
+      context "given the artifact of the given name and version does not exist" do
+        it "returns a Solve::Artifact" do
+          subject.artifacts(name, version).should be_a(Solve::Artifact)
+        end
+
+        it "the artifact has the given name" do
+          subject.artifacts(name, version).name.should eql(name)
+        end
+
+        it "the artifact has the given version" do
+          subject.artifacts(name, version).version.to_s.should eql(version)
+        end
+
+        it "adds an artifact to the artifacts collection" do
+          subject.artifacts(name, version)
+
+          subject.artifacts.should have(1).item
+        end
+
+        it "the artifact added matches the given name" do
+          subject.artifacts(name, version)
+
+          subject.artifacts[0].name.should eql(name)
+        end
+
+        it "the artifact added matches the given version" do
+          subject.artifacts(name, version)
+
+          subject.artifacts[0].version.to_s.should eql(version)
+        end
+      end
+    end
+
+    context "given no arguments" do
+      it "returns an array" do
+        subject.artifacts.should be_a(Array)
       end
 
-      it "the artifact has the given name" do
-        subject.artifact(name, version).name.should eql(name)
+      it "returns an empty array if no artifacts have been accessed" do
+        subject.artifacts.should have(0).items
       end
 
-      it "the artifact has the given version" do
-        subject.artifact(name, version).version.to_s.should eql(version)
-      end
-
-      it "adds an artifact to the artifacts collection" do
-        subject.artifact(name, version)
+      it "returns an array containing an artifact if one was accessed" do
+        subject.artifacts("nginx", "0.101.5")
 
         subject.artifacts.should have(1).item
       end
+    end
 
-      it "the artifact added matches the given name" do
-        subject.artifact(name, version)
-
-        subject.artifacts[0].name.should eql(name)
+    context "given an unexpected number of arguments" do
+      it "raises an ArgumentError if more than two are provided" do
+        lambda {
+          subject.artifacts(1, 2, 3)
+        }.should raise_error(ArgumentError, "Unexpected number of arguments. You gave: 3. Expected: 0 or 2.")
       end
 
-      it "the artifact added matches the given version" do
-        subject.artifact(name, version)
-
-        subject.artifacts[0].version.to_s.should eql(version)
+      it "raises an ArgumentError if one argument is provided" do
+        lambda {
+          subject.artifacts(nil)
+        }.should raise_error(ArgumentError, "Unexpected number of arguments. You gave: 1. Expected: 0 or 2.")
       end
-    end
-  end
 
-  describe "#artifacts" do
-    it "returns an array" do
-      subject.artifacts.should be_a(Array)
-    end
-
-    it "returns an empty array if no artifacts have been accessed" do
-      subject.artifacts.should have(0).items
-    end
-
-    it "returns an array containing an artifact if one was accessed" do
-      subject.artifact("nginx", "0.101.5")
-
-      subject.artifacts.should have(1).item
+      it "raises an ArgumentError if one of the arguments provided is nil" do
+        lambda {
+          subject.artifacts("nginx", nil)
+        }.should raise_error(ArgumentError, 'A name and version must be specified. You gave: ["nginx", nil].')
+      end
     end
   end
 
@@ -112,7 +134,134 @@ describe Solve::Graph do
     end
   end
 
-  describe "#demand" do
-    pending
+  describe "#demands" do
+    context "given a name and constraint argument" do
+      let(:name) { "nginx" }
+      let(:constraint) { "~> 0.101.5" }
+
+      context "given the artifact of the given name and constraint does not exist" do
+        it "returns a Solve::Demand" do
+          subject.demands(name, constraint).should be_a(Solve::Demand)
+        end
+
+        it "the artifact has the given name" do
+          subject.demands(name, constraint).name.should eql(name)
+        end
+
+        it "the artifact has the given constraint" do
+          subject.demands(name, constraint).constraint.to_s.should eql(constraint)
+        end
+
+        it "adds an artifact to the demands collection" do
+          subject.demands(name, constraint)
+
+          subject.demands.should have(1).item
+        end
+
+        it "the artifact added matches the given name" do
+          subject.demands(name, constraint)
+
+          subject.demands[0].name.should eql(name)
+        end
+
+        it "the artifact added matches the given constraint" do
+          subject.demands(name, constraint)
+
+          subject.demands[0].constraint.to_s.should eql(constraint)
+        end
+      end
+    end
+
+    context "given no arguments" do
+      it "returns an array" do
+        subject.demands.should be_a(Array)
+      end
+
+      it "returns an empty array if no demands have been accessed" do
+        subject.demands.should have(0).items
+      end
+
+      it "returns an array containing a demand if one was accessed" do
+        subject.demands("nginx", "~> 0.101.5")
+
+        subject.demands.should have(1).item
+      end
+    end
+
+    context "given an unexpected number of arguments" do
+      it "raises an ArgumentError if more than two are provided" do
+        lambda {
+          subject.demands(1, 2, 3)
+        }.should raise_error(ArgumentError, "Unexpected number of arguments. You gave: 3. Expected: 0 or 2.")
+      end
+
+      it "raises an ArgumentError if one argument is provided" do
+        lambda {
+          subject.demands(nil)
+        }.should raise_error(ArgumentError, "Unexpected number of arguments. You gave: 1. Expected: 0 or 2.")
+      end
+
+      it "raises an ArgumentError if one of the arguments provided is nil" do
+        lambda {
+          subject.demands("nginx", nil)
+        }.should raise_error(ArgumentError, 'A name and constraint must be specified. You gave: ["nginx", nil].')
+      end
+    end
+  end
+
+  describe "#add_demand" do
+    let(:demand) { double('demand') }
+
+    it "adds a Solve::Artifact to the collection of artifacts" do
+      subject.add_demand(demand)
+
+      subject.should have_demand(demand)
+      subject.demands.should have(1).item
+    end
+
+    it "should not add the same demand twice to the collection" do
+      subject.add_demand(demand)
+      subject.add_demand(demand)
+
+      subject.demands.should have(1).item
+    end
+  end
+
+  describe "#remove_demand" do
+    let(:demand) { double('demand') }
+
+    context "given the demand is a member of the collection" do
+      before(:each) { subject.add_demand(demand) }
+
+      it "removes the Solve::Artifact from the collection of demands" do
+        subject.remove_demand(demand)
+
+        subject.demands.should have(0).items
+      end
+
+      it "returns the removed Solve::Artifact" do
+        subject.remove_demand(demand).should eql(demand)
+      end
+    end
+
+    context "given the demand is not a member of the collection" do
+      it "should return nil" do
+        subject.remove_demand(demand).should be_nil
+      end
+    end
+  end
+
+  describe "#has_demand?" do
+    let(:demand) { double('demand') }
+
+    it "returns true if the given Solve::Artifact is a member of the collection" do
+      subject.add_demand(demand)
+
+      subject.has_demand?(demand).should be_true
+    end
+
+    it "returns false if the given Solve::Artifact is not a member of the collection" do
+      subject.has_demand?(demand).should be_false
+    end
   end
 end
