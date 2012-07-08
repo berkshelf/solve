@@ -172,6 +172,12 @@ describe Solve::Graph do
       end
     end
 
+    context "given only a name argument" do
+      it "returns a demand with a match all version constraint (>= 0.0.0)" do
+        subject.demands("nginx").constraint.to_s.should eql(">= 0.0.0")
+      end
+    end
+
     context "given no arguments" do
       it "returns an array" do
         subject.demands.should be_a(Array)
@@ -192,19 +198,19 @@ describe Solve::Graph do
       it "raises an ArgumentError if more than two are provided" do
         lambda {
           subject.demands(1, 2, 3)
-        }.should raise_error(ArgumentError, "Unexpected number of arguments. You gave: 3. Expected: 0 or 2.")
+        }.should raise_error(ArgumentError, "Unexpected number of arguments. You gave: 3. Expected: 2 or less.")
       end
 
-      it "raises an ArgumentError if one argument is provided" do
+      it "raises an ArgumentError if a name argument of nil is provided" do
         lambda {
           subject.demands(nil)
-        }.should raise_error(ArgumentError, "Unexpected number of arguments. You gave: 1. Expected: 0 or 2.")
+        }.should raise_error(ArgumentError, "A name must be specified. You gave: [nil].")
       end
 
-      it "raises an ArgumentError if one of the arguments provided is nil" do
+      it "raises an ArgumentError if a name and constraint argument are provided but name is nil" do
         lambda {
-          subject.demands("nginx", nil)
-        }.should raise_error(ArgumentError, 'A name and constraint must be specified. You gave: ["nginx", nil].')
+          subject.demands(nil, "= 1.0.0")
+        }.should raise_error(ArgumentError, 'A name must be specified. You gave: [nil, "= 1.0.0"].')
       end
     end
   end
