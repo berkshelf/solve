@@ -73,13 +73,13 @@ describe Solve::Artifact do
         }.should raise_error(ArgumentError, "Unexpected number of arguments. You gave: 3. Expected: 2 or less.")
       end
 
-      it "raises an ArgumentError if one argument is provided" do
+      it "raises an ArgumentError if a name argument is provided but it is nil" do
         lambda {
           subject.dependencies(nil)
         }.should raise_error(ArgumentError, "A name must be specified. You gave: [nil].")
       end
 
-      it "raises an ArgumentError if one of the arguments provided is nil" do
+      it "raises an ArgumentError if a name and constraint argument are provided but the name is nil" do
         lambda {
           subject.dependencies(nil, "= 1.0.0")
         }.should raise_error(ArgumentError, 'A name must be specified. You gave: [nil, "= 1.0.0"].')
