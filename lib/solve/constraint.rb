@@ -34,7 +34,6 @@ module Solve
       end
 
       @version = Version.new(ver_str)
-      # JW TODO: Replace DepSelector
       @dep_constraint = DepSelector::VersionConstraint.new(constraint)
     end
 
@@ -45,7 +44,6 @@ module Solve
     #
     # @return [Boolean]
     def satisfies?(version)
-      # JW TODO: Replace DepSelector
       dep_constraint.include?(version)
     end
 

@@ -9,14 +9,14 @@ TODO: Write a gem description
 ## Usage
 
     graph = Graph.new
-    graph.aritfacts("nginx", "1.0.0").depends("nginx", "~> 1.0.0")
+    graph.artifacts("nginx", "1.0.0").depends("nginx", "~> 1.0.0")
     graph.demands('nginx', '>= 0.100.0')
 
     Solve.it!(graph)
 
 ### Removing an artifact, demand, or dependency
 
-    graph.aritfacts("nginx", "1.0.0").delete
+    graph.artifacts("nginx", "1.0.0").delete
 
     graph.demands('nginx', '>= 0.100.0').delete
 
