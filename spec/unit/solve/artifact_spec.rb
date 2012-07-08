@@ -60,23 +60,29 @@ describe Solve::Artifact do
       end
     end
 
+    context "given only a name argument" do
+      it "returns an array containing a match all constraint (>= 0.0.0)" do
+        subject.dependencies("nginx").constraint.to_s.should eql(">= 0.0.0")
+      end
+    end
+
     context "given an unexpected number of arguments" do
       it "raises an ArgumentError if more than two are provided" do
         lambda {
           subject.dependencies(1, 2, 3)
-        }.should raise_error(ArgumentError, "Unexpected number of arguments. You gave: 3. Expected: 0 or 2.")
+        }.should raise_error(ArgumentError, "Unexpected number of arguments. You gave: 3. Expected: 2 or less.")
       end
 
       it "raises an ArgumentError if one argument is provided" do
         lambda {
           subject.dependencies(nil)
-        }.should raise_error(ArgumentError, "Unexpected number of arguments. You gave: 1. Expected: 0 or 2.")
+        }.should raise_error(ArgumentError, "A name must be specified. You gave: [nil].")
       end
 
       it "raises an ArgumentError if one of the arguments provided is nil" do
         lambda {
-          subject.dependencies("nginx", nil)
-        }.should raise_error(ArgumentError, 'A name and constraint must be specified. You gave: ["nginx", nil].')
+          subject.dependencies(nil, "= 1.0.0")
+        }.should raise_error(ArgumentError, 'A name must be specified. You gave: [nil, "= 1.0.0"].')
       end
     end
   end

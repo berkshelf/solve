@@ -30,14 +30,15 @@ module Solve
       if args.empty?
         return dependency_collection
       end
-      unless args.length == 2
-        raise ArgumentError, "Unexpected number of arguments. You gave: #{args.length}. Expected: 0 or 2."
+      if args.length > 2
+        raise ArgumentError, "Unexpected number of arguments. You gave: #{args.length}. Expected: 2 or less."
       end
 
       name, constraint = args
+      constraint ||= ">= 0.0.0"
 
-      if name.nil? || constraint.nil?
-        raise ArgumentError, "A name and constraint must be specified. You gave: #{args}."
+      if name.nil?
+        raise ArgumentError, "A name must be specified. You gave: #{args}."
       end
 
       dependency = Dependency.new(self, name, constraint)
