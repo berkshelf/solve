@@ -34,6 +34,19 @@ module Solve
       end
 
       @version = Version.new(ver_str)
+      # JW TODO: Replace DepSelector
+      @dep_constraint = DepSelector::VersionConstraint.new(constraint)
+    end
+
+    # Returns true or false if the given version would be satisfied by
+    # the version constraint.
+    #
+    # @param [Version, String] version
+    #
+    # @return [Boolean]
+    def satisfies?(version)
+      # JW TODO: Replace DepSelector
+      dep_constraint.include?(version)
     end
 
     # @param [Object] other
@@ -49,5 +62,9 @@ module Solve
     def to_s
       "#{operator} #{version}"
     end
+
+    private
+
+      attr_reader :dep_constraint
   end
 end

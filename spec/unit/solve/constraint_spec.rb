@@ -60,4 +60,136 @@ describe Solve::Constraint do
       end
     end
   end
+
+  describe "#satisfies?" do
+    subject { Solve::Constraint.new("= 1.0.0") }
+
+    it "accepts a String for version" do
+      subject.satisfies?("1.0.0").should be_true
+    end
+
+    it "accepts a Version for version" do
+      subject.satisfies?(Solve::Version.new("1.0.0")).should be_true
+    end
+
+    context "strictly greater than (>)" do
+      subject { Solve::Constraint.new("> 1.0.0") }
+
+      it "returns true if the given version would satisfy the constraint" do
+        subject.satisfies?("2.0.0").should be_true
+      end
+
+      it "returns false if the given version would not satisfy the constraint" do
+        subject.satisfies?("1.0.0").should be_false
+      end
+    end
+
+    context "strictly less than (<)" do
+      subject { Solve::Constraint.new("< 1.0.0") }
+
+      it "returns true if the given version would satisfy the constraint" do
+        subject.satisfies?("0.1.0").should be_true
+      end
+
+      it "returns false if the given version would not satisfy the constraint" do
+        subject.satisfies?("1.0.0").should be_false
+      end
+    end
+
+    context "strictly equal to (=)" do
+      subject { Solve::Constraint.new("= 1.0.0") }
+
+      it "returns true if the given version would satisfy the constraint" do
+        subject.satisfies?("1.0.0").should be_true
+      end
+
+      it "returns false if the given version would not satisfy the constraint" do
+        subject.satisfies?("1.0.1").should be_false
+      end
+    end
+
+    context "greater than or equal to (>=)" do
+      subject { Solve::Constraint.new(">= 1.0.0") }
+
+      it "returns true if the given version is greater than the version constraint" do
+        subject.satisfies?("2.0.0").should be_true
+      end
+
+      it "returns true if the given version is equal to the version constraint" do
+        subject.satisfies?("1.0.0").should be_true
+      end
+
+      it "returns false if the given version is less than the version constraint" do
+        subject.satisfies?("0.9.0").should be_false
+      end
+    end
+
+    context "greater than or equal to (<=)" do
+      subject { Solve::Constraint.new("<= 1.0.0") }
+
+      it "returns true if the given version is less than the version constraint" do
+        subject.satisfies?("0.9.0").should be_true
+      end
+
+      it "returns true if the given version is equal to the version constraint" do
+        subject.satisfies?("1.0.0").should be_true
+      end
+
+      it "returns false if the given version is less than the version constraint" do
+        subject.satisfies?("1.0.1").should be_false
+      end
+    end
+
+    context "greater than or equal to (~>)" do
+      subject { Solve::Constraint.new("~> 1.0.0") }
+
+      it "returns true if the given version is equal to the version constraint" do
+        subject.satisfies?("1.0.0").should be_true
+      end
+
+      context "when the last value in the constraint is for patch" do
+        subject { Solve::Constraint.new("~> 1.0.1") }
+
+        it "returns true if the patch level is greater than the constraint's" do
+          subject.satisfies?("1.0.2").should be_true
+        end
+
+        it "returns true if the patch level is equal to the constraint's" do
+          subject.satisfies?("1.0.1").should be_true
+        end
+
+        it "returns false if the patch level is less than the constraint's" do
+          subject.satisfies?("1.0.0").should be_false
+        end
+
+        it "returns false if the given version is less than the constraint's" do
+          subject.satisfies?("0.9.0").should be_false
+        end
+      end
+
+      context "when the last value in the constraint is for minor" do
+        subject { Solve::Constraint.new("~> 1.1") }
+
+        it "returns true if the minor level is greater than the constraint's" do
+          subject.satisfies?("1.2").should be_true
+        end
+
+        it "returns true if the minor level is equal to the constraint's" do
+          subject.satisfies?("1.1").should be_true
+        end
+
+        it "returns true if a patch level is set but the minor level is equal to or greater than the constraint's" do
+          subject.satisfies?("1.2.8").should be_true
+        end
+
+        it "returns false if the patch level is less than the constraint's" do
+          subject.satisfies?("1.0.1").should be_false
+        end
+
+        it "returns false if the major level is greater than the constraint's" do
+          subject.satisfies?("2.0.0").should be_false
+        end
+      end
+    end
+  end
 end

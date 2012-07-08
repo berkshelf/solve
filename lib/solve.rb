@@ -1,4 +1,5 @@
 require 'solve/errors'
+require 'dep_selector'
 
 module Solve
   autoload :Version, 'solve/version'
