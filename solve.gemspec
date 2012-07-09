@@ -4,7 +4,7 @@ require File.expand_path('../lib/solve/gem_version', __FILE__)
 Gem::Specification.new do |s|
   s.authors               = ["Jamie Winsor"]
   s.email                 = ["jamie@vialstudios.com"]
-  s.description           = %q{TODO: Write a gem description}
+  s.description           = %q{A Ruby constraint solver}
   s.summary               = s.description
   s.homepage              = "https://github.com/reset/solve"
   
