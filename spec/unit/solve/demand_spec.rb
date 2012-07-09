@@ -3,6 +3,23 @@ require 'spec_helper'
 describe Solve::Demand do
   let(:graph) { double('graph') }
   let(:name) { "league" }
+
+  describe "ClassMethods" do
+    subject { Solve::Demand }
+
+    describe "::initialize" do
+      it "accepts a string for the constraint parameter" do
+        subject.new(graph, name, "= 0.0.1").constraint.to_s.should eql("= 0.0.1")
+      end
+
+      it "accepts a Solve::Constraint for the constraint parameter" do
+        constraint = Solve::Constraint.new("= 0.0.1")
+
+        subject.new(graph, name, constraint).constraint.should eql(constraint)
+      end
+    end
+  end
+
   let(:constraint) { "~> 1.0.0" }
   subject { Solve::Demand.new(graph, name, constraint) }
 

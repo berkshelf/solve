@@ -12,7 +12,11 @@ module Solve
       @name = name
 
       if constraint
-        @constraint = Constraint.new(constraint)
+        @constraint = if constraint.is_a?(Solve::Constraint)
+          constraint
+        else
+          Constraint.new(constraint.to_s)
+        end
       end
     end
 
