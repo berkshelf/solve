@@ -5,10 +5,15 @@ module Solve
       #
       # @return [Array, nil]
       def parse(string)
-        _, op, ver = REGEXP.match(string).to_a
-        unless op || ver
-          return nil
+        if string =~ /^[0-9]/
+          op = "="
+          ver = string
+        else
+          _, op, ver = REGEXP.match(string).to_a
         end
+
+        return nil unless op || ver
+
         [ op, ver ]
       end
     end

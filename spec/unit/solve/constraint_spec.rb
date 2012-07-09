@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Solve::Constraint do
   let(:valid_string) { ">= 0.0.0" }
-  let(:invalid_string) { "123u7089213.*" }
+  let(:invalid_string) { "x23u7089213.*" }
 
   describe "ClassMethods" do
     subject { Solve::Constraint }
@@ -23,6 +23,12 @@ describe Solve::Constraint do
       context "given a string that does not match the Constraint REGEXP" do
         it "returns nil" do
           subject.parse(invalid_string).should be_nil
+        end
+      end
+
+      context "given a string that does not contain an operator" do
+        it "returns a constraint constraint with a default operator (=)" do
+          subject.parse("1.0.0")[0].should eql("=")
         end
       end
     end
