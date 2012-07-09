@@ -3,6 +3,7 @@ module Solve
     def initialize
       @artifacts = Hash.new
       @demands = Hash.new
+      @dep_graph = DepSelector::DependencyGraph.new
     end
 
     # @overload artifacts(name, version)
@@ -44,6 +45,7 @@ module Solve
     # @return [Solve::Artifact]
     def add_artifact(artifact)
       unless has_artifact?(artifact)
+        @dep_graph.package(artifact.name).add_version(DepSelector::Version.new(artifact.version.to_s))
         @artifacts[artifact.to_s] = artifact
       end
 
@@ -53,6 +55,7 @@ module Solve
     # @param [Solve::Artifact, nil] artifact
     def remove_artifact(artifact)
       if has_artifact?(artifact)
+        @dep_graph.packages.delete(artifact.to_s)
         @artifacts.delete(artifact.to_s)
       end
     end
@@ -70,6 +73,13 @@ module Solve
     #
     #   @param [#to_s]
     #   @param [Solve::Constraint, #to_s]
+    #
+    #   @return [Solve::Demand]
+    # @overload demands(name)
+    #   Return the Solve::Demand from the collection of demands
+    #   with the given name.
+    #
+    #   @param [#to_s]
     #
     #   @return [Solve::Demand]
     # @overload demands
@@ -126,6 +136,8 @@ module Solve
     end
 
     private
+
+      attr_reader :dep_graph
 
       # @return [Array<Solve::Artifact>]
       def artifact_collection

@@ -7,10 +7,13 @@ module Solve
     # @param [Solve::Graph] graph
     # @param [#to_s] name
     # @param [Solve::Constraint, #to_s] constraint
-    def initialize(graph, name, constraint)
+    def initialize(graph, name, constraint = nil)
       @graph = graph
       @name = name
-      @constraint = Constraint.new(constraint)
+
+      if constraint
+        @constraint = Constraint.new(constraint)
+      end
     end
 
     # @return [Solve::Demand, nil]
@@ -23,7 +26,9 @@ module Solve
     end
 
     def to_s
-      "#{name} (#{constraint})"
+      s = "#{name}"
+      s << "(#{constraint})" if constraint
+      s
     end
   end
 end
