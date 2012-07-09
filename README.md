@@ -1,6 +1,6 @@
 # Solve
 
-TODO: Write a gem description
+A Ruby constraint solver
 
 ## Installation
 
@@ -8,9 +8,23 @@ TODO: Write a gem description
 
 ## Usage
 
+Create a new graph
+
     graph = Graph.new
-    graph.artifacts("nginx", "1.0.0").depends("nginx", "~> 1.0.0")
+
+Add an artifact to the graph
+
+    graph.artifacts("nginx", "1.0.0")
+
+Now add another artifact that has a dependency
+
+    graph.artifacts("mysql", "1.2.4").depends("openssl", "~> 1.0.0")
+
+Setup some demands
+
     graph.demands('nginx', '>= 0.100.0')
+
+And now solve the graph
 
     Solve.it!(graph)
 
@@ -21,14 +35,6 @@ TODO: Write a gem description
     graph.demands('nginx', '>= 0.100.0').delete
 
     artifact.dependencies("nginx", "~> 1.0.0").delete
-
-### Removing an artifact
-
-## Neckbeard Usage
-
-  graph = Graph.new
-  artifact = Artifact.new(graph)
-  graph.add_artifact(artifact)
 
 ## Authors
 
