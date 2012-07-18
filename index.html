@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Solve by reset</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1 class="header">Solve</h1>
+        <p class="header">A Ruby constraint solver</p>
+
+        <ul>
+          <li class="download"><a class="buttons" href="https://github.com/reset/solve/zipball/master">Download ZIP</a></li>
+          <li class="download"><a class="buttons" href="https://github.com/reset/solve/tarball/master">Download TAR</a></li>
+          <li><a class="buttons github" href="https://github.com/reset/solve">View On GitHub</a></li>
+        </ul>
+
+        <p class="header">This project is maintained by <a class="header name" href="https://github.com/reset">reset</a></p>
+
+
+      </header>
+      <section>
+        <h1>Solve</h1>
+
+<p>A Ruby constraint solver</p>
+
+<h2>Installation</h2>
+
+<pre><code>$ gem install solve
+</code></pre>
+
+<h2>Usage</h2>
+
+<p>Create a new graph</p>
+
+<pre><code>graph = Graph.new
+</code></pre>
+
+<p>Add an artifact to the graph</p>
+
+<pre><code>graph.artifacts("nginx", "1.0.0")
+</code></pre>
+
+<p>Now add another artifact that has a dependency</p>
+
+<pre><code>graph.artifacts("mysql", "1.2.4").depends("openssl", "~&gt; 1.0.0")
+</code></pre>
+
+<p>Setup some demands</p>
+
+<pre><code>graph.demands('nginx', '&gt;= 0.100.0')
+</code></pre>
+
+<p>And now solve the graph</p>
+
+<pre><code>Solve.it!(graph)
+</code></pre>
+
+<h3>Removing an artifact, demand, or dependency</h3>
+
+<pre><code>graph.artifacts("nginx", "1.0.0").delete
+
+graph.demands('nginx', '&gt;= 0.100.0').delete
+
+artifact.dependencies("nginx", "~&gt; 1.0.0").delete
+</code></pre>
+
+<h2>Authors</h2>
+
+<p>Author:: Jamie Winsor (<a href="mailto:jamie@vialstudios.com">jamie@vialstudios.com</a>)</p>
+
+<p>Copyright 2012 Jamie Winsor</p>
+      </section>
+      <footer>
+        <p><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><!--<![endif]-->
+		
+  </body>
+</html>
