@@ -1,4 +1,5 @@
 # Solve
+[![Dependency Status](https://gemnasium.com/reset/solve.png?travis)](https://gemnasium.com/reset/solve)
 
 A Ruby constraint solver
 
