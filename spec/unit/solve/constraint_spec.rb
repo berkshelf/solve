@@ -7,33 +7,7 @@ describe Solve::Constraint do
   describe "ClassMethods" do
     subject { Solve::Constraint }
 
-    describe "#parse" do
-      it "returns an array containing two items" do
-        subject.parse(valid_string).should have(2).items
-      end
-
-      it "returns the operator at index 0" do
-        subject.parse(valid_string)[0].should eql(">=")
-      end
-
-      it "returns the version string at index 1" do
-        subject.parse(valid_string)[1].should eql("0.0.0")
-      end
-
-      context "given a string that does not match the Constraint REGEXP" do
-        it "returns nil" do
-          subject.parse(invalid_string).should be_nil
-        end
-      end
-
-      context "given a string that does not contain an operator" do
-        it "returns a constraint constraint with a default operator (=)" do
-          subject.parse("1.0.0")[0].should eql("=")
-        end
-      end
-    end
-
-    describe "#initialize" do
+    describe "::new" do
       it "returns a new instance of Constraint" do
         subject.new(valid_string).should be_a(Solve::Constraint)
       end
@@ -62,6 +36,38 @@ describe Solve::Constraint do
           lambda {
             subject.new(nil)
           }.should raise_error(Solve::InvalidConstraintFormat)
+        end
+      end
+
+      context "given a string containing only a major and minor version" do
+        it "has a nil value for patch" do
+          subject.new("~> 1.2").patch.should be_nil
+        end
+      end
+    end
+
+    describe "::split" do
+      it "returns an array containing two items" do
+        subject.split(valid_string).should have(2).items
+      end
+
+      it "returns the operator at index 0" do
+        subject.split(valid_string)[0].should eql(">=")
+      end
+
+      it "returns the version string at index 1" do
+        subject.split(valid_string)[1].should eql("0.0.0")
+      end
+
+      context "given a string that does not match the Constraint REGEXP" do
+        it "returns nil" do
+          subject.split(invalid_string).should be_nil
+        end
+      end
+
+      context "given a string that does not contain an operator" do
+        it "returns a constraint constraint with a default operator (=)" do
+          subject.split("1.0.0")[0].should eql("=")
         end
       end
     end
@@ -146,7 +152,7 @@ describe Solve::Constraint do
       end
     end
 
-    context "greater than or equal to (~>)" do
+    context "aproximately (~>)" do
       subject { Solve::Constraint.new("~> 1.0.0") }
 
       it "returns true if the given version is equal to the version constraint" do
