@@ -1,4 +1,5 @@
 module Solve
+  # @author Jamie Winsor <jamie@vialstudios.com>
   class Constraint
     class << self
       # @param [#to_s] string

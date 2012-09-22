@@ -1,4 +1,5 @@
 module Solve
+  # @author Jamie Winsor <jamie@vialstudios.com>
   class Artifact
     attr_reader :graph
     attr_reader :name

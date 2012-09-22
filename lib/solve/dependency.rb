@@ -1,4 +1,5 @@
 module Solve
+  # @author Jamie Winsor <jamie@vialstudios.com>
   class Dependency
     attr_reader :artifact
     attr_reader :name

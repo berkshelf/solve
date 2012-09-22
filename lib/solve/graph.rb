@@ -1,4 +1,5 @@
 module Solve
+  # @author Jamie Winsor <jamie@vialstudios.com>
   class Graph
     def initialize
       @artifacts = Hash.new

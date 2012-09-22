@@ -2,6 +2,7 @@ require 'solve/errors'
 require 'solve/core_ext'
 require 'dep_selector'
 
+# @author Jamie Winsor <jamie@vialstudios.com>
 module Solve
   autoload :Version, 'solve/version'
   autoload :Artifact, 'solve/artifact'
