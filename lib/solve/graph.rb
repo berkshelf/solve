@@ -1,10 +1,24 @@
 module Solve
   # @author Jamie Winsor <jamie@vialstudios.com>
   class Graph
+    class << self
+      def key_for(object)
+        key = case object
+        when Solve::Artifact
+          "#{object.name}-#{object.version}"
+        when Solve::Demand
+          "#{object.name}-#{object.constraint}"
+        else
+          raise ArgumentError, "Could not generate graph key for Class: #{object.class}"
+        end
+
+        key.to_sym
+      end
+    end
+
     def initialize
       @artifacts = Hash.new
       @demands = Hash.new
-      @dep_graph = DepSelector::DependencyGraph.new
     end
 
     # @overload artifacts(name, version)
@@ -46,18 +60,23 @@ module Solve
     # @return [Solve::Artifact]
     def add_artifact(artifact)
       unless has_artifact?(artifact)
-        @dep_graph.package(artifact.name).add_version(DepSelector::Version.new(artifact.version.to_s))
-        @artifacts[artifact.to_s] = artifact
+        @artifacts[self.class.key_for(artifact)] = artifact
       end
 
       artifact
     end
 
+    # @param [Solve::Artifact] artifact
+    #
+    # @return [Solve::Artifact, nil]
+    def get_artifact(artifact)
+      @artifacts.fetch(self.class.key_for(artifact), nil)
+    end
+
     # @param [Solve::Artifact, nil] artifact
     def remove_artifact(artifact)
       if has_artifact?(artifact)
-        @dep_graph.packages.delete(artifact.to_s)
-        @artifacts.delete(artifact.to_s)
+        @artifacts.delete(self.class.key_for(artifact))
       end
     end
 
@@ -65,7 +84,7 @@ module Solve
     #
     # @return [Boolean]
     def has_artifact?(artifact)
-      @artifacts.has_key?(artifact.to_s)
+      !get_artifact(artifact).nil?
     end
 
     # @overload demands(name, constraint)

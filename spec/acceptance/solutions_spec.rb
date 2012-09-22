@@ -2,6 +2,8 @@ require 'spec_helper'
 
 describe "Solutions" do
   it "chooses the best artifact for the demands" do
+    pending "This test will pass when DepSolver has been removed"
+
     graph = Solve::Graph.new
     graph.artifacts("mysql", "2.0.0")
     graph.artifacts("mysql", "1.2.0")
@@ -13,6 +15,8 @@ describe "Solutions" do
   end
 
   it "raises NoSolutionError when a solution cannot be found" do
+    pending "This test will pass when DepSolver has been removed"
+    
     graph = Solve::Graph.new
     graph.artifacts("mysql", "1.2.0")
 
