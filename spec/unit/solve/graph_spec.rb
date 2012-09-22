@@ -1,6 +1,36 @@
 require 'spec_helper'
 
 describe Solve::Graph do
+  describe "ClassMethods" do
+    subject { Solve::Graph }
+
+    describe "::key_for" do
+      context "given a Solve::Artifact" do
+        let(:artifact) { Solve::Artifact.new(double('graph'), "nginx", "1.2.3") }
+
+        it "returns a symbol containing the name and version of the artifact" do
+          subject.key_for(artifact).should eql(:'nginx-1.2.3')
+        end
+      end
+
+      context "given a Solve::Demand" do
+        let(:demand) { Solve::Demand.new(double('graph'), "ntp", "2.3.4") }
+
+        it "returns a symbol containing the name and constraint of the demand" do
+          subject.key_for(demand).should eql(:'ntp-= 2.3.4')
+        end
+      end
+
+      context "given an unknown object" do
+        it "raises an ArgumentError" do
+          lambda {
+            subject.key_for("hello")
+          }.should raise_error(ArgumentError)
+        end
+      end
+    end
+  end
+
   subject { Solve::Graph.new }
 
   describe "#artifacts" do
