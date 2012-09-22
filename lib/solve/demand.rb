@@ -8,7 +8,7 @@ module Solve
     # @param [Solve::Graph] graph
     # @param [#to_s] name
     # @param [Solve::Constraint, #to_s] constraint
-    def initialize(graph, name, constraint = nil)
+    def initialize(graph, name, constraint = ">= 0.0.0")
       @graph = graph
       @name = name
 
@@ -31,9 +31,7 @@ module Solve
     end
 
     def to_s
-      s = "#{name}"
-      s << "(#{constraint})" if constraint
-      s
+      "#{name} (#{constraint})"
     end
   end
 end

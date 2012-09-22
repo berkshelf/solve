@@ -7,7 +7,7 @@ describe Solve::Demand do
   describe "ClassMethods" do
     subject { Solve::Demand }
 
-    describe "::initialize" do
+    describe "::new" do
       it "accepts a string for the constraint parameter" do
         subject.new(graph, name, "= 0.0.1").constraint.to_s.should eql("= 0.0.1")
       end
@@ -16,6 +16,15 @@ describe Solve::Demand do
         constraint = Solve::Constraint.new("= 0.0.1")
 
         subject.new(graph, name, constraint).constraint.should eql(constraint)
+      end
+
+      context "when no value for 'constraint' is given" do
+        it "uses a default of >= 0.0.0" do
+          demand = subject.new(graph, name)
+
+          demand.constraint.operator.should eql(">=")
+          demand.constraint.version.to_s.should eql("0.0.0")
+        end
       end
     end
   end

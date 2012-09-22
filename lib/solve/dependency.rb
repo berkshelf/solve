@@ -8,7 +8,7 @@ module Solve
     # @param [Solve::Artifact] artifact
     # @param [#to_s] name
     # @param [Solve::Constraint, #to_s] constraint
-    def initialize(artifact, name, constraint)
+    def initialize(artifact, name, constraint = ">= 0.0.0")
       @artifact = artifact
       @name = name
       @constraint = case constraint

@@ -1,6 +1,21 @@
 require 'spec_helper'
 
 describe Solve::Dependency do
+  describe "ClassMethods" do
+    subject { Solve::Dependency }
+
+    describe "::new" do
+      context "when no value for 'constraint' is given" do
+        it "uses a default of >= 0.0.0" do
+          dep = subject.new(double('artifact'), "ntp")
+
+          dep.constraint.operator.should eql(">=")
+          dep.constraint.version.to_s.should eql("0.0.0")
+        end
+      end
+    end
+  end
+
   let(:artifact) { double('artifact') }
   let(:name) { 'nginx' }
   let(:constraint) { "~> 0.0.1" }
