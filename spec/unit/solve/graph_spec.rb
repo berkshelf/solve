@@ -79,7 +79,7 @@ describe Solve::Graph do
   end
 
   describe "#add_artifact" do
-    let(:artifact) { double('artifact', name: "nginx", version: "1.0.0") }
+    let(:artifact) { Solve::Artifact.new(double('graph'), "nginx", "1.0.0") }
 
     it "adds a Solve::Artifact to the collection of artifacts" do
       subject.add_artifact(artifact)
@@ -97,7 +97,7 @@ describe Solve::Graph do
   end
 
   describe "#remove_artifact" do
-    let(:artifact) { double('artifact', name: "nginx", version: "1.0.0") }
+    let(:artifact) { Solve::Artifact.new(double('graph'), "nginx", "1.0.0") }
 
     context "given the artifact is a member of the collection" do
       before(:each) { subject.add_artifact(artifact) }
@@ -121,7 +121,7 @@ describe Solve::Graph do
   end
 
   describe "#has_artifact?" do
-    let(:artifact) { double('artifact', name: "nginx", version: "1.0.0") }
+    let(:artifact) { Solve::Artifact.new(double('graph'), "nginx", "1.0.0") }
 
     it "returns true if the given Solve::Artifact is a member of the collection" do
       subject.add_artifact(artifact)
@@ -216,7 +216,7 @@ describe Solve::Graph do
   end
 
   describe "#add_demand" do
-    let(:demand) { double('demand') }
+    let(:demand) { Solve::Demand.new(double('graph'), 'ntp') }
 
     it "adds a Solve::Artifact to the collection of artifacts" do
       subject.add_demand(demand)
@@ -234,7 +234,7 @@ describe Solve::Graph do
   end
 
   describe "#remove_demand" do
-    let(:demand) { double('demand') }
+    let(:demand) { Solve::Demand.new(double('graph'), 'ntp') }
 
     context "given the demand is a member of the collection" do
       before(:each) { subject.add_demand(demand) }
@@ -258,7 +258,7 @@ describe Solve::Graph do
   end
 
   describe "#has_demand?" do
-    let(:demand) { double('demand') }
+    let(:demand) { Solve::Demand.new(double('graph'), 'ntp') }
 
     it "returns true if the given Solve::Artifact is a member of the collection" do
       subject.add_demand(demand)

@@ -134,7 +134,7 @@ module Solve
     # @return [Solve::Demand]
     def add_demand(demand)
       unless has_demand?(demand)
-        @demands[demand.to_s] = demand
+        @demands[self.class.key_for(demand)] = demand
       end
 
       demand
@@ -144,7 +144,7 @@ module Solve
     # @param [Solve::Demand, nil] demand
     def remove_demand(demand)
       if has_demand?(demand)
-        @demands.delete(demand.to_s)
+        @demands.delete(self.class.key_for(demand))
       end
     end
 
@@ -152,7 +152,7 @@ module Solve
     #
     # @return [Boolean]
     def has_demand?(demand)
-      @demands.has_key?(demand.to_s)
+      @demands.has_key?(self.class.key_for(demand))
     end
 
     private
