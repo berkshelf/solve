@@ -4,7 +4,7 @@ module Solve
     class << self
       # Create a key for a graph from an instance of an Artifact or Demand
       #
-      # @param [Solve::Artifact, Solve::Demand] object
+      # @param [Solve::Artifact, Solve::Demand, Solve::Dependency] object
       #
       # @raise [ArgumentError] if an instance of an object of an unknown type is given
       #
@@ -14,6 +14,8 @@ module Solve
         when Solve::Artifact
           "#{object.name}-#{object.version}"
         when Solve::Demand
+          "#{object.name}-#{object.constraint}"
+        when Solve::Dependency
           "#{object.name}-#{object.constraint}"
         else
           raise ArgumentError, "Could not generate graph key for Class: #{object.class}"

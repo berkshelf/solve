@@ -56,11 +56,7 @@ module Solve
     # @return [Solve::Dependency]
     def add_dependency(dependency)
       unless has_dependency?(dependency)
-        dep_graph = graph.send(:dep_graph)
-        a = dep_graph.package(self.name).add_version(DepSelector::Version.new(self.version.to_s))
-        dep_pack = dep_graph.package(dependency.name)
-        a.dependencies << DepSelector::Dependency.new(dep_pack, DepSelector::VersionConstraint.new(dependency.constraint.to_s))
-        @dependencies[dependency.to_s] = dependency
+        @dependencies[Graph.key_for(dependency)] = dependency
       end
 
       dependency
@@ -71,7 +67,7 @@ module Solve
     # @return [Solve::Dependency, nil]
     def remove_dependency(dependency)
       if has_dependency?(dependency)
-        @dependencies.delete(dependency.to_s)
+        @dependencies.delete(Graph.key_for(dependency))
       end
     end
 
@@ -79,7 +75,7 @@ module Solve
     #
     # @return [Boolean]
     def has_dependency?(dependency)
-      @dependencies.has_key?(dependency.to_s)
+      @dependencies.has_key?(Graph.key_for(dependency))
     end
 
     # @return [Solve::Artifact, nil]

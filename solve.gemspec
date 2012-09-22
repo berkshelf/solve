@@ -16,8 +16,6 @@ Gem::Specification.new do |s|
   s.version               = Solve::VERSION
   s.required_ruby_version = ">= 1.9.1"
 
-  s.add_runtime_dependency 'dep_selector', '~> 0.0.8'
-
   s.add_development_dependency 'thor'
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'fuubar'
