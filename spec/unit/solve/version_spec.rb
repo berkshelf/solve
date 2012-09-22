@@ -105,7 +105,7 @@ describe Solve::Version do
         it "raises an InvalidVersionFormat error" do
           lambda {
             subject.split("1")
-          }.should raise_error(Solve::InvalidVersionFormat)
+          }.should raise_error(Solve::Errors::InvalidVersionFormat)
         end
       end
     end

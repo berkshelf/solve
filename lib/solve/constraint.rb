@@ -94,7 +94,7 @@ module Solve
     def initialize(constraint = ">= 0.0.0")
       @operator, ver_str = self.class.split(constraint)
       if @operator.nil? || ver_str.nil?
-        raise InvalidConstraintFormat.new(constraint)
+        raise Errors::InvalidConstraintFormat.new(constraint)
       end
 
       @major, @minor, @patch = Version.split(ver_str)

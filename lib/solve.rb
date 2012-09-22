@@ -42,7 +42,7 @@ module Solve
         end
       end
     rescue DepSelector::Exceptions::InvalidSolutionConstraints
-      raise NoSolutionError
+      raise Errors::NoSolutionError
     end
   end
 end

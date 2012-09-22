@@ -14,7 +14,7 @@ module Solve
         when /^(\d+)\.(\d+)$/
           [ $1.to_i, $2.to_i, nil ]
         else
-          raise InvalidVersionFormat.new(version_string)
+          raise Errors::InvalidVersionFormat.new(version_string)
         end
       end
     end

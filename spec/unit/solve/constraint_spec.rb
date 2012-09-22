@@ -27,7 +27,7 @@ describe Solve::Constraint do
         it "raises an InvalidConstraintFormat error" do
           lambda {
             subject.new(invalid_string)
-          }.should raise_error(Solve::InvalidConstraintFormat)
+          }.should raise_error(Solve::Errors::InvalidConstraintFormat)
         end
       end
 
@@ -35,7 +35,7 @@ describe Solve::Constraint do
         it "raises an InvalidConstraintFormat error" do
           lambda {
             subject.new(nil)
-          }.should raise_error(Solve::InvalidConstraintFormat)
+          }.should raise_error(Solve::Errors::InvalidConstraintFormat)
         end
       end
 

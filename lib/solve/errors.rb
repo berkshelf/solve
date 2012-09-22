@@ -1,31 +1,34 @@
 module Solve
-  class SolveError < StandardError; end
+  # @author Jamie Winsor <jamie@vialstudios.com>
+  module Errors
+    class SolveError < StandardError; end
 
-  class InvalidVersionFormat < SolveError
-    attr_reader :version
+    class InvalidVersionFormat < SolveError
+      attr_reader :version
 
-    # @param [#to_s] version
-    def initialize(version)
-      @version = version
+      # @param [#to_s] version
+      def initialize(version)
+        @version = version
+      end
+
+      def message
+        "'#{version}' did not contain a valid version string: 'x.y.z' or 'x.y'."
+      end
     end
 
-    def message
-      "'#{version}' did not contain a valid version string: 'x.y.z' or 'x.y'."
+    class InvalidConstraintFormat < SolveError
+      attr_reader :constraint
+
+      # @param [#to_s] constraint
+      def initialize(constraint)
+        @constraint = constraint
+      end
+
+      def message
+        "'#{constraint}' did not contain a valid operator or a valid version string."
+      end
     end
+
+    class NoSolutionError < SolveError; end
   end
-
-  class InvalidConstraintFormat < SolveError
-    attr_reader :constraint
-
-    # @param [#to_s] constraint
-    def initialize(constraint)
-      @constraint = constraint
-    end
-
-    def message
-      "'#{constraint}' did not contain a valid operator or a valid version string."
-    end
-  end
-
-  class NoSolutionError < SolveError; end
 end

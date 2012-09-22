@@ -20,6 +20,6 @@ describe "Solutions" do
 
     lambda {
       Solve.it!(graph)
-    }.should raise_error(Solve::NoSolutionError)
+    }.should raise_error(Solve::Errors::NoSolutionError)
   end
 end
