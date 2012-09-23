@@ -62,6 +62,88 @@ describe Solve::Solver do
         subject.demand_key(demand).should eql(:'nginx-= 1.2.3')
       end
     end
+
+    describe "::satisfy_all" do
+      let(:ver_one) { Solve::Version.new("3.1.1") }
+      let(:ver_two) { Solve::Version.new("3.1.2") }
+
+      let(:constraints) do
+        [
+          Solve::Constraint.new("> 3.0.0"),
+          Solve::Constraint.new("<= 3.1.2")
+        ]
+      end
+
+      let(:versions) do
+        [
+          Solve::Version.new("0.0.1"),
+          Solve::Version.new("0.1.0"),
+          Solve::Version.new("1.0.0"),
+          Solve::Version.new("2.0.0"),
+          Solve::Version.new("3.0.0"),
+          ver_one,
+          ver_two,
+          Solve::Version.new("4.1.0")
+        ].shuffle
+      end
+
+      it "returns all of the versions which satisfy all of the given constraints" do
+        solution = subject.satisfy_all(constraints, versions)
+
+        solution.should have(2).items
+        solution.should include(ver_one)
+        solution.should include(ver_two)
+      end
+
+      context "given multiple duplicate versions" do
+        let(:versions) do
+          [
+            ver_one,
+            ver_one,
+            ver_one
+          ]
+        end
+
+        it "does not return duplicate satisfied versions" do
+          solution = subject.satisfy_all(constraints, versions)
+
+          solution.should have(1).item
+        end
+      end
+    end
+
+    describe "::satisfy_best" do
+      let(:versions) do
+        [
+          Solve::Version.new("0.0.1"),
+          Solve::Version.new("0.1.0"),
+          Solve::Version.new("1.0.0"),
+          Solve::Version.new("2.0.0"),
+          Solve::Version.new("3.0.0"),
+          Solve::Version.new("3.1.1"),
+          Solve::Version.new("3.1.2"),
+          Solve::Version.new("4.1.0")
+        ].shuffle
+      end
+
+      it "returns the best possible match for the given constraints" do
+        subject.satisfy_best([">= 1.0.0", "< 4.1.0"], versions).to_s.should eql("3.1.2")
+      end
+
+      context "given no version matches a constraint" do
+        let(:versions) do
+          [
+            Solve::Version.new("4.1.0")
+          ]
+        end
+
+        it "raises a NoSolutionError error" do
+          lambda {
+            subject.satisfy_best(">= 5.0.0", versions)
+          }.should raise_error(Solve::Errors::NoSolutionError)
+        end
+      end
+    end
   end
 
   subject { Solve::Solver.new(graph) }

@@ -6,9 +6,47 @@ module Solve
       #
       # @param [Solve::Demand] demand
       #
+      # @raise [NoSolutionError]
+      #
       # @return [Symbol]
       def demand_key(demand)
         "#{demand.name}-#{demand.constraint}".to_sym
+      end
+
+      # Returns all of the versions which satisfy all of the given constraints
+      #
+      # @param [Array<Solve::Constraint>, Array<String>] constraints
+      # @param [Array<Solve::Version>, Array<String>] versions
+      #
+      # @return [Array<Solve::Version>]
+      def satisfy_all(constraints, versions)
+        constraints = Array(constraints).collect do |con|
+          con.is_a?(Constraint) ? con : Constraint.new(con)
+        end.uniq
+
+        versions = Array(versions).collect do |ver|
+          ver.is_a?(Version) ? ver : Version.new(ver)
+        end.uniq
+
+        versions.select { |ver| constraints.all? { |constraint| constraint.satisfies?(ver) } }
+      end
+
+      # Return the best version from the given list of versions for the given list of constraints
+      #
+      # @param [Array<Solve::Constraint>, Array<String>] constraints
+      # @param [Array<Solve::Version>, Array<String>] versions
+      #
+      # @raise [NoSolutionError] if version matches the given constraints
+      #
+      # @return [Solve::Version]
+      def satisfy_best(constraints, versions)
+        solution = satisfy_all(constraints, versions)
+
+        if solution.empty?
+          raise Errors::NoSolutionError
+        end
+
+        solution.sort.last
       end
     end
 
