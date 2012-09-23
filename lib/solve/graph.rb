@@ -95,8 +95,6 @@ module Solve
 
     private
 
-      attr_reader :dep_graph
-
       # @return [Array<Solve::Artifact>]
       def artifact_collection
         @artifacts.collect { |name, artifact| artifact }
