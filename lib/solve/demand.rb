@@ -18,11 +18,6 @@ module Solve
       end
     end
 
-    # @return [Symbol]
-    def key
-      "#{name}-#{constraint}".to_sym
-    end
-
     # @return [Solve::Demand, nil]
     def delete
       unless solver.nil?

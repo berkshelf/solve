@@ -15,6 +15,14 @@ describe Solve::Solver do
         obj.demands.should have(2).items
       end
     end
+
+    describe "::demand_key" do
+      let(:demand) { Solve::Demand.new(double('solver'), "nginx", "= 1.2.3") }
+
+      it "returns a symbol containing the name and constraint of the demand" do
+        subject.demand_key(demand).should eql(:'nginx-= 1.2.3')
+      end
+    end
   end
 
   subject { Solve::Solver.new(graph) }

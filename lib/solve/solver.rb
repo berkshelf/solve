@@ -1,6 +1,12 @@
 module Solve
   # @author Jamie Winsor <jamie@vialstudios.com>
   class Solver
+    class << self
+      def demand_key(demand)
+        "#{demand.name}-#{demand.constraint}".to_sym
+      end
+    end
+
     attr_reader :graph
 
     def initialize(graph, demands = Array.new)
@@ -64,7 +70,7 @@ module Solve
     # @return [Solve::Demand]
     def add_demand(demand)
       unless has_demand?(demand)
-        @demands[demand.key] = demand
+        @demands[self.class.demand_key(demand)] = demand
       end
 
       demand
@@ -74,7 +80,7 @@ module Solve
     # @param [Solve::Demand, nil] demand
     def remove_demand(demand)
       if has_demand?(demand)
-        @demands.delete(demand.key)
+        @demands.delete(self.class.demand_key(demand))
       end
     end
 
@@ -82,7 +88,7 @@ module Solve
     #
     # @return [Boolean]
     def has_demand?(demand)
-      @demands.has_key?(demand.key)
+      @demands.has_key?(self.class.demand_key(demand))
     end
 
     private
