@@ -12,14 +12,19 @@ module Solve
       end
     end
 
+    # The world as we know it
+    #
+    # @return [Solve::Graph]
     attr_reader :graph
 
+    # @param [Solve::Graph] graph
+    # @param [Array<String>, Array<Array<String, String>>] demands
     def initialize(graph, demands = Array.new)
       @graph = graph
       @demands = Hash.new
 
       Array(demands).each do |l_demand|
-        demands(l_demand)
+        demands(*l_demand)
       end
     end
 

@@ -1,8 +1,19 @@
 module Solve
   # @author Jamie Winsor <jamie@vialstudios.com>
   class Demand
+    # A reference to the solver this demand belongs to
+    #
+    # @return [Solve::Solver]
     attr_reader :solver
+
+    # The name of the artifact this demand is for
+    #
+    # @return [String]
     attr_reader :name
+
+    # The acceptable constraint of the artifact this demand is for
+    #
+    # @return [Solve::Constraint]
     attr_reader :constraint
 
     # @param [Solve::Solver] solver
@@ -18,6 +29,8 @@ module Solve
       end
     end
 
+    # Remove this demand from the solver it belongs to
+    #
     # @return [Solve::Demand, nil]
     def delete
       unless solver.nil?

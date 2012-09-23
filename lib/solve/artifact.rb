@@ -1,8 +1,19 @@
 module Solve
   # @author Jamie Winsor <jamie@vialstudios.com>
   class Artifact
+    # A reference to the graph this artifact belongs to
+    #
+    # @return [Solve::Graph]
     attr_reader :graph
+
+    # The name of the artifact
+    #
+    # @return [String]
     attr_reader :name
+
+    # The version of this artifact
+    #
+    # @return [Solve::Version]
     attr_reader :version
 
     # @param [Solve::Graph] graph
@@ -78,6 +89,8 @@ module Solve
       @dependencies.has_key?(Graph.key_for(dependency))
     end
 
+    # Remove this artifact from the graph it belongs to
+    #
     # @return [Solve::Artifact, nil]
     def delete
       unless graph.nil?

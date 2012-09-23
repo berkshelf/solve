@@ -1,8 +1,19 @@
 module Solve
   # @author Jamie Winsor <jamie@vialstudios.com>
   class Dependency
+    # A reference to the artifact this dependency belongs to
+    #
+    # @return [Solve::Artifact]
     attr_reader :artifact
+
+    # The name of the artifact this dependency represents
+    #
+    # @return [String]
     attr_reader :name
+
+    # The constraint requirement of this dependency
+    #
+    # @return [Solve::Constraint]
     attr_reader :constraint
 
     # @param [Solve::Artifact] artifact
@@ -19,6 +30,8 @@ module Solve
       end
     end
 
+    # Remove this dependency from the artifact it belongs to
+    #
     # @return [Solve::Dependency, nil]
     def delete
       unless artifact.nil?

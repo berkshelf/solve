@@ -7,12 +7,51 @@ describe Solve::Solver do
     subject { Solve::Solver }
 
     describe "::new" do
-      let(:demand_array) { [["nginx", "= 1.2.3"], ["ntp", "= 1.0.0"]] }
+      let(:demand_array) { ["nginx", "ntp"] }
 
-      it "converts an array of arrays representing demands into demands on the Solver" do
+      it "adds a demand for each element in the array" do
         obj = subject.new(graph, demand_array)
 
         obj.demands.should have(2).items
+      end
+
+      context "when demand_array is an array of array" do
+        let(:demand_array) { [["nginx", "= 1.2.3"], ["ntp", "= 1.0.0"]] }
+
+        it "creates a new demand with the name and constraint of each element in the array" do
+          obj = subject.new(graph, demand_array)
+
+          obj.demands[0].name.should eql("nginx")
+          obj.demands[0].constraint.to_s.should eql("= 1.2.3")
+          obj.demands[1].name.should eql("ntp")
+          obj.demands[1].constraint.to_s.should eql("= 1.0.0")
+        end
+      end
+
+      context "when demand_array is an array of strings" do
+        let(:demand_array) { ["nginx", "ntp"] }
+
+        it "creates a new demand with the name and a default constraint of each element in the array" do
+          obj = subject.new(graph, demand_array)
+
+          obj.demands[0].name.should eql("nginx")
+          obj.demands[0].constraint.to_s.should eql(">= 0.0.0")
+          obj.demands[1].name.should eql("ntp")
+          obj.demands[1].constraint.to_s.should eql(">= 0.0.0")
+        end
+      end
+
+      context "when demand_array is a mix between an array of arrays and an array of strings" do
+        let(:demand_array) { [["nginx", "= 1.2.3"], "ntp"] }
+
+        it "creates a new demand with the name and default constraint or constraint of each element in the array" do
+          obj = subject.new(graph, demand_array)
+
+          obj.demands[0].name.should eql("nginx")
+          obj.demands[0].constraint.to_s.should eql("= 1.2.3")
+          obj.demands[1].name.should eql("ntp")
+          obj.demands[1].constraint.to_s.should eql(">= 0.0.0")
+        end
       end
     end
 
