@@ -13,14 +13,7 @@ module Solve
   class << self
     # @param [Solve::Graph] graph
     #
-    # @return [Hash]
-    def it(graph)
-      it!(graph)
-    rescue NoSolutionError
-      nil
-    end
-
-    # @param [Solve::Graph] graph
+    # @raise [NoSolutionError]
     #
     # @return [Hash]
     def it!(graph)

@@ -11,7 +11,7 @@ describe "Solutions" do
     graph.demands('nginx')
     graph.demands('mysql')
 
-    Solve.it(graph).should eql("nginx" => "1.0.0", "mysql" => "1.2.0")
+    Solve.it!(graph).should eql("nginx" => "1.0.0", "mysql" => "1.2.0")
   end
 
   it "raises NoSolutionError when a solution cannot be found" do
