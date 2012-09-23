@@ -2,6 +2,11 @@ module Solve
   # @author Jamie Winsor <jamie@vialstudios.com>
   class Solver
     class << self
+      # Create a key to identify a demand on a Solver.
+      #
+      # @param [Solve::Demand] demand
+      #
+      # @return [Symbol]
       def demand_key(demand)
         "#{demand.name}-#{demand.constraint}".to_sym
       end

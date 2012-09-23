@@ -2,9 +2,9 @@ module Solve
   # @author Jamie Winsor <jamie@vialstudios.com>
   class Graph
     class << self
-      # Create a key for a graph from an instance of an Artifact or Demand
+      # Create a key for a graph from an instance of an Artifact or Dependency
       #
-      # @param [Solve::Artifact, Solve::Demand, Solve::Dependency] object
+      # @param [Solve::Artifact, Solve::Dependency] object
       #
       # @raise [ArgumentError] if an instance of an object of an unknown type is given
       #
