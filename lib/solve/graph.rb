@@ -13,8 +13,6 @@ module Solve
         key = case object
         when Solve::Artifact
           "#{object.name}-#{object.version}"
-        when Solve::Demand
-          "#{object.name}-#{object.constraint}"
         when Solve::Dependency
           "#{object.name}-#{object.constraint}"
         else
@@ -27,7 +25,6 @@ module Solve
 
     def initialize
       @artifacts = Hash.new
-      @demands = Hash.new
     end
 
     # @overload artifacts(name, version)
@@ -96,74 +93,6 @@ module Solve
       !get_artifact(artifact).nil?
     end
 
-    # @overload demands(name, constraint)
-    #   Return the Solve::Demand from the collection of demands
-    #   with the given name and constraint.
-    #
-    #   @param [#to_s]
-    #   @param [Solve::Constraint, #to_s]
-    #
-    #   @return [Solve::Demand]
-    # @overload demands(name)
-    #   Return the Solve::Demand from the collection of demands
-    #   with the given name.
-    #
-    #   @param [#to_s]
-    #
-    #   @return [Solve::Demand]
-    # @overload demands
-    #   Return the collection of demands
-    #
-    #   @return [Array<Solve::Demand>]
-    def demands(*args)
-      if args.empty?
-        return demand_collection
-      end
-      if args.length > 2
-        raise ArgumentError, "Unexpected number of arguments. You gave: #{args.length}. Expected: 2 or less."
-      end
-
-      name, constraint = args
-      constraint ||= ">= 0.0.0"
-
-      if name.nil?
-        raise ArgumentError, "A name must be specified. You gave: #{args}."
-      end
-
-      demand = Demand.new(self, name, constraint)
-      add_demand(demand)
-    end
-
-    # Add a Solve::Demand to the collection of demands and
-    # return the added Solve::Demand. No change will be made
-    # if the demand is already a member of the collection.
-    #
-    # @param [Solve::Demand] demand
-    #
-    # @return [Solve::Demand]
-    def add_demand(demand)
-      unless has_demand?(demand)
-        @demands[self.class.key_for(demand)] = demand
-      end
-
-      demand
-    end
-    alias_method :demand, :add_demand
-
-    # @param [Solve::Demand, nil] demand
-    def remove_demand(demand)
-      if has_demand?(demand)
-        @demands.delete(self.class.key_for(demand))
-      end
-    end
-
-    # @param [Solve::Demand] demand
-    #
-    # @return [Boolean]
-    def has_demand?(demand)
-      @demands.has_key?(self.class.key_for(demand))
-    end
-
     private
 
       attr_reader :dep_graph
@@ -171,11 +100,6 @@ module Solve
       # @return [Array<Solve::Artifact>]
       def artifact_collection
         @artifacts.collect { |name, artifact| artifact }
-      end
-
-      # @return [Array<Solve::Demand>]
-      def demand_collection
-        @demands.collect { |name, demand| demand }
       end
   end
 end

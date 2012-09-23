@@ -23,19 +23,13 @@ Now add another artifact that has a dependency
 
     graph.artifacts("mysql", "1.2.4").depends("openssl", "~> 1.0.0")
 
-Setup some demands
+And now solve the graph with some demands
 
-    graph.demands('nginx', '>= 0.100.0')
+    Solve.it!(graph, ['nginx', '>= 0.100.0'])
 
-And now solve the graph
-
-    Solve.it!(graph)
-
-### Removing an artifact, demand, or dependency
+### Removing an artifact, or dependency from the graph
 
     graph.artifacts("nginx", "1.0.0").delete
-
-    graph.demands('nginx', '>= 0.100.0').delete
 
     artifact.dependencies("nginx", "~> 1.0.0").delete
 

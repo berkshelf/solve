@@ -1,31 +1,33 @@
 module Solve
   # @author Jamie Winsor <jamie@vialstudios.com>
   class Demand
-    attr_reader :graph
+    attr_reader :solver
     attr_reader :name
     attr_reader :constraint
 
-    # @param [Solve::Graph] graph
+    # @param [Solve::Solver] solver
     # @param [#to_s] name
     # @param [Solve::Constraint, #to_s] constraint
-    def initialize(graph, name, constraint = ">= 0.0.0")
-      @graph = graph
+    def initialize(solver, name, constraint = ">= 0.0.0")
+      @solver = solver
       @name = name
-
-      if constraint
-        @constraint = if constraint.is_a?(Solve::Constraint)
-          constraint
-        else
-          Constraint.new(constraint.to_s)
-        end
+      @constraint = if constraint.is_a?(Solve::Constraint)
+        constraint
+      else
+        Constraint.new(constraint.to_s)
       end
+    end
+
+    # @return [Symbol]
+    def key
+      "#{name}-#{constraint}".to_sym
     end
 
     # @return [Solve::Demand, nil]
     def delete
-      unless graph.nil?
-        result = graph.remove_demand(self)
-        @graph = nil
+      unless solver.nil?
+        result = solver.remove_demand(self)
+        @solver = nil
         result
       end
     end
