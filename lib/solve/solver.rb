@@ -28,7 +28,9 @@ module Solve
           ver.is_a?(Version) ? ver : Version.new(ver)
         end.uniq
 
-        versions.select { |ver| constraints.all? { |constraint| constraint.satisfies?(ver) } }
+        versions.select do |ver|
+          constraints.all? { |constraint| constraint.satisfies?(ver) }
+        end
       end
 
       # Return the best version from the given list of versions for the given list of constraints
