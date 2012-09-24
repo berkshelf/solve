@@ -26,37 +26,47 @@ module Solve
       @dependencies = Hash.new
     end
 
-    # @overload dependencies(name, constraint)
-    #   Return the Solve::Dependency from the collection of
-    #   dependencies with the given name and constraint.
+    # Return the Solve::Dependency from the collection of
+    # dependencies with the given name and constraint.
     #
-    #   @param [#to_s]
-    #   @param [Solve::Constraint, #to_s]
+    # @param [#to_s] name
+    # @param [Solve::Constraint, #to_s] constraint
     #
-    #   @return [Solve::Dependency]
-    # @overload dependencies
-    #   Return the collection of dependencies
+    # @example adding dependencies
+    #   artifact.depends("nginx") => <#Dependency: @name="nginx", @constraint=">= 0.0.0">
+    #   artifact.depends("ntp", "= 1.0.0") => <#Dependency: @name="ntp", @constraint="= 1.0.0">
     #
-    #   @return [Array<Solve::Dependency>]
-    def dependencies(*args)
-      if args.empty?
-        return dependency_collection
-      end
-      if args.length > 2
-        raise ArgumentError, "Unexpected number of arguments. You gave: #{args.length}. Expected: 2 or less."
-      end
-
-      name, constraint = args
-      constraint ||= ">= 0.0.0"
-
+    # @example chaining dependencies
+    #   artifact.depends("nginx").depends("ntp")
+    #
+    # @return [Solve::Artifact]
+    def depends(name, constraint = ">= 0.0.0")
       if name.nil?
         raise ArgumentError, "A name must be specified. You gave: #{args}."
       end
 
       dependency = Dependency.new(self, name, constraint)
       add_dependency(dependency)
+
+      self
     end
-    alias_method :depends, :dependencies
+
+    # Return the collection of dependencies on this instance of artifact
+    #
+    # @return [Array<Solve::Dependency>]
+    def dependencies
+      @dependencies.collect { |name, dependency| dependency }
+    end
+
+    # Retrieve the dependency from the artifact with the matching name and constraint
+    #
+    # @param [#to_s] name
+    # @param [#to_s] constraint
+    #
+    # @return [Solve::Artifact, nil]
+    def get_dependency(name, constraint)
+      @dependencies.fetch(Graph.dependency_key(name, constraint), nil)
+    end
 
     # Remove this artifact from the graph it belongs to
     #
@@ -90,16 +100,6 @@ module Solve
         get_dependency(dependency.name, dependency.constraint)
       end
 
-      # Retrieve the dependency from the artifact with the matching name and constraint
-      #
-      # @param [#to_s] name
-      # @param [#to_s] constraint
-      #
-      # @return [Solve::Artifact, nil]
-      def get_dependency(name, constraint)
-        @dependencies.fetch(Graph.dependency_key(name, constraint), nil)
-      end
-
       # Remove the matching dependency from the artifact
       #
       # @param [Solve::Dependency] dependency
@@ -119,11 +119,6 @@ module Solve
       # @return [Boolean]
       def has_dependency?(name, constraint)
         @dependencies.has_key?(Graph.dependency_key(name, constraint))
-      end
-
-      # @return [Array<Solve::Dependency>]
-      def dependency_collection
-        @dependencies.collect { |name, dependency| dependency }
       end
   end
 end

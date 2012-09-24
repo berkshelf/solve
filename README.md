@@ -23,6 +23,10 @@ Now add another artifact that has a dependency
 
     graph.artifacts("mysql", "1.2.4").depends("openssl", "~> 1.0.0")
 
+Dependencies can be chained, too
+
+    graph.artifacts("ntp", "1.0.0").depends("build-essential").depends("yum")
+
 And now solve the graph with some demands
 
     Solve.it!(graph, ['nginx', '>= 0.100.0'])
