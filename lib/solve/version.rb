@@ -48,9 +48,6 @@ module Solve
         @major, @minor, @patch = args.first
       else
         @major, @minor, @patch = self.class.split(args.first.to_s)
-      when Solve::Version
-        version = args.first
-        @major, @minor, @patch = version.major, version.minor, version.patch
       end
 
       @major ||= 0

@@ -209,7 +209,7 @@ module Solve
         possible_values_for_unbound = possible_values_for(unbound_variable)
         
         while possible_value = possible_values_for_unbound.shift
-          possible_artifact = graph.get_artifact(Artifact.new(graph, unbound_variable.package, possible_value.version))
+          possible_artifact = graph.get_artifact(unbound_variable.package, possible_value.version)
           possible_dependencies = possible_artifact.dependencies
           all_ok = possible_dependencies.all? { |dependency| can_add_new_constraint?(dependency) }
           if all_ok
@@ -313,7 +313,7 @@ module Solve
       def can_add_new_constraint?(dependency)
         current_binding = variable_table.find_package(dependency.name)
         #haven't seen it before, haven't bound it yet or the binding is ok
-        current_binding.nil? || current_binding.value.nil? || dependency.constraint.satisfies?(current_binding.value)
+        current_binding.nil? || current_binding.value.nil? || dependency.constraint.satisfies?(current_binding.value.version)
       end
 
       def possible_values_for(variable)
@@ -354,7 +354,7 @@ module Solve
           raise Errors::NoSolutionError
         end
 
-        source = graph.artifacts(previous_variable.package, previous_variable.value)
+        source = previous_variable.value
         variable_table.remove_all_with_only_this_source!(source)
         constraint_table.remove_constraints_from_source!(source)
         previous_variable.unbind
