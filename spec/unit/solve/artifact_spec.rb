@@ -42,6 +42,28 @@ describe Solve::Artifact do
     end
   end
 
+  describe "sorting" do
+    let(:one) { Solve::Artifact.new(graph, "riot", "1.0.0") }
+    let(:two) { Solve::Artifact.new(graph, "riot", "2.0.0") }
+    let(:three) { Solve::Artifact.new(graph, "riot", "3.0.0") }
+
+    let(:artifacts) do
+      [
+        one,
+        two,
+        three
+      ].shuffle
+    end
+
+    it "orders artifacts by their version number" do
+      sorted = artifacts.sort
+
+      sorted[0].should eql(one)
+      sorted[1].should eql(two)
+      sorted[2].should eql(three)
+    end
+  end
+
   describe "#dependencies" do
     context "given no arguments" do
       it "returns an array" do

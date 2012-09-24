@@ -1,6 +1,8 @@
 module Solve
   # @author Jamie Winsor <jamie@vialstudios.com>
   class Artifact
+    include Comparable
+
     # A reference to the graph this artifact belongs to
     #
     # @return [Solve::Graph]
@@ -92,6 +94,13 @@ module Solve
         self.version == other.version
     end
     alias_method :eql?, :==
+
+    # @param [Solve::Version] other
+    #
+    # @return [Integer]
+    def <=>(other)
+      self.version <=> other.version
+    end
 
     private
 
