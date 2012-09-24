@@ -177,7 +177,7 @@ describe Solve::Graph do
     it "adds a Solve::Artifact to the collection of artifacts" do
       subject.add_artifact(artifact)
 
-      subject.should have_artifact(artifact)
+      subject.should have_artifact(artifact.name, artifact.version)
       subject.artifacts.should have(1).item
     end
 
@@ -219,11 +219,11 @@ describe Solve::Graph do
     it "returns true if the given Solve::Artifact is a member of the collection" do
       subject.add_artifact(artifact)
 
-      subject.has_artifact?(artifact).should be_true
+      subject.has_artifact?(artifact.name, artifact.version).should be_true
     end
 
     it "returns false if the given Solve::Artifact is not a member of the collection" do
-      subject.has_artifact?(artifact).should be_false
+      subject.has_artifact?(artifact.name, artifact.version).should be_false
     end
   end
 end

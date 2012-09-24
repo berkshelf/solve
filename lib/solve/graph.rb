@@ -97,33 +97,41 @@ module Solve
     #
     # @return [Solve::Artifact]
     def add_artifact(artifact)
-      unless has_artifact?(artifact)
+      unless has_artifact?(artifact.name, artifact.version)
         @artifacts[self.class.key_for(artifact)] = artifact
       end
 
       artifact
     end
 
+    # Retrieve the artifact from the graph with the matching name and version
+    #
     # @param [String] name
-    # @param [Solve::Version, String] version
+    # @param [Solve::Version, #to_s] version
     #
     # @return [Solve::Artifact, nil]
     def get_artifact(name, version)
       @artifacts.fetch(self.class.artifact_key(name, version.to_s), nil)
     end
 
+    # Remove the given instance of artifact from the graph
+    #
     # @param [Solve::Artifact, nil] artifact
     def remove_artifact(artifact)
-      if has_artifact?(artifact)
+      if has_artifact?(artifact.name, artifact.version)
         @artifacts.delete(self.class.key_for(artifact))
       end
     end
 
-    # @param [Solve::Artifact] artifact
+    # Check if an artifact with a matching name and version is a member of this instance
+    # of graph
+    #
+    # @param [String] name
+    # @param [Solve::Version, #to_s] version
     #
     # @return [Boolean]
-    def has_artifact?(artifact)
-      !get_artifact(artifact.name, artifact.version).nil?
+    def has_artifact?(name, version)
+      !get_artifact(name, version).nil?
     end
 
     private
