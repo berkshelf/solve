@@ -334,7 +334,10 @@ module Solve
           variable_table.add(dependency.name, source)
           constraint_table.add(dependency.name, dependency.constraint, source)
           dependency_domain = graph.versions(dependency.name, dependency.constraint)
-          domain[dependency.name] = [(domain[dependency.name] || []), dependency_domain].flatten.uniq.sort_by { |artifact| artifact.version }
+          domain[dependency.name] = [(domain[dependency.name] || []), dependency_domain]
+            .flatten
+            .uniq
+            .sort { |left, right| right.version <=> left.version }
         end
       end
 
