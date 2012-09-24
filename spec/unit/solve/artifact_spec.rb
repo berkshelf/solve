@@ -13,6 +13,35 @@ describe Solve::Artifact do
   let(:version) { "1.0.0" }
   subject { Solve::Artifact.new(graph, name, version) }
 
+  describe "equality" do
+    context "given an artifact with the same name and version" do
+      let(:one) { Solve::Artifact.new(graph, "riot", "1.0.0") }
+      let(:two) { Solve::Artifact.new(graph, "riot", "1.0.0") }
+
+      it "is equal" do
+        one.should be_eql(two)
+      end
+    end
+
+    context "given an artifact with the same name but different version" do
+      let(:one) { Solve::Artifact.new(graph, "riot", "1.0.0") }
+      let(:two) { Solve::Artifact.new(graph, "riot", "2.0.0") }
+
+      it "is not equal" do
+        one.should_not be_eql(two)
+      end
+    end
+
+    context "given an artifact with the same version but different name" do
+      let(:one) { Solve::Artifact.new(graph, "riot", "1.0.0") }
+      let(:two) { Solve::Artifact.new(graph, "league", "1.0.0") }
+
+      it "is not equal" do
+        one.should_not be_eql(two)
+      end
+    end
+  end
+
   describe "#dependencies" do
     context "given no arguments" do
       it "returns an array" do

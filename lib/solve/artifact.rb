@@ -83,6 +83,16 @@ module Solve
       "#{name}-#{version}"
     end
 
+    # @param [Object] other
+    #
+    # @return [Boolean]
+    def ==(other)
+      other.is_a?(self.class) &&
+        self.name == other.name &&
+        self.version == other.version
+    end
+    alias_method :eql?, :==
+
     private
 
       # Add a Solve::Dependency to the collection of dependencies 
