@@ -36,6 +36,13 @@ module Solve
     #
     #   @example
     #     Version.new("1.2.3") => #<Version: @major=1, @minor=2, @patch=3>
+    #
+    # @overload initialize(version)
+    #   @param [Solve::Version] version
+    #
+    #   @example
+    #     Version.new(Version.new("1.2.3")) => #<Version: @major=1, @minor=2, @patch=3>
+    #
     def initialize(*args)
       args.first.is_a?(Array)
       case args.first
@@ -43,6 +50,9 @@ module Solve
         @major, @minor, @patch = args.first
       when String
         @major, @minor, @patch = self.class.split(args.first.to_s)
+      when Solve::Version
+        version = args.first
+        @major, @minor, @patch = version.major, version.minor, version.patch
       end
 
       @major ||= 0

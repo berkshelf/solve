@@ -1,4 +1,5 @@
 module Solve
+
   # @author Jamie Winsor <jamie@vialstudios.com>
   class Solver
     # @author Andrew Garson <andrew.garson@gmail.com>
@@ -208,9 +209,8 @@ module Solve
         possible_values_for_unbound = possible_values_for(unbound_variable)
         
         while possible_value = possible_values_for_unbound.shift
-          possible_artifact = graph.artifacts(unbound_variable.package, possible_value.version)
+          possible_artifact = graph.get_artifact(Artifact.new(graph, unbound_variable.package, possible_value.version))
           possible_dependencies = possible_artifact.dependencies
-
           all_ok = possible_dependencies.all? { |dependency| can_add_new_constraint?(dependency) }
           if all_ok
             add_dependencies(possible_dependencies, possible_artifact) 
@@ -307,13 +307,7 @@ module Solve
       end
 
       def seed_demand_dependencies
-        source = :root
-
-        demands.each do |demand|
-          domain[demand.name] = graph.versions(demand.name, demand.constraint)
-          variable_table.add(demand.name, source)
-          constraint_table.add(demand.name, demand.constraint, source)
-        end
+        add_dependencies(demands, :root)
       end
 
       def can_add_new_constraint?(dependency)
@@ -337,10 +331,10 @@ module Solve
 
       def add_dependencies(dependencies, source)
         dependencies.each do |dependency|
-          variable_table.add(dependency.package, source)
-          constraint_table.add(dependency.package, dependency.constraint, source)
-          dependency_domain = index.values_for(dependency.package, dependency.constraint)
-          domain[dependency.package] = [(domain[dependency.package] || []), dependency_domain].flatten.uniq.sort
+          variable_table.add(dependency.name, source)
+          constraint_table.add(dependency.name, dependency.constraint, source)
+          dependency_domain = graph.versions(dependency.name, dependency.constraint)
+          domain[dependency.name] = [(domain[dependency.name] || []), dependency_domain].flatten.uniq.sort_by { |artifact| artifact.version }
         end
       end
 
@@ -350,6 +344,7 @@ module Solve
       end
 
       def backtrack(unbound_variable)
+
         previous_variable = variable_table.before(unbound_variable.package)
 
         if previous_variable.nil?
