@@ -101,8 +101,12 @@ module Solve
       @compare_fun = OPERATORS.fetch(self.operator)
     end
 
+    # Return the Solve::Version representation of the major, minor, and patch
+    # attributes of this instance
+    #
+    # @return [Solve::Version]
     def version
-      Version.new([self.major, self.minor, self.patch])
+      @version ||= Version.new([self.major, self.minor, self.patch])
     end
 
     # Returns true or false if the given version would be satisfied by
