@@ -1,6 +1,8 @@
 module Solve
   # @author Jamie Winsor <jamie@vialstudios.com>
   class Artifact
+    include Comparable
+
     # A reference to the graph this artifact belongs to
     #
     # @return [Solve::Graph]
@@ -26,67 +28,46 @@ module Solve
       @dependencies = Hash.new
     end
 
-    # @overload dependencies(name, constraint)
-    #   Return the Solve::Dependency from the collection of
-    #   dependencies with the given name and constraint.
+    # Return the Solve::Dependency from the collection of
+    # dependencies with the given name and constraint.
     #
-    #   @param [#to_s]
-    #   @param [Solve::Constraint, #to_s]
+    # @param [#to_s] name
+    # @param [Solve::Constraint, #to_s] constraint
     #
-    #   @return [Solve::Dependency]
-    # @overload dependencies
-    #   Return the collection of dependencies
+    # @example adding dependencies
+    #   artifact.depends("nginx") => <#Dependency: @name="nginx", @constraint=">= 0.0.0">
+    #   artifact.depends("ntp", "= 1.0.0") => <#Dependency: @name="ntp", @constraint="= 1.0.0">
     #
-    #   @return [Array<Solve::Dependency>]
-    def dependencies(*args)
-      if args.empty?
-        return dependency_collection
-      end
-      if args.length > 2
-        raise ArgumentError, "Unexpected number of arguments. You gave: #{args.length}. Expected: 2 or less."
-      end
-
-      name, constraint = args
-      constraint ||= ">= 0.0.0"
-
+    # @example chaining dependencies
+    #   artifact.depends("nginx").depends("ntp")
+    #
+    # @return [Solve::Artifact]
+    def depends(name, constraint = ">= 0.0.0")
       if name.nil?
         raise ArgumentError, "A name must be specified. You gave: #{args}."
       end
 
       dependency = Dependency.new(self, name, constraint)
       add_dependency(dependency)
-    end
-    alias_method :depends, :dependencies
 
-    # Add a Solve::Dependency to the collection of dependencies 
-    # and return the added Solve::Dependency. No change will be
-    # made if the dependency is already a member of the collection.
-    #
-    # @param [Solve::Dependency] dependency
-    #
-    # @return [Solve::Dependency]
-    def add_dependency(dependency)
-      unless has_dependency?(dependency)
-        @dependencies[Graph.key_for(dependency)] = dependency
-      end
-
-      dependency
+      self
     end
 
-    # @param [Solve::Dependency] dependency
+    # Return the collection of dependencies on this instance of artifact
     #
-    # @return [Solve::Dependency, nil]
-    def remove_dependency(dependency)
-      if has_dependency?(dependency)
-        @dependencies.delete(Graph.key_for(dependency))
-      end
+    # @return [Array<Solve::Dependency>]
+    def dependencies
+      @dependencies.collect { |name, dependency| dependency }
     end
 
-    # @param [Solve::Dependency] dependency
+    # Retrieve the dependency from the artifact with the matching name and constraint
     #
-    # @return [Boolean]
-    def has_dependency?(dependency)
-      @dependencies.has_key?(Graph.key_for(dependency))
+    # @param [#to_s] name
+    # @param [#to_s] constraint
+    #
+    # @return [Solve::Artifact, nil]
+    def get_dependency(name, constraint)
+      @dependencies.fetch(Graph.dependency_key(name, constraint), nil)
     end
 
     # Remove this artifact from the graph it belongs to
@@ -104,11 +85,59 @@ module Solve
       "#{name}-#{version}"
     end
 
+    # @param [Object] other
+    #
+    # @return [Boolean]
+    def ==(other)
+      other.is_a?(self.class) &&
+        self.name == other.name &&
+        self.version == other.version
+    end
+    alias_method :eql?, :==
+
+    # @param [Solve::Version] other
+    #
+    # @return [Integer]
+    def <=>(other)
+      self.version <=> other.version
+    end
+
     private
 
-      # @return [Array<Solve::Dependency>]
-      def dependency_collection
-        @dependencies.collect { |name, dependency| dependency }
+      # Add a Solve::Dependency to the collection of dependencies 
+      # and return the added Solve::Dependency. No change will be
+      # made if the dependency is already a member of the collection.
+      #
+      # @param [Solve::Dependency] dependency
+      #
+      # @return [Solve::Dependency]
+      def add_dependency(dependency)
+        unless has_dependency?(dependency.name, dependency.constraint)
+          @dependencies[Graph.key_for(dependency)] = dependency
+        end
+
+        get_dependency(dependency.name, dependency.constraint)
+      end
+
+      # Remove the matching dependency from the artifact
+      #
+      # @param [Solve::Dependency] dependency
+      #
+      # @return [Solve::Dependency, nil]
+      def remove_dependency(dependency)
+        if has_dependency?(dependency)
+          @dependencies.delete(Graph.key_for(dependency))
+        end
+      end
+
+      # Check if the artifact has a dependency with the matching name and constraint
+      #
+      # @param [#to_s] name
+      # @param [#to_s] constraint
+      #
+      # @return [Boolean]
+      def has_dependency?(name, constraint)
+        @dependencies.has_key?(Graph.dependency_key(name, constraint))
       end
   end
 end

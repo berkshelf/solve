@@ -10,16 +10,34 @@ module Solve
       #
       # @return [Symbol]
       def key_for(object)
-        key = case object
+        case object
         when Solve::Artifact
-          "#{object.name}-#{object.version}"
+          artifact_key(object.name, object.version)
         when Solve::Dependency
-          "#{object.name}-#{object.constraint}"
+          dependency_key(object.name, object.constraint)
         else
           raise ArgumentError, "Could not generate graph key for Class: #{object.class}"
         end
+      end
 
-        key.to_sym
+      # Create a key representing an artifact for an instance of Graph
+      #
+      # @param [#to_s] name
+      # @param [#to_s] version
+      #
+      # @return [Symbol]
+      def artifact_key(name, version)
+        "#{name}-#{version}".to_sym
+      end
+
+      # Create a key representing an dependency for an instance of Graph
+      #
+      # @param [#to_s] name
+      # @param [#to_s] constraint
+      #
+      # @return [Symbol]
+      def dependency_key(name, constraint)
+        "#{name}-#{constraint}".to_sym
       end
     end
 
@@ -79,32 +97,41 @@ module Solve
     #
     # @return [Solve::Artifact]
     def add_artifact(artifact)
-      unless has_artifact?(artifact)
+      unless has_artifact?(artifact.name, artifact.version)
         @artifacts[self.class.key_for(artifact)] = artifact
       end
 
-      artifact
+      get_artifact(artifact.name, artifact.version)
     end
 
-    # @param [Solve::Artifact] artifact
+    # Retrieve the artifact from the graph with the matching name and version
+    #
+    # @param [String] name
+    # @param [Solve::Version, #to_s] version
     #
     # @return [Solve::Artifact, nil]
-    def get_artifact(artifact)
-      @artifacts.fetch(self.class.key_for(artifact), nil)
+    def get_artifact(name, version)
+      @artifacts.fetch(self.class.artifact_key(name, version.to_s), nil)
     end
 
+    # Remove the given instance of artifact from the graph
+    #
     # @param [Solve::Artifact, nil] artifact
     def remove_artifact(artifact)
-      if has_artifact?(artifact)
+      if has_artifact?(artifact.name, artifact.version)
         @artifacts.delete(self.class.key_for(artifact))
       end
     end
 
-    # @param [Solve::Artifact] artifact
+    # Check if an artifact with a matching name and version is a member of this instance
+    # of graph
+    #
+    # @param [String] name
+    # @param [Solve::Version, #to_s] version
     #
     # @return [Boolean]
-    def has_artifact?(artifact)
-      !get_artifact(artifact).nil?
+    def has_artifact?(name, version)
+      !get_artifact(name, version).nil?
     end
 
     private

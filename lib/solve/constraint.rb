@@ -2,7 +2,25 @@ module Solve
   # @author Jamie Winsor <jamie@vialstudios.com>
   class Constraint
     class << self
+      # Split a constraint string into an Array of two elements. The first
+      # element being the operator and second being the version string.
+      #
+      # If the given string does not contain a constraint operator then (=)
+      # will be used.
+      #
+      # If the given string does not contain a valid version string then
+      # nil will be returned.
+      #
       # @param [#to_s] string
+      #
+      # @example splitting a string with a constraint operator and valid version string
+      #   Constraint.split(">= 1.0.0") => [ ">=", "1.0.0" ]
+      #
+      # @example splitting a string without a constraint operator
+      #   Constraint.split("0.0.0") => [ "=", "1.0.0" ]
+      #
+      # @example splitting a string without a valid version string
+      #   Constraint.split("hello") => nil
       #
       # @return [Array, nil]
       def split(string)
@@ -98,11 +116,15 @@ module Solve
       end
 
       @major, @minor, @patch = Version.split(ver_str)
-      @compare_fun = OPERATORS[self.operator]
+      @compare_fun = OPERATORS.fetch(self.operator)
     end
 
+    # Return the Solve::Version representation of the major, minor, and patch
+    # attributes of this instance
+    #
+    # @return [Solve::Version]
     def version
-      Version.new([self.major, self.minor, self.patch])
+      @version ||= Version.new([self.major, self.minor, self.patch])
     end
 
     # Returns true or false if the given version would be satisfied by

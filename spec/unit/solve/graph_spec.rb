@@ -8,16 +8,20 @@ describe Solve::Graph do
       context "given a Solve::Artifact" do
         let(:artifact) { Solve::Artifact.new(double('graph'), "nginx", "1.2.3") }
 
-        it "returns a symbol containing the name and version of the artifact" do
-          subject.key_for(artifact).should eql(:'nginx-1.2.3')
+        it "delegates to ::artifact_key with the name and version of the artifact" do
+          subject.should_receive(:artifact_key).with(artifact.name, artifact.version)
+
+          subject.key_for(artifact)
         end
       end
 
       context "given a Solve::Dependency" do
         let(:demand) { Solve::Dependency.new(double('artifact'), "ntp", "= 2.3.4") }
 
-        it "returns a symbol containing the name and constraint of the dependency" do
-          subject.key_for(demand).should eql(:'ntp-= 2.3.4')
+        it "delegates to ::dependency_key with the name and constraint of the dependency" do
+          subject.should_receive(:dependency_key).with(demand.name, anything)
+
+          subject.key_for(demand)
         end
       end
 
@@ -27,6 +31,18 @@ describe Solve::Graph do
             subject.key_for("hello")
           }.should raise_error(ArgumentError)
         end
+      end
+    end
+
+    describe "::artifact_key" do
+      it "returns a symbol containing the name and version of the artifact" do
+        subject.artifact_key("nginx", "1.2.3").should eql(:'nginx-1.2.3')
+      end
+    end
+
+    describe "::dependency_key" do
+      it "returns a symbol containing the name and constraint of the dependency" do
+        subject.dependency_key("ntp", "= 2.3.4").should eql(:'ntp-= 2.3.4')
       end
     end
   end
@@ -108,6 +124,26 @@ describe Solve::Graph do
     end
   end
 
+  describe "#get_artifact" do
+    before(:each) do
+      subject.artifacts("nginx", "1.0.0")
+    end
+
+    it "returns an instance of artifact of the matching name and version" do
+      artifact = subject.get_artifact("nginx", "1.0.0")
+
+      artifact.should be_a(Solve::Artifact)
+      artifact.name.should eql("nginx")
+      artifact.version.to_s.should eql("1.0.0")
+    end
+
+    context "when an artifact of the given name is not in the collection of artifacts" do
+      it "returns nil" do
+        subject.get_artifact("nothere", "1.0.0").should be_nil
+      end
+    end
+  end
+
   describe "#versions" do
     let(:artifacts) do
       [
@@ -141,7 +177,7 @@ describe Solve::Graph do
     it "adds a Solve::Artifact to the collection of artifacts" do
       subject.add_artifact(artifact)
 
-      subject.should have_artifact(artifact)
+      subject.should have_artifact(artifact.name, artifact.version)
       subject.artifacts.should have(1).item
     end
 
@@ -183,11 +219,11 @@ describe Solve::Graph do
     it "returns true if the given Solve::Artifact is a member of the collection" do
       subject.add_artifact(artifact)
 
-      subject.has_artifact?(artifact).should be_true
+      subject.has_artifact?(artifact.name, artifact.version).should be_true
     end
 
     it "returns false if the given Solve::Artifact is not a member of the collection" do
-      subject.has_artifact?(artifact).should be_false
+      subject.has_artifact?(artifact.name, artifact.version).should be_false
     end
   end
 end

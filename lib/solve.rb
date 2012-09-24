@@ -1,5 +1,4 @@
 require 'solve/errors'
-require 'solve/core_ext'
 
 # @author Jamie Winsor <jamie@vialstudios.com>
 module Solve
