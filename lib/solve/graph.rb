@@ -57,6 +57,20 @@ module Solve
       add_artifact(artifact)
     end
 
+    # Return all the artifacts from the collection of artifacts
+    # with the given name.
+    #
+    # @param [String] name
+    #
+    # @return [Array<Solve::Artifact>]
+    def versions(name, constraint = ">= 0.0.0")
+      constraint = constraint.is_a?(Constraint) ? constraint : Constraint.new(constraint)
+
+      artifacts.select do |art|
+        art.name == name && constraint.satisfies?(art.version)
+      end
+    end
+
     # Add a Solve::Artifact to the collection of artifacts and
     # return the added Solve::Artifact. No change will be made
     # if the artifact is already a member of the collection.

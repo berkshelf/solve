@@ -108,6 +108,33 @@ describe Solve::Graph do
     end
   end
 
+  describe "#versions" do
+    let(:artifacts) do
+      [
+        double('artifact', name: 'nginx', version: Solve::Version.new('1.0.0')),
+        double('artifact', name: 'nginx', version: Solve::Version.new('2.0.0')),
+        double('artifact', name: 'nginx', version: Solve::Version.new('3.0.0')),
+        double('artifact', name: 'nginx', version: Solve::Version.new('4.0.0')),
+        double('artifact', name: 'nginx', version: Solve::Version.new('5.0.0')),
+        double('artifact', name: 'mysql', version: Solve::Version.new('4.0.0'))
+      ]
+    end
+
+    before(:each) do
+      subject.stub(:artifacts).and_return(artifacts)
+    end
+
+    it "returns all the artifacts matching the given name" do
+      subject.versions("nginx").should have(5).items
+    end
+
+    context "given an optional constraint value" do
+      it "returns only the artifacts matching the given constraint value and name" do
+        subject.versions("nginx", ">= 4.0.0").should have(2).items
+      end
+    end
+  end
+
   describe "#add_artifact" do
     let(:artifact) { Solve::Artifact.new(double('graph'), "nginx", "1.0.0") }
 
