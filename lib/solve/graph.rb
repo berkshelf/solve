@@ -101,7 +101,7 @@ module Solve
         @artifacts[self.class.key_for(artifact)] = artifact
       end
 
-      artifact
+      get_artifact(artifact.name, artifact.version)
     end
 
     # Retrieve the artifact from the graph with the matching name and version
