@@ -66,4 +66,18 @@ describe "Solutions" do
                       "C" => "2.1.0",
                       "D" => "2.1.0")
   end
+
+  it "finds the correct solution when there is a circular dependency" do
+    graph = Solve::Graph.new
+
+    graph.artifacts("A", "1.0.0").depends("B", "1.0.0")
+    graph.artifacts("B", "1.0.0").depends("C", "1.0.0")
+    graph.artifacts("C", "1.0.0").depends("A", "1.0.0")
+
+    result = Solve.it!(graph, [["A", "1.0.0"]])
+
+    result.should eql("A" => "1.0.0", 
+                      "B" => "1.0.0",
+                      "C" => "1.0.0")
+  end
 end
