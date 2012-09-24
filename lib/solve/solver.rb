@@ -1,6 +1,129 @@
 module Solve
   # @author Jamie Winsor <jamie@vialstudios.com>
   class Solver
+    # @author Andrew Garson <andrew.garson@gmail.com>
+    # @author Jamie Winsor <jamie@vialstudios.com>
+    class VariableTable
+      attr_reader :rows
+
+      def initialize
+        @rows = Array.new
+      end
+
+      def add(package, source)
+        row = rows.detect { |row| row.package == package }
+        if row.nil?
+          @rows << Variable.new(package, source)
+        else
+          row.add_source(source)
+        end
+      end
+
+      def first_unbound
+        @rows.detect { |row| row.bound? == false }
+      end
+
+      def find_package(package)
+        @rows.detect { |row| row.package == package }
+      end
+
+      def remove_all_with_only_this_source!(source)
+        with_only_this_source, others = @rows.partition { |row| row.sources == [source] }
+        @rows = others
+        with_only_this_source
+      end
+
+      def all_from_source(source)
+        @rows.select { |row| row.sources.include?(source) }
+      end
+
+      def before(package)
+        package_index = @rows.index { |row| row.package == package }
+        (package_index == 0) ? nil : @rows[package_index - 1]
+      end
+
+      def all_after(package)
+        package_index = @rows.index { |row| row.package == package }
+        @rows[(package_index+1)..-1]
+      end
+    end
+
+    # @author Andrew Garson <andrew.garson@gmail.com>
+    # @author Jamie Winsor <jamie@vialstudios.com>
+    class Variable
+      attr_reader :package
+      attr_reader :value
+      attr_reader :sources
+
+      def initialize(package, source)
+        @package = package
+        @value = nil
+        @sources = Array(source)
+      end
+
+      def add_source(source)
+        @sources << source
+      end
+
+      def last_source
+        @sources.last
+      end
+
+      def bind(value)
+        @value = value
+      end
+
+      def unbind
+        @value = nil
+      end
+
+      def bound?
+        !@value.nil?
+      end
+
+      def remove_source(source)
+        @sources.delete(source)
+      end
+    end
+
+    # @author Andrew Garson <andrew.garson@gmail.com>
+    # @author Jamie Winsor <jamie@vialstudios.com>
+    class ConstraintTable
+      attr_reader :rows
+
+      def initialize
+        @rows = Array.new
+      end
+
+      def add(package, constraint, source)
+        @rows << ConstraintRow.new(package, constraint, source)
+      end
+
+      def constraints_on_package(package)
+        @rows.select do |row|
+          row.package == package
+        end.map { |row| row.constraint }
+      end
+
+      def remove_constraints_from_source!(source)
+        @rows.reject! { |row| row.source == source }
+      end
+    end
+
+    # @author Andrew Garson <andrew.garson@gmail.com>
+    # @author Jamie Winsor <jamie@vialstudios.com>
+    class ConstraintRow
+      attr_reader :package
+      attr_reader :constraint
+      attr_reader :source
+
+      def initialize(package, constraint, source)
+        @package = package
+        @constraint = constraint
+        @source = source
+      end
+    end
+
     class << self
       # Create a key to identify a demand on a Solver.
       #
@@ -21,11 +144,11 @@ module Solve
       # @return [Array<Solve::Version>]
       def satisfy_all(constraints, versions)
         constraints = Array(constraints).collect do |con|
-          con.is_a?(Constraint) ? con : Constraint.new(con)
+          con.is_a?(Constraint) ? con : Constraint.new(con.to_s)
         end.uniq
 
         versions = Array(versions).collect do |ver|
-          ver.is_a?(Version) ? ver : Version.new(ver)
+          ver.is_a?(Version) ? ver : Version.new(ver.to_s)
         end.uniq
 
         versions.select do |ver|
@@ -57,11 +180,20 @@ module Solve
     # @return [Solve::Graph]
     attr_reader :graph
 
+    attr_reader :domain
+    attr_reader :variable_table
+    attr_reader :constraint_table
+    attr_reader :possible_values
+
     # @param [Solve::Graph] graph
     # @param [Array<String>, Array<Array<String, String>>] demands
     def initialize(graph, demands = Array.new)
       @graph = graph
+      @domain = Hash.new
       @demands = Hash.new
+      @possible_values = Hash.new
+      @constraint_table = ConstraintTable.new
+      @variable_table = VariableTable.new
 
       Array(demands).each do |l_demand|
         demands(*l_demand)
@@ -70,7 +202,33 @@ module Solve
 
     # @return [Hash]
     def resolve
-      Hash.new
+      seed_demand_dependencies
+
+      while unbound_variable = variable_table.first_unbound
+        possible_values_for_unbound = possible_values_for(unbound_variable)
+        
+        while possible_value = possible_values_for_unbound.shift
+          possible_artifact = graph.artifacts(unbound_variable.package, possible_value.version)
+          possible_dependencies = possible_artifact.dependencies
+
+          all_ok = possible_dependencies.all? { |dependency| can_add_new_constraint?(dependency) }
+          if all_ok
+            add_dependencies(possible_dependencies, possible_artifact) 
+            unbound_variable.bind(possible_value)
+            break
+          end
+        end
+
+        unless unbound_variable.bound?
+          backtrack(unbound_variable) 
+        end
+      end
+
+      {}.tap do |solution|
+        variable_table.rows.each do |variable|
+          solution[variable.package] = variable.value.version.to_s
+        end
+      end
     end
 
     # @overload demands(name, constraint)
@@ -146,6 +304,65 @@ module Solve
       # @return [Array<Solve::Demand>]
       def demand_collection
         @demands.collect { |name, demand| demand }
+      end
+
+      def seed_demand_dependencies
+        source = :root
+
+        demands.each do |demand|
+          domain[demand.name] = graph.versions(demand.name, demand.constraint)
+          variable_table.add(demand.name, source)
+          constraint_table.add(demand.name, demand.constraint, source)
+        end
+      end
+
+      def can_add_new_constraint?(dependency)
+        current_binding = variable_table.find_package(dependency.name)
+        #haven't seen it before, haven't bound it yet or the binding is ok
+        current_binding.nil? || current_binding.value.nil? || dependency.constraint.satisfies?(current_binding.value)
+      end
+
+      def possible_values_for(variable)
+        possible_values_for_variable = possible_values[variable.package]
+        if possible_values_for_variable.nil?
+          constraints_for_variable = constraint_table.constraints_on_package(variable.package)
+          all_values_for_variable = domain[variable.package]
+          possible_values_for_variable = constraints_for_variable.inject(all_values_for_variable) do |remaining_values, constraint|
+            remaining_values.reject { |value| !constraint.satisfies?(value.version) }
+          end
+          possible_values[variable.package] = possible_values_for_variable
+        end
+        possible_values_for_variable
+      end
+
+      def add_dependencies(dependencies, source)
+        dependencies.each do |dependency|
+          variable_table.add(dependency.package, source)
+          constraint_table.add(dependency.package, dependency.constraint, source)
+          dependency_domain = index.values_for(dependency.package, dependency.constraint)
+          domain[dependency.package] = [(domain[dependency.package] || []), dependency_domain].flatten.uniq.sort
+        end
+      end
+
+      def reset_possible_values_for(variable)
+        possible_values[variable.package] = nil
+        possible_values_for(variable)
+      end
+
+      def backtrack(unbound_variable)
+        previous_variable = variable_table.before(unbound_variable.package)
+
+        if previous_variable.nil?
+          raise Errors::NoSolutionError
+        end
+
+        source = graph.artifacts(previous_variable.package, previous_variable.value)
+        variable_table.remove_all_with_only_this_source!(source)
+        constraint_table.remove_constraints_from_source!(source)
+        previous_variable.unbind
+        variable_table.all_after(previous_variable.package).each do |variable| 
+          new_possibles = reset_possible_values_for(variable)
+        end
       end
   end
 end
