@@ -10,16 +10,34 @@ module Solve
       #
       # @return [Symbol]
       def key_for(object)
-        key = case object
+        case object
         when Solve::Artifact
-          "#{object.name}-#{object.version}"
+          artifact_key(object.name, object.version)
         when Solve::Dependency
-          "#{object.name}-#{object.constraint}"
+          dependency_key(object.name, object.constraint)
         else
           raise ArgumentError, "Could not generate graph key for Class: #{object.class}"
         end
+      end
 
-        key.to_sym
+      # Create a key representing an artifact for an instance of Graph
+      #
+      # @param [#to_s] name
+      # @param [#to_s] version
+      #
+      # @return [Symbol]
+      def artifact_key(name, version)
+        "#{name}-#{version}".to_sym
+      end
+
+      # Create a key representing an dependency for an instance of Graph
+      #
+      # @param [#to_s] name
+      # @param [#to_s] constraint
+      #
+      # @return [Symbol]
+      def dependency_key(name, constraint)
+        "#{name}-#{constraint}".to_sym
       end
     end
 
@@ -86,11 +104,12 @@ module Solve
       artifact
     end
 
-    # @param [Solve::Artifact] artifact
+    # @param [String] name
+    # @param [Solve::Version, String] version
     #
     # @return [Solve::Artifact, nil]
-    def get_artifact(artifact)
-      @artifacts.fetch(self.class.key_for(artifact), nil)
+    def get_artifact(name, version)
+      @artifacts.fetch(self.class.artifact_key(name, version.to_s), nil)
     end
 
     # @param [Solve::Artifact, nil] artifact
@@ -104,7 +123,7 @@ module Solve
     #
     # @return [Boolean]
     def has_artifact?(artifact)
-      !get_artifact(artifact).nil?
+      !get_artifact(artifact.name, artifact.version).nil?
     end
 
     private
