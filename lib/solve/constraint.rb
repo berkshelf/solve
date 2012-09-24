@@ -98,7 +98,7 @@ module Solve
       end
 
       @major, @minor, @patch = Version.split(ver_str)
-      @compare_fun = OPERATORS[self.operator]
+      @compare_fun = OPERATORS.fetch(self.operator)
     end
 
     def version
