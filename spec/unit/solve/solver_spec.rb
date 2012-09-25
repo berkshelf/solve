@@ -149,6 +149,15 @@ describe Solve::Solver do
   subject { Solve::Solver.new(graph) }
 
   describe "#resolve" do
+    let(:graph) { Solve::Graph.new }
+
+    subject { Solve::Solver.new(graph) }
+
+    before(:each) do
+      graph.artifacts("nginx", "1.0.0")
+      subject.demands("nginx", "= 1.0.0")
+    end
+
     it "returns a solution in the form of a Hash" do
       subject.resolve.should be_a(Hash)
     end

@@ -36,6 +36,13 @@ module Solve
     #
     #   @example
     #     Version.new("1.2.3") => #<Version: @major=1, @minor=2, @patch=3>
+    #
+    # @overload initialize(version)
+    #   @param [Solve::Version] version
+    #
+    #   @example
+    #     Version.new(Version.new("1.2.3")) => #<Version: @major=1, @minor=2, @patch=3>
+    #
     def initialize(*args)
       if args.first.is_a?(Array)
         @major, @minor, @patch = args.first
