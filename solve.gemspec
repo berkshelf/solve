@@ -16,8 +16,11 @@ Gem::Specification.new do |s|
   s.version               = Solve::VERSION
   s.required_ruby_version = ">= 1.9.1"
 
+  s.add_dependency 'json'
+
   s.add_development_dependency 'thor', '>= 0.16.0'
   s.add_development_dependency 'rake', '>= 0.9.2.2'
+  s.add_development_dependency 'pry'
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'fuubar'
   s.add_development_dependency 'spork'

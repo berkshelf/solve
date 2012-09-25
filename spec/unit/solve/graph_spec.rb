@@ -226,4 +226,42 @@ describe Solve::Graph do
       subject.has_artifact?(artifact.name, artifact.version).should be_false
     end
   end
+
+  describe "eql?" do
+    subject do
+      graph = Solve::Graph.new
+      graph.artifacts("A", "1.0.0").depends("B", "1.0.0")
+      graph.artifacts("A", "2.0.0").depends("C", "1.0.0")
+      graph
+    end
+
+    it "returns false if other isn't a Solve::Graph" do
+      subject.should_not be_eql("chicken")
+    end
+
+    it "returns true if other is a Solve::Graph with the same artifacts and dependencies" do
+      other = Solve::Graph.new
+      other.artifacts("A", "1.0.0").depends("B", "1.0.0")
+      other.artifacts("A", "2.0.0").depends("C", "1.0.0")
+
+      subject.should eql(other)
+    end
+
+    it "returns false if the other is a Solve::Graph with the same artifacts but different dependencies" do
+      other = Solve::Graph.new
+      other.artifacts("A", "1.0.0")
+      other.artifacts("A", "2.0.0")
+
+      subject.should_not eql(other)
+    end
+
+    it "returns false if the other is a Solve::Graph with the same dependencies but different artifacts" do
+      other = Solve::Graph.new
+      other.artifacts("A", "1.0.0").depends("B", "1.0.0")
+      other.artifacts("A", "2.0.0").depends("C", "1.0.0")
+      other.artifacts("B", "1.0.0")
+
+      subject.should_not eql(other)
+    end
+  end
 end

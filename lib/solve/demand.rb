@@ -43,5 +43,12 @@ module Solve
     def to_s
       "#{name} (#{constraint})"
     end
+
+    def ==(other)
+      other.is_a?(self.class) &&
+        self.name == other.name &&
+        self.constraint == other.constraint
+    end
+    alias_method :eql?, :==
   end
 end
