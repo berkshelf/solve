@@ -1,3 +1,4 @@
+require 'forwardable'
 require 'solve/errors'
 
 # @author Jamie Winsor <jamie@vialstudios.com>
