@@ -2,7 +2,7 @@ module Solve
   class Solver
     # @author Andrew Garson <andrew.garson@gmail.com>
     # @author Jamie Winsor <jamie@vialstudios.com>
-    class Variable
+    class VariableRow
       attr_reader :package
       attr_reader :value
       attr_reader :sources

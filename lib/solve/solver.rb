@@ -2,7 +2,7 @@ module Solve
   # @author Jamie Winsor <jamie@vialstudios.com>
   class Solver
     autoload :VariableTable, 'solve/solver/variable_table'
-    autoload :Variable, 'solve/solver/variable'
+    autoload :VariableRow, 'solve/solver/variable_row'
     autoload :ConstraintTable, 'solve/solver/constraint_table'
     autoload :ConstraintRow, 'solve/solver/constraint_row'
 

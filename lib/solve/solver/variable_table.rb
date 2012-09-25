@@ -12,7 +12,7 @@ module Solve
       def add(package, source)
         row = rows.detect { |row| row.package == package }
         if row.nil?
-          @rows << Variable.new(package, source)
+          @rows << VariableRow.new(package, source)
         else
           row.add_source(source)
         end
