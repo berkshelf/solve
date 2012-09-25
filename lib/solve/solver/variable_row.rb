@@ -2,17 +2,20 @@ module Solve
   class Solver
     # @author Andrew Garson <andrew.garson@gmail.com>
     # @author Jamie Winsor <jamie@vialstudios.com>
-    class Variable
-      attr_reader :package
+    class VariableRow
+      attr_reader :artifact
       attr_reader :value
       attr_reader :sources
 
-      def initialize(package, source)
-        @package = package
+      # @param [String] artifact
+      # @param [String, Symbol] source
+      def initialize(artifact, source)
+        @artifact = artifact
         @value = nil
         @sources = Array(source)
       end
 
+      # @param [String, Symbol] source
       def add_source(source)
         @sources << source
       end
@@ -33,6 +36,7 @@ module Solve
         !@value.nil?
       end
 
+      # @param [String, Symbol] source
       def remove_source(source)
         @sources.delete(source)
       end
