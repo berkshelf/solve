@@ -145,9 +145,7 @@ module Solve
     def ==(other)
       other.is_a?(self.class) &&
         self.operator == other.operator &&
-        self.major == other.minor &&
-        self.minor == other.minor &&
-        self.patch == other.patch
+        self.version == other.version 
     end
     alias_method :eql?, :==
 
