@@ -90,7 +90,7 @@ module Solve
         possible_values_for_unbound = possible_values_for(unbound_variable)
         
         while possible_value = possible_values_for_unbound.shift
-          possible_artifact = graph.get_artifact(unbound_variable.package, possible_value.version)
+          possible_artifact = graph.get_artifact(unbound_variable.artifact, possible_value.version)
           possible_dependencies = possible_artifact.dependencies
           all_ok = possible_dependencies.all? { |dependency| can_add_new_constraint?(dependency) }
           if all_ok
@@ -107,7 +107,7 @@ module Solve
 
       {}.tap do |solution|
         variable_table.rows.each do |variable|
-          solution[variable.package] = variable.value.version.to_s
+          solution[variable.artifact] = variable.value.version.to_s
         end
       end
     end
@@ -192,20 +192,20 @@ module Solve
       end
 
       def can_add_new_constraint?(dependency)
-        current_binding = variable_table.find_package(dependency.name)
+        current_binding = variable_table.find_artifact(dependency.name)
         #haven't seen it before, haven't bound it yet or the binding is ok
         current_binding.nil? || current_binding.value.nil? || dependency.constraint.satisfies?(current_binding.value.version)
       end
 
       def possible_values_for(variable)
-        possible_values_for_variable = possible_values[variable.package]
+        possible_values_for_variable = possible_values[variable.artifact]
         if possible_values_for_variable.nil?
-          constraints_for_variable = constraint_table.constraints_on_package(variable.package)
-          all_values_for_variable = domain[variable.package]
+          constraints_for_variable = constraint_table.constraints_on_artifact(variable.artifact)
+          all_values_for_variable = domain[variable.artifact]
           possible_values_for_variable = constraints_for_variable.inject(all_values_for_variable) do |remaining_values, constraint|
             remaining_values.reject { |value| !constraint.satisfies?(value.version) }
           end
-          possible_values[variable.package] = possible_values_for_variable
+          possible_values[variable.artifact] = possible_values_for_variable
         end
         possible_values_for_variable
       end
@@ -223,12 +223,12 @@ module Solve
       end
 
       def reset_possible_values_for(variable)
-        possible_values[variable.package] = nil
+        possible_values[variable.artifact] = nil
         possible_values_for(variable)
       end
 
       def backtrack(unbound_variable)
-        previous_variable = variable_table.before(unbound_variable.package)
+        previous_variable = variable_table.before(unbound_variable.artifact)
 
         if previous_variable.nil?
           raise Errors::NoSolutionError
@@ -238,7 +238,7 @@ module Solve
         variable_table.remove_all_with_only_this_source!(source)
         constraint_table.remove_constraints_from_source!(source)
         previous_variable.unbind
-        variable_table.all_after(previous_variable.package).each do |variable| 
+        variable_table.all_after(previous_variable.artifact).each do |variable| 
           new_possibles = reset_possible_values_for(variable)
         end
       end

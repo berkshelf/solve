@@ -3,12 +3,12 @@ module Solve
     # @author Andrew Garson <andrew.garson@gmail.com>
     # @author Jamie Winsor <jamie@vialstudios.com>
     class VariableRow
-      attr_reader :package
+      attr_reader :artifact
       attr_reader :value
       attr_reader :sources
 
-      def initialize(package, source)
-        @package = package
+      def initialize(artifact, source)
+        @artifact = artifact
         @value = nil
         @sources = Array(source)
       end

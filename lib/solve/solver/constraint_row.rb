@@ -10,6 +10,8 @@ module Solve
       def_delegator :dependency, :name
       def_delegator :dependency, :constraint
 
+      # @param [Solve::Dependency] dependency
+      # @param [String, Symbol] source
       def initialize(dependency, source)
         @dependency = dependency
         @source = source

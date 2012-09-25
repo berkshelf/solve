@@ -9,11 +9,15 @@ module Solve
         @rows = Array.new
       end
 
+      # @param [Solve::Dependency] dependency
+      # @param [String, Symbol] source
+      #
+      # @return [Array<ConstraintRow>]
       def add(dependency, source)
         @rows << ConstraintRow.new(dependency, source)
       end
 
-      def constraints_on_package(name)
+      def constraints_on_artifact(name)
         @rows.select do |row|
           row.name == name
         end.map { |row| row.constraint }
