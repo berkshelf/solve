@@ -24,7 +24,9 @@ module Solve
       end
 
       def remove_constraints_from_source!(source)
-        @rows.reject! { |row| row.source == source }
+        from_source, others = @rows.partition { |row| row.source == source }
+        @rows = others
+        from_source
       end
     end
   end

@@ -33,7 +33,7 @@ describe "Solutions" do
     }.should raise_error(Solve::Errors::NoSolutionError)
   end
 
-  it "find the correct solution when backtracking in variables introduced via demands", focus: true  do
+  it "find the correct solution when backtracking in variables introduced via demands" do
     graph = Solve::Graph.new
 
     graph.artifacts("D", "1.2.0")
