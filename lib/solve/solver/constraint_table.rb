@@ -9,13 +9,13 @@ module Solve
         @rows = Array.new
       end
 
-      def add(package, constraint, source)
-        @rows << ConstraintRow.new(package, constraint, source)
+      def add(dependency, source)
+        @rows << ConstraintRow.new(dependency, source)
       end
 
-      def constraints_on_package(package)
+      def constraints_on_package(name)
         @rows.select do |row|
-          row.package == package
+          row.name == name
         end.map { |row| row.constraint }
       end
 

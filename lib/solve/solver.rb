@@ -213,7 +213,7 @@ module Solve
       def add_dependencies(dependencies, source)
         dependencies.each do |dependency|
           variable_table.add(dependency.name, source)
-          constraint_table.add(dependency.name, dependency.constraint, source)
+          constraint_table.add(dependency, source)
           dependency_domain = graph.versions(dependency.name, dependency.constraint)
           domain[dependency.name] = [(domain[dependency.name] || []), dependency_domain]
             .flatten
