@@ -1,4 +1,5 @@
 require 'forwardable'
+require 'json'
 require 'solve/errors'
 
 # @author Jamie Winsor <jamie@vialstudios.com>

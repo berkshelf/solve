@@ -63,4 +63,28 @@ describe Solve::Demand do
       end
     end
   end
+
+  describe "equality" do
+    it "returns true when other is a Solve::Demand with the same name and constriant" do
+      other = Solve::Demand.new(solver, name, constraint)
+
+      subject.should eql(other)
+    end
+
+    it "returns false when other isn't a Solve::Demand" do
+      subject.should_not eql("chicken")
+    end
+
+    it "returns false when other is a Solve::Demand with the same name but a different constraint" do
+      other = Solve::Demand.new(solver, name, "< 3.4.5")
+
+      subject.should_not eql(other)
+    end
+    
+    it "returns false when other is a Solve::Demand with the same constraint but a different name" do
+      other = Solve::Demand.new(solver, "chicken", constraint)
+
+      subject.should_not eql(other)
+    end
+  end
 end

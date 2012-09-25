@@ -95,4 +95,30 @@ describe "Solutions" do
                       "C" => "1.0.0")
   end
 
+  it "finds the correct solution when there is a diamond shaped dependency" do
+    graph = Solve::Graph.new
+
+    graph.artifacts("A", "1.0.0")
+      .depends("B", "1.0.0")
+      .depends("C", "1.0.0")
+    graph.artifacts("B", "1.0.0")
+      .depends("D", "1.0.0")
+    graph.artifacts("C", "1.0.0")
+      .depends("D", "1.0.0")
+    graph.artifacts("D", "1.0.0")
+
+    result = Solve.it!(graph, [["A", "1.0.0"]])
+
+    result.should eql("A" => "1.0.0",
+                      "B" => "1.0.0",
+                      "C" => "1.0.0",
+                      "D" => "1.0.0")
+  end
+
+  it "gives an empty solution when there are no demands" do
+    graph = Solve::Graph.new
+    result = Solve.it!(graph, [])
+    result.should eql({})
+  end
+
 end

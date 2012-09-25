@@ -5,6 +5,7 @@ module Solve
     autoload :VariableRow, 'solve/solver/variable_row'
     autoload :ConstraintTable, 'solve/solver/constraint_table'
     autoload :ConstraintRow, 'solve/solver/constraint_row'
+    autoload :Serializer, 'solve/solver/serializer'
 
     class << self
       # Create a key to identify a demand on a Solver.
@@ -61,6 +62,7 @@ module Solve
     #
     # @return [Solve::Graph]
     attr_reader :graph
+    attr_reader :demands
 
     attr_reader :domain
     attr_reader :variable_table
@@ -69,7 +71,7 @@ module Solve
 
     # @param [Solve::Graph] graph
     # @param [Array<String>, Array<Array<String, String>>] demands
-    def initialize(graph, demands = Array.new)
+    def initialize(graph, demands = Array.new) 
       @graph = graph
       @domain = Hash.new
       @demands = Hash.new
