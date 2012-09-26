@@ -6,6 +6,7 @@ module Solve
     autoload :ConstraintTable, 'solve/solver/constraint_table'
     autoload :ConstraintRow, 'solve/solver/constraint_row'
     autoload :Serializer, 'solve/solver/serializer'
+    autoload :TabooTable, 'solve/solver/taboo_table'
 
     class << self
       # Create a key to identify a demand on a Solver.
@@ -257,6 +258,7 @@ module Solve
         source = previous_variable.value
         removed_variables = variable_table.remove_all_with_only_this_source!(source)
         removed_variables.each do |removed_variable|
+          possible_values[removed_variable.artifact] = nil
           trace("Removed variable #{removed_variable.artifact}")
         end
         removed_constraints = constraint_table.remove_constraints_from_source!(source)
