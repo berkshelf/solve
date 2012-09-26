@@ -204,4 +204,29 @@ describe Solve::Constraint do
       end
     end
   end
+
+  describe "#eql?" do
+
+    subject { Solve::Constraint.new("= 1.0.0") }
+
+    it "returns true if the other object is a Solve::Constraint with the same operator and version" do
+      other = Solve::Constraint.new("= 1.0.0")
+      subject.should eql(other)
+    end
+
+    it "returns false if the other object is a Solve::Constraint with the same operator and different version" do
+      other = Solve::Constraint.new("= 9.9.9")
+      subject.should_not eql(other)
+    end
+
+    it "returns false if the other object is a Solve::Constraint with the same version and different operator" do
+      other = Solve::Constraint.new("> 1.0.0")
+      subject.should_not eql(other)
+    end
+
+    it "returns false if the other object is not a Solve::Constraint" do
+      other = "chicken"
+      subject.should_not eql(other)
+    end
+  end
 end

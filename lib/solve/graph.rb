@@ -134,11 +134,35 @@ module Solve
       !get_artifact(name, version).nil?
     end
 
-    private
+    # @param [Object] other
+    #
+    # @return [Boolean]
+    def ==(other)
+      return false unless other.is_a?(self.class)
 
-      # @return [Array<Solve::Artifact>]
-      def artifact_collection
-        @artifacts.collect { |name, artifact| artifact }
-      end
+      self_artifacts = self.artifacts
+      other_artifacts = other.artifacts
+
+      self_dependencies = self_artifacts.inject([]) do |list, artifact|
+        list << artifact.dependencies
+      end.flatten
+
+      other_dependencies = other_artifacts.inject([]) do |list, artifact|
+        list << artifact.dependencies
+      end.flatten
+
+      self_artifacts.size == other_artifacts.size &&
+        self_dependencies.size == other_dependencies.size &&
+        self_artifacts.all? { |artifact| other_artifacts.include?(artifact) } &&
+        self_dependencies.all? { |dependency| other_dependencies.include?(dependency) }
+    end
+    alias_method :eql?, :==
+
+      private
+
+        # @return [Array<Solve::Artifact>]
+        def artifact_collection
+          @artifacts.collect { |name, artifact| artifact }
+        end
   end
 end

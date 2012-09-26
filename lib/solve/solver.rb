@@ -5,6 +5,7 @@ module Solve
     autoload :VariableRow, 'solve/solver/variable_row'
     autoload :ConstraintTable, 'solve/solver/constraint_table'
     autoload :ConstraintRow, 'solve/solver/constraint_row'
+    autoload :Serializer, 'solve/solver/serializer'
 
     class << self
       # Create a key to identify a demand on a Solver.
@@ -61,6 +62,8 @@ module Solve
     #
     # @return [Solve::Graph]
     attr_reader :graph
+    attr_reader :demands
+    attr_reader :ui
 
     attr_reader :domain
     attr_reader :variable_table
@@ -69,10 +72,13 @@ module Solve
 
     # @param [Solve::Graph] graph
     # @param [Array<String>, Array<Array<String, String>>] demands
-    def initialize(graph, demands = Array.new)
+    # @param [#say] ui
+    def initialize(graph, demands = Array.new, ui=nil) 
       @graph = graph
-      @domain = Hash.new
       @demands = Hash.new
+      @ui = ui.respond_to?(:say) ? ui : nil
+
+      @domain = Hash.new
       @possible_values = Hash.new
       @constraint_table = ConstraintTable.new
       @variable_table = VariableTable.new
@@ -84,16 +90,20 @@ module Solve
 
     # @return [Hash]
     def resolve
+      trace("Attempting to find a solution")
       seed_demand_dependencies
 
       while unbound_variable = variable_table.first_unbound
         possible_values_for_unbound = possible_values_for(unbound_variable)
+        trace("Searching for a value for #{unbound_variable.artifact}")
+        trace("Possible values are #{possible_values_for_unbound}")
         
         while possible_value = possible_values_for_unbound.shift
           possible_artifact = graph.get_artifact(unbound_variable.artifact, possible_value.version)
           possible_dependencies = possible_artifact.dependencies
           all_ok = possible_dependencies.all? { |dependency| can_add_new_constraint?(dependency) }
           if all_ok
+            trace("Attempting to use #{possible_artifact}")
             add_dependencies(possible_dependencies, possible_artifact) 
             unbound_variable.bind(possible_value)
             break
@@ -101,15 +111,21 @@ module Solve
         end
 
         unless unbound_variable.bound?
+          trace("Could not find an acceptable value for #{unbound_variable.artifact}")
           backtrack(unbound_variable) 
         end
       end
 
-      {}.tap do |solution|
+      solution = {}.tap do |solution|
         variable_table.rows.each do |variable|
           solution[variable.artifact] = variable.value.version.to_s
         end
       end
+
+      trace("Found Solution")
+      trace(solution)
+
+      solution
     end
 
     # @overload demands(name, constraint)
@@ -212,6 +228,7 @@ module Solve
 
       def add_dependencies(dependencies, source)
         dependencies.each do |dependency|
+          trace("Adding constraint #{dependency.name} #{dependency.constraint} from #{source}")
           variable_table.add(dependency.name, source)
           constraint_table.add(dependency, source)
           dependency_domain = graph.versions(dependency.name, dependency.constraint)
@@ -231,16 +248,29 @@ module Solve
         previous_variable = variable_table.before(unbound_variable.artifact)
 
         if previous_variable.nil?
+          trace("Cannot backtrack any further")
           raise Errors::NoSolutionError
         end
 
+        trace("Unbinding #{previous_variable.artifact}")
+
         source = previous_variable.value
-        variable_table.remove_all_with_only_this_source!(source)
-        constraint_table.remove_constraints_from_source!(source)
+        removed_variables = variable_table.remove_all_with_only_this_source!(source)
+        removed_variables.each do |removed_variable|
+          trace("Removed variable #{removed_variable.artifact}")
+        end
+        removed_constraints = constraint_table.remove_constraints_from_source!(source)
+        removed_constraints.each do |removed_constraint|
+          trace("Removed constraint #{removed_constraint.name} #{removed_constraint.constraint}")
+        end
         previous_variable.unbind
         variable_table.all_after(previous_variable.artifact).each do |variable| 
           new_possibles = reset_possible_values_for(variable)
         end
+      end
+
+      def trace(message)
+        ui.say(message) unless ui.nil?
       end
   end
 end
