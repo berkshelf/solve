@@ -6,7 +6,6 @@ module Solve
     autoload :ConstraintTable, 'solve/solver/constraint_table'
     autoload :ConstraintRow, 'solve/solver/constraint_row'
     autoload :Serializer, 'solve/solver/serializer'
-    autoload :TabooTable, 'solve/solver/taboo_table'
 
     class << self
       # Create a key to identify a demand on a Solver.
