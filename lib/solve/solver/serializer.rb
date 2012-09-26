@@ -1,9 +1,6 @@
-require 'json'
-
 module Solve
   class Solver
     class Serializer
-
       # @param [Solve::Solver] solver
       #
       # @return [String]
@@ -17,7 +14,6 @@ module Solve
         problem = graph_hash.merge(demands_hash)
         problem.to_json
       end
-
 
       # @param [Hash, #to_s] solver a json string or a hash representing a solver
       #
@@ -36,7 +32,8 @@ module Solve
         Solve::Solver.new(graph, demands)
       end
 
-      private 
+      private
+
         def format_graph(graph)
           artifacts = graph.artifacts.inject([]) do |list, artifact|
             list << format_artifact(artifact)
@@ -49,14 +46,18 @@ module Solve
             list << format_dependency(dependency)
           end
 
-          { "name" => artifact.name,
+          { 
+            "name" => artifact.name,
             "version" => artifact.version.to_s,
-            "dependencies" => dependencies}
+            "dependencies" => dependencies
+          }
         end
 
         def format_dependency(dependency)
-          { "name" => dependency.name, 
-            "constraint" => dependency.constraint.to_s}
+          { 
+            "name" => dependency.name, 
+            "constraint" => dependency.constraint.to_s
+          }
         end
 
         def format_demands(demands)
@@ -67,11 +68,11 @@ module Solve
         end
 
         def format_demand(demand)
-          { "name" => demand.name,
-            "constraint" => demand.constraint.to_s}
+          { 
+            "name" => demand.name,
+            "constraint" => demand.constraint.to_s
+          }
         end
-
-
 
         def load_graph(artifacts_list)
           graph = Solve::Graph.new
