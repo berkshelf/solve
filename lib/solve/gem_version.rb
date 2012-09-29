@@ -1,3 +1,3 @@
 module Solve
-  VERSION = "0.4.0.dev"
+  VERSION = "0.3.1"
 end
