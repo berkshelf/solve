@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.description           = %q{A Ruby constraint solver}
   s.summary               = s.description
   s.homepage              = "https://github.com/reset/solve"
-  
+
   s.files                 = `git ls-files`.split($\)
   s.executables           = s.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
   s.test_files            = s.files.grep(%r{^spec/})
@@ -30,5 +30,4 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'guard-rspec'
   s.add_development_dependency 'guard-spork'
   s.add_development_dependency 'guard-yard'
-  s.add_development_dependency 'coolline'
 end
