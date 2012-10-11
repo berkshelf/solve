@@ -6,6 +6,15 @@ gemspec
 # installed on Travis CI.
 #
 group :development do
+  gem 'pry'
+  gem 'fuubar'
+  gem 'yard'
+  gem 'redcarpet'
+  gem 'guard'
+  gem 'guard-rspec'
+  gem 'guard-spork'
+  gem 'guard-yard'
+
   platform :ruby_19 do
     gem 'coolline'
   end
@@ -31,3 +40,13 @@ group :development do
   end
 end
 
+# The test group will be
+# installed on Travis CI
+#
+group :test do
+  gem 'thor', '>= 0.16.0'
+  gem 'rake', '>= 0.9.2.2'
+
+  gem 'spork'
+  gem 'rspec'
+end

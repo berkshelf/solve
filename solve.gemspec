@@ -17,17 +17,4 @@ Gem::Specification.new do |s|
   s.required_ruby_version = ">= 1.9.1"
 
   s.add_dependency 'json'
-
-  s.add_development_dependency 'thor', '>= 0.16.0'
-  s.add_development_dependency 'rake', '>= 0.9.2.2'
-  s.add_development_dependency 'pry'
-  s.add_development_dependency 'rspec'
-  s.add_development_dependency 'fuubar'
-  s.add_development_dependency 'spork'
-  s.add_development_dependency 'yard'
-  s.add_development_dependency 'redcarpet'
-  s.add_development_dependency 'guard'
-  s.add_development_dependency 'guard-rspec'
-  s.add_development_dependency 'guard-spork'
-  s.add_development_dependency 'guard-yard'
 end
