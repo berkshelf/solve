@@ -16,6 +16,10 @@ describe Solve::Constraint do
         subject.new(valid_string).operator.should eql(">=")
       end
 
+      it "assigns the parsed operator to the operator attribute with no separation between operator and version" do
+        subject.new(">=0.0.0").operator.should eql(">=")
+      end
+
       it "assigns the parsed version string as an instance of Version to the version attribute" do
         result = subject.new(valid_string)
 
@@ -85,26 +89,34 @@ describe Solve::Constraint do
     end
 
     context "strictly greater than (>)" do
-      subject { Solve::Constraint.new("> 1.0.0") }
+      subject { Solve::Constraint.new("> 1.0.0-alpha") }
 
       it "returns true if the given version would satisfy the constraint" do
         subject.satisfies?("2.0.0").should be_true
       end
 
+      it "returns true if the given version would satisfy the constraint (2)" do
+        subject.satisfies?("1.0.0").should be_true
+      end
+
       it "returns false if the given version would not satisfy the constraint" do
-        subject.satisfies?("1.0.0").should be_false
+        subject.satisfies?("1.0.0-alpha").should be_false
       end
     end
 
     context "strictly less than (<)" do
-      subject { Solve::Constraint.new("< 1.0.0") }
+      subject { Solve::Constraint.new("< 1.0.0+build.20") }
 
       it "returns true if the given version would satisfy the constraint" do
         subject.satisfies?("0.1.0").should be_true
       end
 
+      it "returns true if the given version would satisfy the constraint (2)" do
+        subject.satisfies?("1.0.0").should be_true
+      end
+
       it "returns false if the given version would not satisfy the constraint" do
-        subject.satisfies?("1.0.0").should be_false
+        subject.satisfies?("1.0.0+build.21").should be_false
       end
     end
 
@@ -117,6 +129,10 @@ describe Solve::Constraint do
 
       it "returns false if the given version would not satisfy the constraint" do
         subject.satisfies?("1.0.1").should be_false
+      end
+
+      it "returns false if the given version would not satisfy the constraint" do
+        subject.satisfies?("1.0.0-alpha").should be_false
       end
     end
 
@@ -152,54 +168,92 @@ describe Solve::Constraint do
       end
     end
 
-    context "aproximately (~>)" do
-      subject { Solve::Constraint.new("~> 1.0.0") }
+    # TODO
+    # "~> 1.2.3-4" eq               ">= 1.2.3-4 " && "< 1.2.5--"  # note that '-' is a valid non-numeric identifier
+    # "~> 1.2.3-alpha" eq           ">= 1.2.3-alpha" && "< 1.2.3"
+    # "~> 1.2.3-alpha.4" eq         ">= 1.2.3-alpha.4" && "< 1.2.3-alpha.-"
+    # "~> 1.2.3-alpha.4+5" eq       ">= 1.2.3-alpha.4+5" && "< 1.2.3-alpha.4+-"
+    # "~> 1.2.3-alpha.4+build" eq   ">= 1.2.3-alpha.4+build < 1.2.3-alpha.5"
+    # "~> 1.2.3-alpha.4+build.5" eq ">= 1.2.3-alpha.4+build.5" && "< 1.2.3-alpha.4+build.-"
+    # "~> 1.2.3" eq                 ">= 1.2.3" && "< 1.3.0-0"
+    # "~> 1.2.3+4" eq               ">= 1.2.3+4" && "< 1.2.3+-"
+    # "~> 1.2.3+build" eq           ">= 1.2.3+build" && "< 1.2.4-0"
+    # "~> 1.2.3+build.4" eq         ">= 1.2.3+build.4" && "< 1.2.3+build.-"
+    # "~> 1.2" eq                   ">= 1.2.0" && "< 2.0.0-0"
+    %w[~> ~].each do |operator|
+      pending "aproximately (#{operator})" do
+        subject { Solve::Constraint.new("#{operator} 1.0.0") }
 
-      it "returns true if the given version is equal to the version constraint" do
-        subject.satisfies?("1.0.0").should be_true
-      end
-
-      context "when the last value in the constraint is for patch" do
-        subject { Solve::Constraint.new("~> 1.0.1") }
-
-        it "returns true if the patch level is greater than the constraint's" do
-          subject.satisfies?("1.0.2").should be_true
+        it "returns true if the given version is equal to the version constraint" do
+          subject.satisfies?("1.0.0").should be_true
         end
 
-        it "returns true if the patch level is equal to the constraint's" do
-          subject.satisfies?("1.0.1").should be_true
+        context "when the last value in the constraint is for special" do
+          subject { Solve::Constraint.new("#{operator} 1.0.0+build.2") }
+
+          it "returns true if the special level is greater than the constraint's" do
+            subject.satisfies?("1.0.0+build.3").should be_true
+          end
+
+          it "returns true if the special level is equal to the constraint's" do
+            subject.satisfies?("1.0.0+build.2").should be_true
+          end
+
+          it "returns false if the special level is less than the constraint's" do
+            subject.satisfies?("1.0.0+build").should be_false
+          end
+
+          it "returns false if the patch level is less than the constraint's" do
+            subject.satisfies?("1.0.0").should be_false
+          end
+
+          it "returns false if the given version is less than the constraint's" do
+            subject.satisfies?("0.9.0").should be_false
+          end
         end
 
-        it "returns false if the patch level is less than the constraint's" do
-          subject.satisfies?("1.0.0").should be_false
+        context "when the last value in the constraint is for patch" do
+          subject { Solve::Constraint.new("#{operator} 1.0.1") }
+
+          it "returns true if the patch level is greater than the constraint's" do
+            subject.satisfies?("1.0.2").should be_true
+          end
+
+          it "returns true if the patch level is equal to the constraint's" do
+            subject.satisfies?("1.0.1").should be_true
+          end
+
+          it "returns false if the patch level is less than the constraint's" do
+            subject.satisfies?("1.0.0").should be_false
+          end
+
+          it "returns false if the given version is less than the constraint's" do
+            subject.satisfies?("0.9.0").should be_false
+          end
         end
 
-        it "returns false if the given version is less than the constraint's" do
-          subject.satisfies?("0.9.0").should be_false
-        end
-      end
+        context "when the last value in the constraint is for minor" do
+          subject { Solve::Constraint.new("#{operator} 1.1") }
 
-      context "when the last value in the constraint is for minor" do
-        subject { Solve::Constraint.new("~> 1.1") }
+          it "returns true if the minor level is greater than the constraint's" do
+            subject.satisfies?("1.2").should be_true
+          end
 
-        it "returns true if the minor level is greater than the constraint's" do
-          subject.satisfies?("1.2").should be_true
-        end
+          it "returns true if the minor level is equal to the constraint's" do
+            subject.satisfies?("1.1").should be_true
+          end
 
-        it "returns true if the minor level is equal to the constraint's" do
-          subject.satisfies?("1.1").should be_true
-        end
+          it "returns true if a patch level is set but the minor level is equal to or greater than the constraint's" do
+            subject.satisfies?("1.2.8").should be_true
+          end
 
-        it "returns true if a patch level is set but the minor level is equal to or greater than the constraint's" do
-          subject.satisfies?("1.2.8").should be_true
-        end
+          it "returns false if the patch level is less than the constraint's" do
+            subject.satisfies?("1.0.1").should be_false
+          end
 
-        it "returns false if the patch level is less than the constraint's" do
-          subject.satisfies?("1.0.1").should be_false
-        end
-
-        it "returns false if the major level is greater than the constraint's" do
-          subject.satisfies?("2.0.0").should be_false
+          it "returns false if the major level is greater than the constraint's" do
+            subject.satisfies?("2.0.0").should be_false
+          end
         end
       end
     end

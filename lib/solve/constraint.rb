@@ -81,32 +81,28 @@ module Solve
       #
       # @return [Boolean]
       def compare_aprox(constraint, target_version)
-        unless constraint.patch.nil?
-          target_version.patch >= constraint.patch &&
-            target_version.minor == constraint.minor &&
-            target_version.major == constraint.major
-        else
-          target_version.minor >= constraint.minor &&
-            target_version.major == constraint.major
-        end
+        # TODO
       end
     end
 
     OPERATORS = {
-      "=" => method(:compare_equal),
-      ">" => method(:compare_gt),
-      "<" => method(:compare_lt),
+      "~>" => method(:compare_aprox),
       ">=" => method(:compare_gte),
       "<=" => method(:compare_lte),
-      "~>" => method(:compare_aprox)
+      "=" => method(:compare_equal),
+      "~" => method(:compare_aprox),
+      ">" => method(:compare_gt),
+      "<" => method(:compare_lt)
     }.freeze
 
-    REGEXP = /^(#{OPERATORS.keys.join('|')}) (.+)$/
+    REGEXP = /^(#{OPERATORS.keys.join('|')})\s?(.+)$/
 
     attr_reader :operator
     attr_reader :major
     attr_reader :minor
     attr_reader :patch
+    attr_reader :pre_release
+    attr_reader :build
 
     # @param [#to_s] constraint
     def initialize(constraint = ">= 0.0.0")
@@ -115,7 +111,7 @@ module Solve
         raise Errors::InvalidConstraintFormat.new(constraint)
       end
 
-      @major, @minor, @patch = Version.split(ver_str)
+      @major, @minor, @patch, @pre_release, @build = Version.split(ver_str)
       @compare_fun = OPERATORS.fetch(self.operator)
     end
 
@@ -124,7 +120,7 @@ module Solve
     #
     # @return [Solve::Version]
     def version
-      @version ||= Version.new([self.major, self.minor, self.patch])
+      @version ||= Version.new([@major, @minor, @patch, @pre_release, @build])
     end
 
     # Returns true or false if the given version would be satisfied by
@@ -145,12 +141,16 @@ module Solve
     def ==(other)
       other.is_a?(self.class) &&
         self.operator == other.operator &&
-        self.version == other.version 
+        self.version == other.version
     end
     alias_method :eql?, :==
 
     def to_s
-      "#{operator} #{major}.#{minor}.#{patch}"
+      str = operator
+      str += " #{major}.#{minor}.#{patch}"
+      str += "-#{pre_release}" if pre_release
+      str += "+#{build}" if build
+      str
     end
   end
 end
