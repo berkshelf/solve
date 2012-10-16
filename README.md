@@ -3,7 +3,7 @@
 [![Dependency Status](https://gemnasium.com/reset/solve.png?travis)](https://gemnasium.com/reset/solve)
 [![Code Climate](https://codeclimate.com/badge.png)](https://codeclimate.com/github/reset/solve)
 
-A Ruby constraint solver
+A Ruby constraint version solver supporting [Semantic Versioning 2.0.0-rc.1](http://semver.org).
 
 ## Installation
 
@@ -21,7 +21,7 @@ Add an artifact to the graph
 
 Now add another artifact that has a dependency
 
-    graph.artifacts("mysql", "1.2.4").depends("openssl", "~> 1.0.0")
+    graph.artifacts("mysql", "1.2.4-alpha.1").depends("openssl", "~> 1.0.0")
 
 Dependencies can be chained, too
 
