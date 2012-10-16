@@ -1,5 +1,11 @@
 require 'spec_helper'
 
+RSpec::Matchers.define :satisfies do |*args|
+  match do |constraint|
+    constraint.satisfies?(*args).should be_true
+  end
+end
+
 describe Solve::Constraint do
   let(:valid_string) { ">= 0.0.0" }
   let(:invalid_string) { "x23u7089213.*" }
@@ -77,183 +83,176 @@ describe Solve::Constraint do
     end
   end
 
-  describe "#satisfies?" do
+  describe "#satisfies?", :focus do
     subject { Solve::Constraint.new("= 1.0.0") }
 
-    it "accepts a String for version" do
-      subject.satisfies?("1.0.0").should be_true
-    end
+    it { should satisfies("1.0.0") }
 
     it "accepts a Version for version" do
-      subject.satisfies?(Solve::Version.new("1.0.0")).should be_true
+      should satisfies(Solve::Version.new("1.0.0"))
     end
 
     context "strictly greater than (>)" do
       subject { Solve::Constraint.new("> 1.0.0-alpha") }
 
-      it "returns true if the given version would satisfy the constraint" do
-        subject.satisfies?("2.0.0").should be_true
-      end
-
-      it "returns true if the given version would satisfy the constraint (2)" do
-        subject.satisfies?("1.0.0").should be_true
-      end
-
-      it "returns false if the given version would not satisfy the constraint" do
-        subject.satisfies?("1.0.0-alpha").should be_false
-      end
+      it { should satisfies("2.0.0") }
+      it { should satisfies("1.0.0") }
+      it { should_not satisfies("1.0.0-alpha") }
     end
 
     context "strictly less than (<)" do
       subject { Solve::Constraint.new("< 1.0.0+build.20") }
 
-      it "returns true if the given version would satisfy the constraint" do
-        subject.satisfies?("0.1.0").should be_true
-      end
-
-      it "returns true if the given version would satisfy the constraint (2)" do
-        subject.satisfies?("1.0.0").should be_true
-      end
-
-      it "returns false if the given version would not satisfy the constraint" do
-        subject.satisfies?("1.0.0+build.21").should be_false
-      end
+      it { should satisfies("0.1.0") }
+      it { should satisfies("1.0.0") }
+      it { should_not satisfies("1.0.0+build.21") }
     end
 
     context "strictly equal to (=)" do
       subject { Solve::Constraint.new("= 1.0.0") }
 
-      it "returns true if the given version would satisfy the constraint" do
-        subject.satisfies?("1.0.0").should be_true
-      end
-
-      it "returns false if the given version would not satisfy the constraint" do
-        subject.satisfies?("1.0.1").should be_false
-      end
-
-      it "returns false if the given version would not satisfy the constraint" do
-        subject.satisfies?("1.0.0-alpha").should be_false
-      end
+      it { should_not satisfies("0.9.9+build") }
+      it { should satisfies("1.0.0") }
+      it { should_not satisfies("1.0.1") }
+      it { should_not satisfies("1.0.0-alpha") }
     end
 
     context "greater than or equal to (>=)" do
       subject { Solve::Constraint.new(">= 1.0.0") }
 
-      it "returns true if the given version is greater than the version constraint" do
-        subject.satisfies?("2.0.0").should be_true
-      end
-
-      it "returns true if the given version is equal to the version constraint" do
-        subject.satisfies?("1.0.0").should be_true
-      end
-
-      it "returns false if the given version is less than the version constraint" do
-        subject.satisfies?("0.9.0").should be_false
-      end
+      it { should_not satisfies("0.9.9+build") }
+      it { should_not satisfies("1.0.0-alpha") }
+      it { should satisfies("1.0.0") }
+      it { should satisfies("1.0.1") }
+      it { should satisfies("2.0.0") }
     end
 
     context "greater than or equal to (<=)" do
       subject { Solve::Constraint.new("<= 1.0.0") }
 
-      it "returns true if the given version is less than the version constraint" do
-        subject.satisfies?("0.9.0").should be_true
-      end
-
-      it "returns true if the given version is equal to the version constraint" do
-        subject.satisfies?("1.0.0").should be_true
-      end
-
-      it "returns false if the given version is less than the version constraint" do
-        subject.satisfies?("1.0.1").should be_false
-      end
+      it { should satisfies("0.9.9+build") }
+      it { should satisfies("1.0.0-alpha") }
+      it { should satisfies("1.0.0") }
+      it { should_not satisfies("1.0.0+build") }
+      it { should_not satisfies("1.0.1") }
+      it { should_not satisfies("2.0.0") }
     end
 
-    # TODO
-    # "~> 1.2.3-4" eq               ">= 1.2.3-4 " && "< 1.2.5--"  # note that '-' is a valid non-numeric identifier
-    # "~> 1.2.3-alpha" eq           ">= 1.2.3-alpha" && "< 1.2.3"
-    # "~> 1.2.3-alpha.4" eq         ">= 1.2.3-alpha.4" && "< 1.2.3-alpha.-"
-    # "~> 1.2.3-alpha.4+5" eq       ">= 1.2.3-alpha.4+5" && "< 1.2.3-alpha.4+-"
-    # "~> 1.2.3-alpha.4+build" eq   ">= 1.2.3-alpha.4+build < 1.2.3-alpha.5"
-    # "~> 1.2.3-alpha.4+build.5" eq ">= 1.2.3-alpha.4+build.5" && "< 1.2.3-alpha.4+build.-"
-    # "~> 1.2.3" eq                 ">= 1.2.3" && "< 1.3.0-0"
-    # "~> 1.2.3+4" eq               ">= 1.2.3+4" && "< 1.2.3+-"
-    # "~> 1.2.3+build" eq           ">= 1.2.3+build" && "< 1.2.4-0"
-    # "~> 1.2.3+build.4" eq         ">= 1.2.3+build.4" && "< 1.2.3+build.-"
-    # "~> 1.2" eq                   ">= 1.2.0" && "< 2.0.0-0"
     %w[~> ~].each do |operator|
-      pending "aproximately (#{operator})" do
-        subject { Solve::Constraint.new("#{operator} 1.0.0") }
+      describe "aproximately (#{operator})" do
+        context "when the last value in the constraint is for minor" do
+          subject { Solve::Constraint.new("#{operator} 1.2") }
 
-        it "returns true if the given version is equal to the version constraint" do
-          subject.satisfies?("1.0.0").should be_true
-        end
-
-        context "when the last value in the constraint is for special" do
-          subject { Solve::Constraint.new("#{operator} 1.0.0+build.2") }
-
-          it "returns true if the special level is greater than the constraint's" do
-            subject.satisfies?("1.0.0+build.3").should be_true
-          end
-
-          it "returns true if the special level is equal to the constraint's" do
-            subject.satisfies?("1.0.0+build.2").should be_true
-          end
-
-          it "returns false if the special level is less than the constraint's" do
-            subject.satisfies?("1.0.0+build").should be_false
-          end
-
-          it "returns false if the patch level is less than the constraint's" do
-            subject.satisfies?("1.0.0").should be_false
-          end
-
-          it "returns false if the given version is less than the constraint's" do
-            subject.satisfies?("0.9.0").should be_false
-          end
-        end
-
-        context "when the last value in the constraint is for patch" do
-          subject { Solve::Constraint.new("#{operator} 1.0.1") }
-
-          it "returns true if the patch level is greater than the constraint's" do
-            subject.satisfies?("1.0.2").should be_true
-          end
-
-          it "returns true if the patch level is equal to the constraint's" do
-            subject.satisfies?("1.0.1").should be_true
-          end
-
-          it "returns false if the patch level is less than the constraint's" do
-            subject.satisfies?("1.0.0").should be_false
-          end
-
-          it "returns false if the given version is less than the constraint's" do
-            subject.satisfies?("0.9.0").should be_false
-          end
+          it { should_not satisfies("1.1.0") }
+          it { should_not satisfies("1.2.0-alpha") }
+          it { should satisfies("1.2.0") }
+          it { should satisfies("1.2.3") }
+          it { should satisfies("1.2.3+build") }
+          it { should_not satisfies("2.0.0-0") }
+          it { should_not satisfies("2.0.0") }
         end
 
         context "when the last value in the constraint is for minor" do
-          subject { Solve::Constraint.new("#{operator} 1.1") }
+          subject { Solve::Constraint.new("#{operator} 1.2.3") }
 
-          it "returns true if the minor level is greater than the constraint's" do
-            subject.satisfies?("1.2").should be_true
-          end
+          it { should_not satisfies("1.1.0") }
+          it { should_not satisfies("1.2.3-alpha") }
+          it { should_not satisfies("1.2.2") }
+          it { should satisfies("1.2.3") }
+          it { should satisfies("1.2.5+build") }
+          it { should_not satisfies("1.3.0-0") }
+          it { should_not satisfies("1.3.0") }
+        end
 
-          it "returns true if the minor level is equal to the constraint's" do
-            subject.satisfies?("1.1").should be_true
-          end
+        context "when the last value in the constraint is for pre_release with a last numeric identifier" do
+          subject { Solve::Constraint.new("#{operator} 1.2.3-4") }
 
-          it "returns true if a patch level is set but the minor level is equal to or greater than the constraint's" do
-            subject.satisfies?("1.2.8").should be_true
-          end
+          it { should_not satisfies("1.2.3") }
+          it { should satisfies("1.2.3-4") }
+          it { should satisfies("1.2.3-10") }
+          it { should satisfies("1.2.3-10.5+build.33") }
+          it { should_not satisfies("1.2.3--") }
+          it { should_not satisfies("1.2.3-alpha") }
+          it { should_not satisfies("1.2.3") }
+          it { should_not satisfies("1.2.4") }
+          it { should_not satisfies("1.3.0") }
+        end
 
-          it "returns false if the patch level is less than the constraint's" do
-            subject.satisfies?("1.0.1").should be_false
-          end
+        context "when the last value in the constraint is for pre_release with a last non-numeric identifier" do
+          subject { Solve::Constraint.new("#{operator} 1.2.3-alpha") }
 
-          it "returns false if the major level is greater than the constraint's" do
-            subject.satisfies?("2.0.0").should be_false
-          end
+          it { should_not satisfies("1.2.3-4") }
+          it { should_not satisfies("1.2.3--") }
+          it { should satisfies("1.2.3-alpha") }
+          it { should satisfies("1.2.3-alpha.0") }
+          it { should satisfies("1.2.3-beta") }
+          it { should satisfies("1.2.3-omega") }
+          it { should satisfies("1.2.3-omega.4") }
+          it { should_not satisfies("1.2.3") }
+          it { should_not satisfies("1.3.0") }
+        end
+
+        context "when the last value in the constraint is for build with a last numeric identifier and a pre-release" do
+          subject { Solve::Constraint.new("#{operator} 1.2.3-alpha+5") }
+
+          it { should_not satisfies("1.2.3-alpha") }
+          it { should_not satisfies("1.2.3-alpha.4") }
+          it { should_not satisfies("1.2.3-alpha.4+4") }
+          it { should satisfies("1.2.3-alpha+5") }
+          it { should satisfies("1.2.3-alpha+5.5") }
+          it { should satisfies("1.2.3-alpha+10") }
+          it { should_not satisfies("1.2.3-alpha+-") }
+          it { should_not satisfies("1.2.3-alpha+build") }
+          it { should_not satisfies("1.2.3-beta") }
+          it { should_not satisfies("1.2.3") }
+          it { should_not satisfies("1.3.0") }
+        end
+
+        context "when the last value in the constraint is for build with a last non-numeric identifier and a pre-release" do
+          subject { Solve::Constraint.new("#{operator} 1.2.3-alpha+build") }
+
+          it { should_not satisfies("1.2.3-alpha") }
+          it { should_not satisfies("1.2.3-alpha.4") }
+          it { should_not satisfies("1.2.3-alpha.4+4") }
+          it { should satisfies("1.2.3-alpha+build") }
+          it { should satisfies("1.2.3-alpha+build.5") }
+          it { should satisfies("1.2.3-alpha+preview") }
+          it { should satisfies("1.2.3-alpha+zzz") }
+          it { should_not satisfies("1.2.3-alphb") }
+          it { should_not satisfies("1.2.3-beta") }
+          it { should_not satisfies("1.2.3") }
+          it { should_not satisfies("1.3.0") }
+        end
+
+        context "when the last value in the constraint is for build with a last numeric identifier" do
+          subject { Solve::Constraint.new("#{operator} 1.2.3+5") }
+
+          it { should_not satisfies("1.2.3") }
+          it { should_not satisfies("1.2.3-alpha") }
+          it { should_not satisfies("1.2.3+4") }
+          it { should satisfies("1.2.3+5") }
+          it { should satisfies("1.2.3+99") }
+          it { should_not satisfies("1.2.3+5.build") }
+          it { should_not satisfies("1.2.3+-") }
+          it { should_not satisfies("1.2.3+build") }
+          it { should_not satisfies("1.2.4") }
+          it { should_not satisfies("1.3.0") }
+        end
+
+        context "when the last value in the constraint is for build with a last non-numeric identifier" do
+          subject { Solve::Constraint.new("#{operator} 1.2.3+build") }
+
+          it { should_not satisfies("1.2.3-alpha") }
+          it { should_not satisfies("1.2.3") }
+          it { should_not satisfies("1.2.3+5") }
+          it { should satisfies("1.2.3+build") }
+          it { should satisfies("1.2.3+build.5") }
+          it { should satisfies("1.2.3+preview") }
+          it { should satisfies("1.2.3+zzz") }
+          it { should_not satisfies("1.2.4-0") }
+          it { should_not satisfies("1.2.4") }
+          it { should_not satisfies("1.2.5") }
+          it { should_not satisfies("1.3.0") }
         end
       end
     end

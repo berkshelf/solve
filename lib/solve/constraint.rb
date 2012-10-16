@@ -81,7 +81,21 @@ module Solve
       #
       # @return [Boolean]
       def compare_aprox(constraint, target_version)
-        # TODO
+        min = constraint.version
+        if constraint.patch == nil
+          max = Version.new([min.major + 1, 0, 0, 0])
+        elsif constraint.build
+          identifiers = constraint.version.identifiers(:build)
+          replace = identifiers.last.to_i.to_s == identifiers.last.to_s ? "-" : nil
+          max = Version.new([min.major, min.minor, min.patch, min.pre_release, identifiers.fill(replace, -1).join('.')])
+        elsif constraint.pre_release
+          identifiers = constraint.version.identifiers(:pre_release)
+          replace = identifiers.last.to_i.to_s == identifiers.last.to_s ? "-" : nil
+          max = Version.new([min.major, min.minor, min.patch, identifiers.fill(replace, -1).join('.')])
+        else
+          max = Version.new([min.major, min.minor + 1, 0, 0])
+        end
+        min <= target_version && target_version < max
       end
     end
 
