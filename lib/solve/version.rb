@@ -1,5 +1,5 @@
 module Solve
-  # @author Jamie Winsor <jamie@vialstudios.com>
+  # @author Jamie Winsor <jamie@vialstudios.com>, Thibaud Guillaume-Gentil <thibaud@thibaud.me>
   class Version
     class << self
       # @param [#to_s] version_string

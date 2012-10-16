@@ -40,5 +40,6 @@ And now solve the graph with some demands
 ## Authors
 
 Author:: Jamie Winsor (<jamie@vialstudios.com>)
+Contributor:: [Thibaud Guillaume-Gentil](https://github.com/thibaudgg) ([@thibaudgg](http://twitter.com/thibaudgg), [thibaud.me](http://thibaud.me/)
 
 Copyright 2012 Jamie Winsor
