@@ -1,5 +1,6 @@
 module Solve
-  # @author Jamie Winsor <jamie@vialstudios.com>, Thibaud Guillaume-Gentil <thibaud@thibaud.me>
+  # @author Jamie Winsor <jamie@vialstudios.com>
+  # @author Thibaud Guillaume-Gentil <thibaud@thibaud.me>
   class Constraint
     class << self
       # Split a constraint string into an Array of two elements. The first

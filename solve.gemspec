@@ -4,8 +4,8 @@ require File.expand_path('../lib/solve/gem_version', __FILE__)
 Gem::Specification.new do |s|
   s.authors               = ["Jamie Winsor", "Andrew Garson", "Thibaud Guillaume-Gentil"]
   s.email                 = ["jamie@vialstudios.com", "andrew.garson@gmail.com", "thibaud@thibaud.me"]
-  s.description           = %q{A Ruby constraint solver}
-  s.summary               = s.description
+  s.description           = %q{A Ruby version constraint solver}
+  s.summary               = %q{A Ruby version constraint solver implementing Semantic Versioning 2.0.0-rc.1}
   s.homepage              = "https://github.com/reset/solve"
 
   s.files                 = `git ls-files`.split($\)
