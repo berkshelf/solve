@@ -5,7 +5,7 @@ describe Solve::Version do
     subject { Solve::Version }
 
     describe "::new" do
-      context "a string containing a major, minor and patch separated by periods and a pre-release" do
+      context "a string containing a major, minor and patch separated by periods a pre-release and a build" do
         before(:each) { @version = subject.new("1.2.3-rc.1+build.1") }
 
         it "assigns a major value" do
@@ -20,13 +20,17 @@ describe Solve::Version do
           @version.patch.should eql(3)
         end
 
-        it "assigns a special value" do
-          @version.special.should eql('-rc.1+build.1')
+        it "assigns a pre_release value" do
+          @version.pre_release.should eql('rc.1')
+        end
+
+        it "assigns a build value" do
+          @version.build.should eql('build.1')
         end
       end
 
       context "a string containing a major, minor and patch separated by periods and a build" do
-        before(:each) { @version = subject.new("1.2.3+build.11.e0f985a") }
+        before(:each) { @version = subject.new("1.2.3+pre-build.11.e0f985a") }
 
         it "assigns a major value" do
           @version.major.should eql(1)
@@ -40,8 +44,12 @@ describe Solve::Version do
           @version.patch.should eql(3)
         end
 
-        it "assigns a special value" do
-          @version.special.should eql('+build.11.e0f985a')
+        it "doesn't assigns a pre_release value" do
+          @version.pre_release.should be_nil
+        end
+
+        it "assigns a build value" do
+          @version.build.should eql('pre-build.11.e0f985a')
         end
       end
 
@@ -60,13 +68,17 @@ describe Solve::Version do
           @version.patch.should eql(3)
         end
 
-        it "doesn't assigns a special value" do
-          @version.special.should be_nil
+        it "doesn't assigns a pre_release value" do
+          @version.pre_release.should be_nil
+        end
+
+        it "doesn't assigns a build value" do
+          @version.build.should be_nil
         end
       end
 
-      context "a four element array" do
-        before(:each) { @version = subject.new([1,2,3,'-alpha.1']) }
+      context "a five element array" do
+        before(:each) { @version = subject.new([1,2,3,nil,'build.1']) }
 
         it "assigns a major value" do
           @version.major.should eql(1)
@@ -80,8 +92,36 @@ describe Solve::Version do
           @version.patch.should eql(3)
         end
 
-        it "assigns a special value" do
-          @version.special.should eql('-alpha.1')
+        it "doesn't assigns a pre_release value" do
+          @version.pre_release.should be_nil
+        end
+
+        it "assigns a build value" do
+          @version.build.should eql('build.1')
+        end
+      end
+
+      context "a four element array" do
+        before(:each) { @version = subject.new([1,2,3,'alpha.1']) }
+
+        it "assigns a major value" do
+          @version.major.should eql(1)
+        end
+
+        it "assigns a minor value" do
+          @version.minor.should eql(2)
+        end
+
+        it "assigns a patch value" do
+          @version.patch.should eql(3)
+        end
+
+        it "assigns a pre_release value" do
+          @version.pre_release.should eql('alpha.1')
+        end
+
+        it "doesn't assigns a build value" do
+          @version.build.should be_nil
         end
       end
 
@@ -100,8 +140,12 @@ describe Solve::Version do
           @version.patch.should eql(3)
         end
 
-        it "doesn't assigns a special value" do
-          @version.special.should be_nil
+        it "doesn't assigns a pre_release value" do
+          @version.pre_release.should be_nil
+        end
+
+        it "doesn't assigns a build value" do
+          @version.build.should be_nil
         end
       end
 
@@ -120,8 +164,12 @@ describe Solve::Version do
           @version.patch.should eql(0)
         end
 
-        it "doesn't assigns a special value" do
-          @version.special.should be_nil
+        it "doesn't assigns a pre_release value" do
+          @version.pre_release.should be_nil
+        end
+
+        it "doesn't assigns a build value" do
+          @version.build.should be_nil
         end
       end
 
@@ -140,8 +188,12 @@ describe Solve::Version do
           @version.patch.should eql(0)
         end
 
-        it "doesn't assigns a special value" do
-          @version.special.should be_nil
+        it "doesn't assigns a pre_release value" do
+          @version.pre_release.should be_nil
+        end
+
+        it "doesn't assigns a build value" do
+          @version.build.should be_nil
         end
       end
 
@@ -160,44 +212,48 @@ describe Solve::Version do
           @version.patch.should eql(0)
         end
 
-        it "doesn't assigns a special value" do
-          @version.special.should be_nil
+        it "doesn't assigns a pre_release value" do
+          @version.pre_release.should be_nil
+        end
+
+        it "doesn't assigns a build value" do
+          @version.build.should be_nil
         end
       end
     end
 
     describe "::split" do
-      it "returns an array containing 4 elements" do
-        subject.split("1.2.0-alpha.1").should have(4).items
+      it "returns an array containing 5 elements" do
+        subject.split("1.2.0-alpha.1").should have(5).items
       end
 
       context "given a string only containing a major, minor and patch version" do
         it "returns an array containing 4 elements" do
-          subject.split("1.2.3").should have(4).items
+          subject.split("1.2.3").should have(5).items
         end
 
         it "returns nil as fourth element" do
           subject.split("1.2.3")[3].should be_nil
         end
+
+        it "returns nil as fifth element" do
+          subject.split("1.2.3")[4].should be_nil
+        end
       end
 
       context "given a string only containing a major and minor version" do
         it "returns an array containing 4 elements" do
-          subject.split("1.2").should have(4).items
+          subject.split("1.2").should have(3).items
         end
 
         it "returns nil as the third element" do
           subject.split("1.2")[2].should be_nil
         end
-
-        it "returns nil as the fourth element" do
-          subject.split("1.2")[3].should be_nil
-        end
       end
 
       context "given a string with only a major version" do
-        it "returns an array containing 4 elements" do
-          subject.split("1").should have(4).items
+        it "returns an array containing 3 elements" do
+          subject.split("1").should have(3).items
         end
 
         it "returns nil as the second element" do
@@ -207,25 +263,21 @@ describe Solve::Version do
         it "returns nil as the third element" do
           subject.split("1")[2].should be_nil
         end
+      end
 
-        it "returns nil as the fourth element" do
-          subject.split("1")[3].should be_nil
-        end
-
-      context "given a string with an invalid version"
-        it "raises an InvalidVersionFormat error" do
-          lambda {
-            subject.split("hello")
-          }.should raise_error(Solve::Errors::InvalidVersionFormat)
-        end
+    context "given a string with an invalid version"
+      it "raises an InvalidVersionFormat error" do
+        lambda {
+          subject.split("hello")
+        }.should raise_error(Solve::Errors::InvalidVersionFormat)
       end
     end
   end
 
-  subject { Solve::Version.new("1.0.0-rc.1+build.1") }
-
   describe "#to_s" do
-    it "returns a string containing the major.minor.patch and special" do
+    subject { Solve::Version.new("1.0.0-rc.1+build.1") }
+
+    it "returns a string containing the major.minor.patch-pre_release+build" do
       subject.to_s.should eql("1.0.0-rc.1+build.1")
     end
   end
@@ -233,6 +285,7 @@ describe Solve::Version do
   describe "#<=>" do
     it "compares versions" do
       versions_list = %w[
+        1.0.0-0
         1.0.0-alpha
         1.0.0-alpha.1
         1.0.0-beta.2
@@ -247,11 +300,13 @@ describe Solve::Version do
       ]
       versions = versions_list.map { |version| Solve::Version.new(version) }
 
-      shuffled_versions = versions.shuffle
-      while shuffled_versions == versions
-        shuffled_versions = shuffled_versions.shuffle
+      100.times do
+        shuffled_versions = versions.shuffle
+        while shuffled_versions == versions
+          shuffled_versions = shuffled_versions.shuffle
+        end
+        shuffled_versions.sort.map(&:to_s).should == versions_list
       end
-      shuffled_versions.sort.map(&:to_s).should == versions_list
     end
   end
 
