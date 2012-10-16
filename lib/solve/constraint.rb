@@ -135,7 +135,15 @@ module Solve
     #
     # @return [Solve::Version]
     def version
-      @version ||= Version.new([@major, @minor, @patch, @pre_release, @build])
+      @version ||= Version.new(
+        [
+          self.major,
+          self.minor,
+          self.patch,
+          self.pre_release,
+          self.build
+        ]
+      )
     end
 
     # Returns true or false if the given version would be satisfied by
