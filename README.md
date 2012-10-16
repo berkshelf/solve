@@ -3,7 +3,7 @@
 [![Dependency Status](https://gemnasium.com/reset/solve.png?travis)](https://gemnasium.com/reset/solve)
 [![Code Climate](https://codeclimate.com/badge.png)](https://codeclimate.com/github/reset/solve)
 
-A Ruby constraint version solver supporting [Semantic Versioning 2.0.0-rc.1](http://semver.org).
+A Ruby versioning constraint solver implementing [Semantic Versioning 2.0.0-rc.1](http://semver.org).
 
 ## Installation
 
@@ -40,6 +40,8 @@ And now solve the graph with some demands
 ## Authors
 
 Author:: Jamie Winsor (<jamie@vialstudios.com>)
-Contributor:: [Thibaud Guillaume-Gentil](https://github.com/thibaudgg) ([@thibaudgg](http://twitter.com/thibaudgg), [thibaud.me](http://thibaud.me/)
+Author:: Andrew Garson (<andrew.garson@gmail.com>)
 
-Copyright 2012 Jamie Winsor
+## Contributors
+
+[Thibaud Guillaume-Gentil](https://github.com/thibaudgg) ([@thibaudgg](http://twitter.com/thibaudgg))
