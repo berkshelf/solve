@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe "Solutions" do
-  
+
   it "chooses the correct artifact for the demands" do
     graph = Solve::Graph.new
     graph.artifacts("mysql", "2.0.0")
@@ -18,13 +18,13 @@ describe "Solutions" do
     graph.artifacts("mysql", "2.0.0")
     graph.artifacts("mysql", "1.2.0")
     graph.artifacts("nginx", "1.0.0").depends("mysql", ">= 1.2.0")
-    
+
     result = Solve.it!(graph, [['nginx', '= 1.0.0'], ['mysql']])
 
     result.should eql("nginx" => "1.0.0", "mysql" => "2.0.0")
   end
 
-  it "raises NoSolutionError when a solution cannot be found" do    
+  it "raises NoSolutionError when a solution cannot be found" do
     graph = Solve::Graph.new
     graph.artifacts("mysql", "1.2.0")
 
@@ -76,7 +76,7 @@ describe "Solutions" do
 
     result = Solve.it!(graph, [["A", "1.0.0"]])
 
-    result.should eql("A" => "1.0.0", 
+    result.should eql("A" => "1.0.0",
                       "B" => "1.0.0",
                       "C" => "1.0.0")
   end
@@ -90,7 +90,7 @@ describe "Solutions" do
 
     result = Solve.it!(graph, [["A", "1.0.0"]])
 
-    result.should eql("A" => "1.0.0", 
+    result.should eql("A" => "1.0.0",
                       "B" => "1.0.0",
                       "C" => "1.0.0")
   end
@@ -141,7 +141,7 @@ describe "Solutions" do
     graph.artifacts("D", "1.0.0").depends("A", "< 0.0.0")
 
     # Add a solution to the graph that should be reached only after
-    #   all of the others have been tried 
+    #   all of the others have been tried
     #   it must be circular to ensure that no other branch can find it
     graph.artifacts("A", "0.0.0").depends("B", "0.0.0")
     graph.artifacts("B", "0.0.0").depends("C", "0.0.0")
@@ -151,11 +151,44 @@ describe "Solutions" do
     demands = [["A"]]
 
     result = Solve.it!(graph, demands)
-    
+
     result.should eql({ "A" => "0.0.0",
                         "B" => "0.0.0",
                         "C" => "0.0.0",
                         "D" => "0.0.0"})
 
+  end
+
+  it "correctly resolves when a resolution exists but it is not the latest" do
+    graph = Solve::Graph.new
+
+    graph.artifacts("get-the-old-one", "1.0.0")
+      .depends("locked-mid-1", ">= 0.0.0")
+      .depends("locked-mid-2", ">= 0.0.0")
+    graph.artifacts("get-the-old-one", "0.5.0")
+
+    graph.artifacts("locked-mid-1", "2.0.0").depends("old-bottom", "= 2.0.0")
+    graph.artifacts("locked-mid-1", "1.3.0").depends("old-bottom", "= 0.5.0")
+    graph.artifacts("locked-mid-1", "1.0.0")
+
+    graph.artifacts("locked-mid-2", "2.0.0").depends("old-bottom", "= 2.1.0")
+    graph.artifacts("locked-mid-2", "1.4.0").depends("old-bottom", "= 0.5.0")
+    graph.artifacts("locked-mid-2", "1.0.0")
+
+    graph.artifacts("old-bottom", "2.1.0")
+    graph.artifacts("old-bottom", "2.0.0")
+    graph.artifacts("old-bottom", "1.0.0")
+    graph.artifacts("old-bottom", "0.5.0")
+
+    demands = [["get-the-old-one"]]
+
+    result = Solve.it!(graph, demands)
+
+    result.should eql({
+        "get-the-old-one" => "1.0.0",
+        "locked-mid-1" => "1.3.0",
+        "locked-mid-2" => "1.4.0",
+        "old-bottom" => "0.5.0"
+      })
   end
 end
