@@ -158,4 +158,37 @@ describe "Solutions" do
                         "D" => "0.0.0"})
 
   end
+
+  it "correctly resolves when a resolution exists but it is not the latest" do
+    graph = Solve::Graph.new
+
+    graph.artifacts("get-the-old-one", "1.0.0")
+      .depends("locked-mid-1", ">= 0.0.0")
+      .depends("locked-mid-2", ">= 0.0.0")
+    graph.artifacts("get-the-old-one", "0.5.0")
+
+    graph.artifacts("locked-mid-1", "2.0.0").depends("old-bottom", "= 2.0.0")
+    graph.artifacts("locked-mid-1", "1.3.0").depends("old-bottom", "= 0.5.0")
+    graph.artifacts("locked-mid-1", "1.0.0")
+
+    graph.artifacts("locked-mid-2", "2.0.0").depends("old-bottom", "= 2.1.0")
+    graph.artifacts("locked-mid-2", "1.4.0").depends("old-bottom", "= 0.5.0")
+    graph.artifacts("locked-mid-2", "1.0.0")
+
+    graph.artifacts("old-bottom", "2.1.0")
+    graph.artifacts("old-bottom", "2.0.0")
+    graph.artifacts("old-bottom", "1.0.0")
+    graph.artifacts("old-bottom", "0.5.0")
+
+    demands = [["get-the-old-one"]]
+
+    result = Solve.it!(graph, demands)
+
+    result.should eql({
+      "get-the-old-one" => "1.0.0",
+      "locked-mid-1" => "2.0.0",
+      "locked-mid-2" => "1.0.0",
+      "old-bottom" => "2.0.0"
+    })
+  end
 end

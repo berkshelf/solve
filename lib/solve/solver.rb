@@ -96,6 +96,10 @@ module Solve
       while unbound_variable = variable_table.first_unbound
         possible_values_for_unbound = possible_values_for(unbound_variable)
         trace("Searching for a value for #{unbound_variable.artifact}")
+        trace("Constraints are")
+        constraint_table.constraints_on_artifact(unbound_variable.artifact).each do |constraint|
+          trace("\t#{constraint}")
+        end
         trace("Possible values are #{possible_values_for_unbound}")
         
         while possible_value = possible_values_for_unbound.shift
@@ -233,15 +237,29 @@ module Solve
           constraint_table.add(dependency, source)
           dependency_domain = graph.versions(dependency.name, dependency.constraint)
           domain[dependency.name] = [(domain[dependency.name] || []), dependency_domain]
-            .flatten
-            .uniq
-            .sort { |left, right| right.version <=> left.version }
+          .flatten
+          .uniq
+          .sort { |left, right| right.version <=> left.version }
+
+          #if the variable we are constraining is still unbound, we want to filter
+          #its possible values, if its already bound, we know its ok to add this constraint because
+          #we can never change a previously bound value without removing this constraint and we check above
+          #whether or not its ok to add this constraint given the current value
+
+          variable = variable_table.find_artifact(dependency.name)
+          if variable.value.nil?
+            reset_possible_values_for(variable)
+          end
+
         end
       end
 
       def reset_possible_values_for(variable)
+        trace("Resetting possible values for #{variable.artifact}")
         possible_values[variable.artifact] = nil
-        possible_values_for(variable)
+        x = possible_values_for(variable)
+        trace("Possible values are #{x}")
+        x
       end
 
       def backtrack(unbound_variable)
