@@ -236,10 +236,7 @@ module Solve
           variable_table.add(dependency.name, source)
           constraint_table.add(dependency, source)
           dependency_domain = graph.versions(dependency.name, dependency.constraint)
-          domain[dependency.name] = [(domain[dependency.name] || []), dependency_domain]
-          .flatten
-          .uniq
-          .sort { |left, right| right.version <=> left.version }
+          domain[dependency.name] = [(domain[dependency.name] || []), dependency_domain].flatten.uniq.sort { |left, right| right.version <=> left.version }
 
           #if the variable we are constraining is still unbound, we want to filter
           #its possible values, if its already bound, we know its ok to add this constraint because
