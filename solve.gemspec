@@ -7,6 +7,7 @@ Gem::Specification.new do |s|
   s.description           = %q{A Ruby version constraint solver}
   s.summary               = %q{A Ruby version constraint solver implementing Semantic Versioning 2.0.0-rc.1}
   s.homepage              = "https://github.com/reset/solve"
+  s.license               = "Apache 2.0"
 
   s.files                 = `git ls-files`.split($\)
   s.executables           = s.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
