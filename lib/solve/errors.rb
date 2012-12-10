@@ -29,6 +29,12 @@ module Solve
       end
     end
 
-    class NoSolutionError < SolveError; end
+    class NoSolutionError < SolveError
+      attr_reader :errors
+
+      def initialize(errors = [])
+        @errors = errors
+      end
+    end
   end
 end
