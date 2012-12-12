@@ -6,7 +6,7 @@ describe Solve::Artifact do
     package_version = double('package_version')
     package_version.stub(:dependencies).and_return([])
     package.stub(:add_version).and_return(package_version)
-    double('graph', dep_graph: double('dep_graph', package: package))
+    double('graph', :dep_graph => double('dep_graph', :package => package))
   end
 
   let(:name) { "league" }

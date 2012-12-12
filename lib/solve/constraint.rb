@@ -110,7 +110,7 @@ module Solve
       "<" => method(:compare_lt)
     }.freeze
 
-    REGEXP = /^(#{OPERATORS.keys.join('|')})\s?(.+)$/
+    REGEXP = /^(#{OPERATORS.keys.sort{|a,b| b.length <=> a.length}.join('|')})\s?(.+)$/
 
     attr_reader :operator
     attr_reader :major

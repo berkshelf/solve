@@ -147,12 +147,12 @@ describe Solve::Graph do
   describe "#versions" do
     let(:artifacts) do
       [
-        double('artifact', name: 'nginx', version: Solve::Version.new('1.0.0')),
-        double('artifact', name: 'nginx', version: Solve::Version.new('2.0.0')),
-        double('artifact', name: 'nginx', version: Solve::Version.new('3.0.0')),
-        double('artifact', name: 'nginx', version: Solve::Version.new('4.0.0')),
-        double('artifact', name: 'nginx', version: Solve::Version.new('5.0.0')),
-        double('artifact', name: 'mysql', version: Solve::Version.new('4.0.0'))
+        double('artifact', :name => 'nginx', :version => Solve::Version.new('1.0.0')),
+        double('artifact', :name => 'nginx', :version => Solve::Version.new('2.0.0')),
+        double('artifact', :name => 'nginx', :version => Solve::Version.new('3.0.0')),
+        double('artifact', :name => 'nginx', :version => Solve::Version.new('4.0.0')),
+        double('artifact', :name => 'nginx', :version => Solve::Version.new('5.0.0')),
+        double('artifact', :name => 'mysql', :version => Solve::Version.new('4.0.0'))
       ]
     end
 
