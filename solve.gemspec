@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   s.name                  = "solve"
   s.require_paths         = ["lib"]
   s.version               = Solve::VERSION
-  s.required_ruby_version = ">= 1.9.1"
+  s.required_ruby_version = ">= 1.8.7"
 
   s.add_dependency 'json'
 end

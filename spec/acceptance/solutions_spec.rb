@@ -98,13 +98,9 @@ describe "Solutions" do
   it "finds the correct solution when there is a diamond shaped dependency" do
     graph = Solve::Graph.new
 
-    graph.artifacts("A", "1.0.0")
-      .depends("B", "1.0.0")
-      .depends("C", "1.0.0")
-    graph.artifacts("B", "1.0.0")
-      .depends("D", "1.0.0")
-    graph.artifacts("C", "1.0.0")
-      .depends("D", "1.0.0")
+    graph.artifacts("A", "1.0.0").depends("B", "1.0.0").depends("C", "1.0.0")
+    graph.artifacts("B", "1.0.0").depends("D", "1.0.0")
+    graph.artifacts("C", "1.0.0").depends("D", "1.0.0")
     graph.artifacts("D", "1.0.0")
 
     result = Solve.it!(graph, [["A", "1.0.0"]])
@@ -162,9 +158,7 @@ describe "Solutions" do
   it "correctly resolves when a resolution exists but it is not the latest" do
     graph = Solve::Graph.new
 
-    graph.artifacts("get-the-old-one", "1.0.0")
-      .depends("locked-mid-1", ">= 0.0.0")
-      .depends("locked-mid-2", ">= 0.0.0")
+    graph.artifacts("get-the-old-one", "1.0.0").depends("locked-mid-1", ">= 0.0.0").depends("locked-mid-2", ">= 0.0.0")
     graph.artifacts("get-the-old-one", "0.5.0")
 
     graph.artifacts("locked-mid-1", "2.0.0").depends("old-bottom", "= 2.0.0")

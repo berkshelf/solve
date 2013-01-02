@@ -90,6 +90,7 @@ module Solve
 
     # @return [Hash]
     def resolve
+      @errors = []
       trace("Attempting to find a solution")
       seed_demand_dependencies
 
@@ -214,7 +215,9 @@ module Solve
       def can_add_new_constraint?(dependency)
         current_binding = variable_table.find_artifact(dependency.name)
         #haven't seen it before, haven't bound it yet or the binding is ok
-        current_binding.nil? || current_binding.value.nil? || dependency.constraint.satisfies?(current_binding.value.version)
+        return true if current_binding.nil? || current_binding.value.nil? || dependency.constraint.satisfies?(current_binding.value.version)
+        @errors << "Selected #{dependency.name} version #{current_binding.value.version} but it does not satisfy additional constraint #{dependency.constraint.to_s}."
+        false
       end
 
       def possible_values_for(variable)
@@ -226,6 +229,14 @@ module Solve
             remaining_values.reject { |value| !constraint.satisfies?(value.version) }
           end
           possible_values[variable.artifact] = possible_values_for_variable
+
+          if possible_values_for_variable.empty?
+            versions = all_values_for_variable.map {|d| d.version.to_s}.join ', '
+            versions = 'none' if versions.empty?
+            constraints = constraints_for_variable.map{|c| "[#{c.to_s}]"}.join ', '
+            constraints = 'none' if constraints.empty?
+            @errors << "No appropriate version of #{variable.artifact} found. Available versions: #{versions}, constraints: #{constraints}"
+          end
         end
         possible_values_for_variable
       end
@@ -236,10 +247,7 @@ module Solve
           variable_table.add(dependency.name, source)
           constraint_table.add(dependency, source)
           dependency_domain = graph.versions(dependency.name, dependency.constraint)
-          domain[dependency.name] = [(domain[dependency.name] || []), dependency_domain]
-          .flatten
-          .uniq
-          .sort { |left, right| right.version <=> left.version }
+          domain[dependency.name] = [(domain[dependency.name] || []), dependency_domain].flatten.uniq.sort { |left, right| right.version <=> left.version }
 
           #if the variable we are constraining is still unbound, we want to filter
           #its possible values, if its already bound, we know its ok to add this constraint because
@@ -257,9 +265,6 @@ module Solve
       def reset_possible_values_for(variable)
         trace("Resetting possible values for #{variable.artifact}")
         possible_values[variable.artifact] = nil
-        x = possible_values_for(variable)
-        trace("Possible values are #{x}")
-        x
       end
 
       def backtrack(unbound_variable)
@@ -267,7 +272,7 @@ module Solve
 
         if previous_variable.nil?
           trace("Cannot backtrack any further")
-          raise Errors::NoSolutionError
+          raise Errors::NoSolutionError.new @errors.uniq
         end
 
         trace("Unbinding #{previous_variable.artifact}")
