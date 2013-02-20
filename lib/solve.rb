@@ -21,12 +21,12 @@ module Solve
     #
     # @param [Solve::Graph] graph
     # @param [Array<Solve::Demand>, Array<String, String>] demands
-    # @param [#say, nil] ui
+    # @param [#say, nil] ui (nil)
     #
     # @raise [NoSolutionError]
     #
     # @return [Hash]
-    def it!(graph, demands, ui=nil)
+    def it!(graph, demands, ui = nil)
       Solver.new(graph, demands, ui).resolve
     end
   end

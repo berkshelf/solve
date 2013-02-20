@@ -119,8 +119,12 @@ module Solve
     attr_reader :pre_release
     attr_reader :build
 
-    # @param [#to_s] constraint
-    def initialize(constraint = ">= 0.0.0")
+    # @param [#to_s] constraint (">= 0.0.0")
+    def initialize(constraint = nil)
+      if constraint.nil? || constraint.empty?
+        constraint = ">= 0.0.0"
+      end
+
       @operator, ver_str = self.class.split(constraint)
       if @operator.nil? || ver_str.nil?
         raise Errors::InvalidConstraintFormat.new(constraint)

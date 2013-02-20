@@ -33,6 +33,14 @@ describe Solve::Constraint do
         result.version.to_s.should eql("0.0.0")
       end
 
+      it "sets a default of '>= 0.0.0' if given a nil value" do
+        subject.new(nil).to_s.should eql(">= 0.0.0")
+      end
+
+      it "sets a default of '>= 0.0.0' if given a blank string" do
+        subject.new('').to_s.should eql(">= 0.0.0")
+      end
+
       context "given a string that does not match the Constraint REGEXP" do
         it "raises an InvalidConstraintFormat error" do
           lambda {
