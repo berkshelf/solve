@@ -246,8 +246,12 @@ describe Solve::Version do
           subject.split("1.2").should have(3).items
         end
 
-        it "returns nil as the third element" do
-          subject.split("1.2")[2].should be_nil
+        it "returns 0 as the third element" do
+          subject.split("1.2")[2].should eql(0)
+        end
+
+        it "converts the third element to 0 if it's nil or blank" do
+          subject.split("1.2.")[2].should eql(0)
         end
       end
 
@@ -256,12 +260,16 @@ describe Solve::Version do
           subject.split("1").should have(3).items
         end
 
-        it "returns nil as the second element" do
-          subject.split("1")[2].should be_nil
+        it "returns 0 as the second element" do
+          subject.split("1")[2].should eql(0)
         end
 
-        it "returns nil as the third element" do
-          subject.split("1")[2].should be_nil
+        it "returns 0 as the third element" do
+          subject.split("1")[2].should eql(0)
+        end
+
+        it "converts the second element to 0 if it's nil or blank" do
+          subject.split("1.")[1].should eql(0)
         end
       end
 
