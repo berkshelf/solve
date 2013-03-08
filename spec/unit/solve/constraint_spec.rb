@@ -49,17 +49,9 @@ describe Solve::Constraint do
         end
       end
 
-      context "given a nil value" do
-        it "raises an InvalidConstraintFormat error" do
-          lambda {
-            subject.new(nil)
-          }.should raise_error(Solve::Errors::InvalidConstraintFormat)
-        end
-      end
-
       context "given a string containing only a major and minor version" do
-        it "has a nil value for patch" do
-          subject.new("~> 1.2").patch.should be_nil
+        it "has '0' for value of patch" do
+          subject.new("~> 1.2").patch.should eql(0)
         end
       end
     end
@@ -91,7 +83,7 @@ describe Solve::Constraint do
     end
   end
 
-  describe "#satisfies?", :focus do
+  describe "#satisfies?" do
     subject { Solve::Constraint.new("= 1.0.0") }
 
     it { should satisfies("1.0.0") }
