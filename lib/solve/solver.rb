@@ -1,3 +1,5 @@
+require 'tsort'
+
 module Solve
   # @author Jamie Winsor <jamie@vialstudios.com>
   class Solver
@@ -88,8 +90,12 @@ module Solve
       end
     end
 
-    # @return [Hash]
-    def resolve
+    # @option options [Boolean] :sorted
+    #   return the solution as a sorted list instead of a Hash
+    #
+    # @return [Hash, List] Returns a hash like { "Artifact Name" => "Version",... } 
+    #   unless options[:sorted], then it returns a list like [["Artifact Name", "Version],...]
+    def resolve(options={})
       trace("Attempting to find a solution")
       seed_demand_dependencies
 
@@ -120,16 +126,44 @@ module Solve
         end
       end
 
-      solution = {}.tap do |solution|
-        variable_table.rows.each do |variable|
-          solution[variable.artifact] = variable.value.version.to_s
-        end
-      end
+      solution = (options[:sorted]) ? build_sorted_solution : build_unsorted_solution
 
       trace("Found Solution")
       trace(solution)
 
       solution
+    end
+
+    def build_unsorted_solution
+      {}.tap do |solution|
+        variable_table.rows.each do |variable|
+          solution[variable.artifact] = variable.value.version.to_s
+        end
+      end
+    end
+
+    def build_sorted_solution
+      require 'pry'
+      used_artifacts = build_unsorted_solution
+      nodes = Hash.new
+      used_artifacts.each do |name, version|
+        nodes[name] = @graph.get_artifact(name, version).dependencies.map(&:name)
+      end
+
+      # Modified from http://ruby-doc.org/stdlib-1.9.3/libdoc/tsort/rdoc/TSort.html
+      class << nodes                                                             
+        include TSort                                                            
+        alias tsort_each_node each_key                                           
+        def tsort_each_child(node, &block)                                       
+          fetch(node).each(&block)                                               
+        end                                                                      
+      end 
+      sorted_names = nodes.tsort
+
+      sorted_names.map do |artifact|
+        [artifact, used_artifacts[artifact]]
+      end
+
     end
 
     # @overload demands(name, constraint)

@@ -191,4 +191,48 @@ describe "Solutions" do
       "old-bottom" => "2.0.0"
     })
   end
+
+  describe "when options[:sorted] is true" do
+    describe "with a simple list of dependencies" do
+      it "returns a sorted list of dependencies" do
+        graph = Solve::Graph.new
+
+        graph.artifacts("A", "1.0.0").depends("B", "= 1.0.0")
+        graph.artifacts("B", "1.0.0").depends("C", "= 1.0.0")
+        graph.artifacts("C", "1.0.0")
+
+        demands = [["A"]]
+
+        result = Solve.it!(graph, demands, { :sorted => true })
+
+        result.should eql([
+          ["C", "1.0.0"],
+          ["B", "1.0.0"],
+          ["A", "1.0.0"]
+        ])
+      end
+    end
+
+    # The order that the demands come in determines the order of artifacts
+    # in the solver's variable_table. This must not determine the sort order
+    describe "with a constraint that depends upon an earlier constrained artifact" do
+      it "returns a sorted list of dependencies" do
+        graph = Solve::Graph.new
+
+        graph.artifacts("B", "1.0.0").depends("A", "= 1.0.0")
+        graph.artifacts("A", "1.0.0").depends("C", "= 1.0.0")
+        graph.artifacts("C", "1.0.0")
+
+        demands = [["A"],["B"]] 
+
+        result = Solve.it!(graph, demands, { :sorted => true  } )
+
+        result.should eql([
+          ["C", "1.0.0"],
+          ["A", "1.0.0"],
+          ["B", "1.0.0"]
+        ])
+      end
+    end
+  end
 end
