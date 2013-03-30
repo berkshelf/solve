@@ -234,5 +234,27 @@ describe "Solutions" do
         ])
       end
     end
+
+    describe "when the solution is cyclic" do
+      it "raises a Solve::Errors::UnsortableSolutionError which contains the unsorted solution" do
+        graph = Solve::Graph.new
+
+        graph.artifacts("A", "1.0.0").depends("B", "= 1.0.0")
+        graph.artifacts("B", "1.0.0").depends("C", "= 1.0.0")
+        graph.artifacts("C", "1.0.0").depends("A", "= 1.0.0")
+
+        demands = [["A"]]
+
+        expect { Solve.it!(graph, demands, { :sorted => true  } ) }.to raise_error { |error|
+          error.should be_a(Solve::Errors::UnsortableSolutionError)
+          error.unsorted_solution.should eql({
+            "A" => "1.0.0",
+            "B" => "1.0.0",
+            "C" => "1.0.0",
+          })
+        }
+
+      end
+    end
   end
 end

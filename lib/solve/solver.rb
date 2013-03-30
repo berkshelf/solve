@@ -144,9 +144,9 @@ module Solve
 
     def build_sorted_solution
       require 'pry'
-      used_artifacts = build_unsorted_solution
+      unsorted_solution = build_unsorted_solution
       nodes = Hash.new
-      used_artifacts.each do |name, version|
+      unsorted_solution.each do |name, version|
         nodes[name] = @graph.get_artifact(name, version).dependencies.map(&:name)
       end
 
@@ -158,12 +158,15 @@ module Solve
           fetch(node).each(&block)                                               
         end                                                                      
       end 
-      sorted_names = nodes.tsort
-
-      sorted_names.map do |artifact|
-        [artifact, used_artifacts[artifact]]
+      begin
+        sorted_names = nodes.tsort
+      rescue TSort::Cyclic => e
+        raise Solve::Errors::UnsortableSolutionError.new(e, unsorted_solution)
       end
 
+      sorted_names.map do |artifact|
+        [artifact, unsorted_solution[artifact]]
+      end
     end
 
     # @overload demands(name, constraint)
