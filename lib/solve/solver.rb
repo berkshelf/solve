@@ -143,7 +143,6 @@ module Solve
     end
 
     def build_sorted_solution
-      require 'pry'
       unsorted_solution = build_unsorted_solution
       nodes = Hash.new
       unsorted_solution.each do |name, version|
