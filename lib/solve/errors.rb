@@ -1,5 +1,5 @@
 module Solve
-  # @author Jamie Winsor <jamie@vialstudios.com>
+  # @author Jamie Winsor <reset@riotgames.com>
   module Errors
     class SolveError < StandardError
       alias_method :mesage, :to_s

@@ -1,5 +1,5 @@
 module Solve
-  # @author Jamie Winsor <jamie@vialstudios.com>
+  # @author Jamie Winsor <reset@riotgames.com>
   # @author Thibaud Guillaume-Gentil <thibaud@thibaud.me>
   class Version
     class << self
