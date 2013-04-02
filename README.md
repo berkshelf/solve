@@ -39,6 +39,6 @@ And now solve the graph with some demands
 
 ## Authors
 
-* [Jamie Winsor](https://github.com/reset) (<reset@riotgames.com)
+* [Jamie Winsor](https://github.com/reset) (<reset@riotgames.com>)
 * [Andrew Garson](andrewGarson) (<agarson@riotgames.com>)
 * [Thibaud Guillaume-Gentil](https://github.com/thibaudgg) ([@thibaudgg](http://twitter.com/thibaudgg))
