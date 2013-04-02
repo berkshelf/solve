@@ -1,5 +1,5 @@
 module Solve
-  # @author Jamie Winsor <jamie@vialstudios.com>
+  # @author Jamie Winsor <jwinsor@riotgames.com, jamie@vialstudios.com>
   # @author Thibaud Guillaume-Gentil <thibaud@thibaud.me>
   class Constraint
     class << self

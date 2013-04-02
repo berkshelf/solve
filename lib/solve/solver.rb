@@ -1,5 +1,6 @@
 module Solve
-  # @author Jamie Winsor <jamie@vialstudios.com>
+  # @author Jamie Winsor <jwinsor@riotgames.com, jamie@vialstudios.com>
+  # @author Andrew Garson <agarson@riotgames.com, andrew.garson@gmail.com>
   class Solver
     autoload :VariableTable, 'solve/solver/variable_table'
     autoload :VariableRow, 'solve/solver/variable_row'
@@ -101,7 +102,7 @@ module Solve
           trace("\t#{constraint}")
         end
         trace("Possible values are #{possible_values_for_unbound}")
-        
+
         while possible_value = possible_values_for_unbound.shift
           possible_artifact = graph.get_artifact(unbound_variable.artifact, possible_value.version)
           possible_dependencies = possible_artifact.dependencies

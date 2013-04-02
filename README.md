@@ -39,8 +39,8 @@ And now solve the graph with some demands
 
 ## Authors
 
-Author:: Jamie Winsor (<jamie@vialstudios.com>)
-Author:: Andrew Garson (<andrew.garson@gmail.com>)
+Author:: Jamie Winsor (<jwinsor@riotgames.com, jamie@vialstudios.com>)
+Author:: Andrew Garson (<agarson@riotgames.com, andrew.garson@gmail.com>)
 
 ## Contributors
 

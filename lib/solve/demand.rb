@@ -1,5 +1,5 @@
 module Solve
-  # @author Jamie Winsor <jamie@vialstudios.com>
+  # @author Jamie Winsor <jwinsor@riotgames.com, jamie@vialstudios.com>
   class Demand
     # A reference to the solver this demand belongs to
     #
