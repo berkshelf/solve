@@ -2,7 +2,7 @@ require 'forwardable'
 require 'json'
 require 'solve/errors'
 
-# @author Jamie Winsor <jwinsor@riotgames.com, jamie@vialstudios.com>
+# @author Jamie Winsor <reset@riotgames.com>
 module Solve
   autoload :Version, 'solve/version'
   autoload :Artifact, 'solve/artifact'

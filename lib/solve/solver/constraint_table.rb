@@ -1,7 +1,7 @@
 module Solve
   class Solver
-    # @author Andrew Garson <agarson@riotgames.com, andrew.garson@gmail.com>
-    # @author Jamie Winsor <jwinsor@riotgames.com, jamie@vialstudios.com>
+    # @author Andrew Garson <agarson@riotgames.com>
+    # @author Jamie Winsor <reset@riotgames.com>
     class ConstraintTable
       attr_reader :rows
 

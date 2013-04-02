@@ -1,6 +1,6 @@
 module Solve
-  # @author Jamie Winsor <jwinsor@riotgames.com, jamie@vialstudios.com>
-  # @author Andrew Garson <agarson@riotgames.com, andrew.garson@gmail.com>
+  # @author Jamie Winsor <reset@riotgames.com>
+  # @author Andrew Garson <agarson@riotgames.com>
   class Solver
     autoload :VariableTable, 'solve/solver/variable_table'
     autoload :VariableRow, 'solve/solver/variable_row'
