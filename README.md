@@ -5,6 +5,8 @@
 
 A Ruby versioning constraint solver implementing [Semantic Versioning 2.0.0-rc.1](http://semver.org).
 
+Maintained by the RightScale Teal Team
+
 ## Installation
 
     $ gem install solve
