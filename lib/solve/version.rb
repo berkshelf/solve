@@ -91,6 +91,10 @@ module Solve
       end
     end
 
+    def pre_release?
+      !!pre_release
+    end
+
     # @return [Integer]
     def pre_release_and_build_presence_score
       pre_release ? 0 : (build.nil? ? 1 : 2)

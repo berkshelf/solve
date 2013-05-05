@@ -169,6 +169,10 @@ module Solve
     def satisfies?(target_version)
       target_version = Version.new(target_version.to_s)
 
+      if target_version.pre_release? && !version.pre_release?
+        return false
+      end
+
       @compare_fun.call(self, target_version)
     end
 

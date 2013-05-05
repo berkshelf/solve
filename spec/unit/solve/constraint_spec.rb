@@ -256,6 +256,22 @@ describe Solve::Constraint do
       should satisfies(Solve::Version.new("1.0.0"))
     end
 
+    context "when the constraint contains a pre-release value" do
+      subject { Solve::Constraint.new(">= 1.2.3-alpha") }
+
+      it "is satisfied by pre-release versions" do
+        should satisfies("1.2.3-beta")
+      end
+    end
+
+    context "when the constraint does not contain a pre-release value" do
+      subject { Solve::Constraint.new(">= 1.2.3") }
+
+      it "is not satisfied by pre-release versions" do
+        should_not satisfies("1.2.3-beta")
+      end
+    end
+
     context "strictly greater than (>)" do
       subject { Solve::Constraint.new("> 1.0.0-alpha") }
 
@@ -295,7 +311,7 @@ describe Solve::Constraint do
       subject { Solve::Constraint.new("<= 1.0.0") }
 
       it { should satisfies("0.9.9+build") }
-      it { should satisfies("1.0.0-alpha") }
+      it { should_not satisfies("1.0.0-alpha") }
       it { should satisfies("1.0.0") }
       it { should_not satisfies("1.0.0+build") }
       it { should_not satisfies("1.0.1") }
