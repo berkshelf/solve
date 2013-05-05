@@ -49,35 +49,199 @@ describe Solve::Constraint do
         end
       end
 
-      context "given a string containing only a major and minor version" do
-        it "has '0' for value of patch" do
-          subject.new("~> 1.2").patch.should eql(0)
+      context "given a constraint that does not include a minor version" do
+        it "has a nil value for minor" do
+          subject.new(">= 1").minor.should be_nil
+        end
+      end
+
+      context "given a constraint that does not include a patch version" do
+        it "has a nil value for patch" do
+          subject.new("~> 1.2").patch.should be_nil
+        end
+      end
+
+      context "given a constraint that does not include a build version" do
+        it "has a nil value for build" do
+          subject.new(">= 1.2.3-alpha").build.should be_nil
+        end
+      end
+
+      context "given a constraint that does not include a pre release version" do
+        it "has a nil value for pre release" do
+          subject.new(">= 1.2.3+build").pre_release.should be_nil
         end
       end
     end
 
     describe "::split" do
-      it "returns an array containing two items" do
-        subject.split(valid_string).should have(2).items
+      let(:constraint_string) { nil }
+
+      subject { described_class.split(constraint_string) }
+
+      context "given a constraint containing the elements (operator, major, minor, patch, pre_release, build)" do
+        let(:constraint_string) { ">= 1.2.3-alpha+build" }
+
+        it "returns an array with the constraint operator at index 0" do
+          subject[0].should eql(">=")
+        end
+
+        it "returns an array with the major version in index 1" do
+          subject[1].should eql(1)
+        end
+
+        it "returns an array with the minor version at index 2" do
+          subject[2].should eql(2)
+        end
+
+        it "returns an array with the patch version at index 3" do
+          subject[3].should eql(3)
+        end
+
+        it "returns an array with the pre release version at index 4" do
+          subject[4].should eql("alpha")
+        end
+
+        it "returns an array with the build version at index 5" do
+          subject[5].should eql("build")
+        end
       end
 
-      it "returns the operator at index 0" do
-        subject.split(valid_string)[0].should eql(">=")
+      context "given a constraint containing the elements (operator, major, minor, patch, pre_release)" do
+        let(:constraint_string) { ">= 1.2.3-alpha" }
+
+        it "returns an array with the constraint operator at index 0" do
+          subject[0].should eql(">=")
+        end
+
+        it "returns an array with the major version in index 1" do
+          subject[1].should eql(1)
+        end
+
+        it "returns an array with the minor version at index 2" do
+          subject[2].should eql(2)
+        end
+
+        it "returns an array with the patch version at index 3" do
+          subject[3].should eql(3)
+        end
+
+        it "returns an array with the pre release version at index 4" do
+          subject[4].should eql("alpha")
+        end
+
+        it "returns an array with a nil value at index 5" do
+          subject[5].should be_nil
+        end
       end
 
-      it "returns the version string at index 1" do
-        subject.split(valid_string)[1].should eql("0.0.0")
+      context "given a constraint containing the elements (operator, major, minor, patch)" do
+        let(:constraint_string) { ">= 1.2.3" }
+
+        it "returns an array with the constraint operator at index 0" do
+          subject[0].should eql(">=")
+        end
+
+        it "returns an array with the major version in index 1" do
+          subject[1].should eql(1)
+        end
+
+        it "returns an array with the minor version at index 2" do
+          subject[2].should eql(2)
+        end
+
+        it "returns an array with the patch version at index 3" do
+          subject[3].should eql(3)
+        end
+
+        it "returns an array with a nil value at index 4" do
+          subject[4].should be_nil
+        end
+
+        it "returns an array with a nil value at index 5" do
+          subject[5].should be_nil
+        end
+      end
+
+      context "given a constraint containing the elements (operator, major, minor)" do
+        let(:constraint_string) { ">= 1.2" }
+
+        it "returns an array with the constraint operator at index 0" do
+          subject[0].should eql(">=")
+        end
+
+        it "returns an array with the major version in index 1" do
+          subject[1].should eql(1)
+        end
+
+        it "returns an array with the minor version at index 2" do
+          subject[2].should eql(2)
+        end
+
+        it "returns an array with a nil value at index 3" do
+          subject[3].should be_nil
+        end
+
+        it "returns an array with a nil value at index 4" do
+          subject[4].should be_nil
+        end
+
+        it "returns an array with a nil value at index 5" do
+          subject[5].should be_nil
+        end
+      end
+
+      context "given a constraint containing the elements (operator, major)" do
+        let(:constraint_string) { ">= 1" }
+
+        it "returns an array with the constraint operator at index 0" do
+          subject[0].should eql(">=")
+        end
+
+        it "returns an array with the major version in index 1" do
+          subject[1].should eql(1)
+        end
+
+        it "returns an array with a nil value at index 2" do
+          subject[2].should be_nil
+        end
+
+        it "returns an array with a nil value at index 3" do
+          subject[3].should be_nil
+        end
+
+        it "returns an array with a nil value at index 4" do
+          subject[4].should be_nil
+        end
+
+        it "returns an array with a nil value at index 5" do
+          subject[5].should be_nil
+        end
+      end
+
+      context "given a constraint which is missing an operator" do
+        let(:constraint_string) { "1.2.3" }
+
+        it "returns an equality operator at index 0" do
+          subject[0].should eql("=")
+        end
       end
 
       context "given a string that does not match the Constraint REGEXP" do
-        it "returns nil" do
-          subject.split(invalid_string).should be_nil
+        let(:constraint_string) { "x23u7089213.*" }
+
+        it "raises an InvalidConstraintFormat error" do
+          expect {
+            subject.split(invalid_string)
+          }.to raise_error(Solve::Errors::InvalidConstraintFormat)
         end
       end
 
       context "given a string that does not contain an operator" do
+        let(:constraint_string) { "1.2.3" }
+
         it "returns a constraint constraint with a default operator (=)" do
-          subject.split("1.0.0")[0].should eql("=")
+          subject[0].should eql("=")
         end
       end
     end
@@ -148,16 +312,18 @@ describe Solve::Constraint do
           it { should satisfies("1.2.0") }
           it { should satisfies("1.2.3") }
           it { should satisfies("1.2.3+build") }
+          it { should satisfies("1.3") }
+          it { should satisfies("1.3.0") }
           it { should_not satisfies("2.0.0-0") }
           it { should_not satisfies("2.0.0") }
         end
 
-        context "when the last value in the constraint is for minor" do
-          subject { Solve::Constraint.new("#{operator} 1.2.3") }
+        context "when the last value in the constraint is for patch" do
+          subject { Solve::Constraint.new("#{operator} 1.2.0") }
 
           it { should_not satisfies("1.1.0") }
           it { should_not satisfies("1.2.3-alpha") }
-          it { should_not satisfies("1.2.2") }
+          it { should satisfies("1.2.2") }
           it { should satisfies("1.2.3") }
           it { should satisfies("1.2.5+build") }
           it { should_not satisfies("1.3.0-0") }

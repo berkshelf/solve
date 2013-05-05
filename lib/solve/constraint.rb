@@ -12,7 +12,7 @@ module Solve
       # If the given string does not contain a valid version string then
       # nil will be returned.
       #
-      # @param [#to_s] string
+      # @param [#to_s] constraint
       #
       # @example splitting a string with a constraint operator and valid version string
       #   Constraint.split(">= 1.0.0") => [ ">=", "1.0.0" ]
@@ -24,17 +24,32 @@ module Solve
       #   Constraint.split("hello") => nil
       #
       # @return [Array, nil]
-      def split(string)
-        if string =~ /^[0-9]/
-          op = "="
-          ver = string
+      def split(constraint)
+        if constraint =~ /^[0-9]/
+          operator = "="
+          version  = constraint
         else
-          _, op, ver = REGEXP.match(string).to_a
+          _, operator, version = REGEXP.match(constraint).to_a
         end
 
-        return nil unless op || ver
+        if operator.nil?
+          raise Errors::InvalidConstraintFormat.new(constraint)
+        end
 
-        [ op, ver ]
+        split_version = case version.to_s
+        when /^(\d+)\.(\d+)\.(\d+)(-([0-9a-z\-\.]+))?(\+([0-9a-z\-\.]+))?$/i
+          [ $1.to_i, $2.to_i, $3.to_i, $5, $7 ]
+        when /^(\d+)\.(\d+)\.(\d+)?$/
+          [ $1.to_i, $2.to_i, $3.to_i, nil, nil ]
+        when /^(\d+)\.(\d+)?$/
+          [ $1.to_i, $2.to_i, nil, nil, nil ]
+        when /^(\d+)$/
+          [ $1.to_i, nil, nil, nil, nil ]
+        else
+          raise Errors::InvalidConstraintFormat.new(constraint)
+        end
+
+        [ operator, split_version ].flatten
       end
 
       # @param [Solve::Constraint] constraint
@@ -83,18 +98,18 @@ module Solve
       # @return [Boolean]
       def compare_aprox(constraint, target_version)
         min = constraint.version
-        if constraint.patch == nil
-          max = Version.new([min.major + 1, 0, 0, 0])
+        max = if constraint.patch.nil?
+          Version.new([min.major + 1, 0, 0, 0])
         elsif constraint.build
           identifiers = constraint.version.identifiers(:build)
-          replace = identifiers.last.to_i.to_s == identifiers.last.to_s ? "-" : nil
-          max = Version.new([min.major, min.minor, min.patch, min.pre_release, identifiers.fill(replace, -1).join('.')])
+          replace     = identifiers.last.to_i.to_s == identifiers.last.to_s ? "-" : nil
+          Version.new([min.major, min.minor, min.patch, min.pre_release, identifiers.fill(replace, -1).join('.')])
         elsif constraint.pre_release
           identifiers = constraint.version.identifiers(:pre_release)
-          replace = identifiers.last.to_i.to_s == identifiers.last.to_s ? "-" : nil
-          max = Version.new([min.major, min.minor, min.patch, identifiers.fill(replace, -1).join('.')])
+          replace     = identifiers.last.to_i.to_s == identifiers.last.to_s ? "-" : nil
+          Version.new([min.major, min.minor, min.patch, identifiers.fill(replace, -1).join('.')])
         else
-          max = Version.new([min.major, min.minor + 1, 0, 0])
+          Version.new([min.major, min.minor + 1, 0, 0])
         end
         min <= target_version && target_version < max
       end
@@ -125,12 +140,7 @@ module Solve
         constraint = ">= 0.0.0"
       end
 
-      @operator, ver_str = self.class.split(constraint)
-      if @operator.nil? || ver_str.nil?
-        raise Errors::InvalidConstraintFormat.new(constraint)
-      end
-
-      @major, @minor, @patch, @pre_release, @build = Version.split(ver_str)
+      @operator, @major, @minor, @patch, @pre_release, @build = self.class.split(constraint)
       @compare_fun = OPERATORS.fetch(self.operator)
     end
 
