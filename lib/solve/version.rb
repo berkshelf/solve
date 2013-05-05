@@ -57,9 +57,11 @@ module Solve
         @major, @minor, @patch, @pre_release, @build = self.class.split(args.first.to_s)
       end
 
-      @major ||= 0
-      @minor ||= 0
-      @patch ||= 0
+      @major       ||= 0
+      @minor       ||= 0
+      @patch       ||= 0
+      @pre_release ||= nil
+      @build       ||= nil
     end
 
     # @param [Solve::Version] other
