@@ -282,6 +282,18 @@ describe Solve::Version do
     end
   end
 
+  describe "#pre_release?" do
+    context "when a pre-release value is set" do
+      subject { described_class.new("1.2.3-alpha").pre_release? }
+      it { should be_true }
+    end
+
+    context "when no pre-release value is set" do
+      subject { described_class.new("1.2.3").pre_release? }
+      it { should be_false }
+    end
+  end
+
   describe "#to_s" do
     subject { Solve::Version.new("1.0.0-rc.1+build.1") }
 
