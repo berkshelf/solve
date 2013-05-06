@@ -57,9 +57,11 @@ module Solve
         @major, @minor, @patch, @pre_release, @build = self.class.split(args.first.to_s)
       end
 
-      @major ||= 0
-      @minor ||= 0
-      @patch ||= 0
+      @major       ||= 0
+      @minor       ||= 0
+      @patch       ||= 0
+      @pre_release ||= nil
+      @build       ||= nil
     end
 
     # @param [Solve::Version] other
@@ -87,6 +89,10 @@ module Solve
       send(release).to_s.split('.').map do |str|
         str.to_i.to_s == str ? str.to_i : str
       end
+    end
+
+    def pre_release?
+      !!pre_release
     end
 
     # @return [Integer]
