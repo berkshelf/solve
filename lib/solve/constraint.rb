@@ -96,7 +96,7 @@ module Solve
       # @param [Solve::Version] target_version
       #
       # @return [Boolean]
-      def compare_aprox(constraint, target_version)
+      def compare_approx(constraint, target_version)
         min = constraint.version
         max = if constraint.patch.nil?
           Version.new([min.major + 1, 0, 0, 0])
@@ -115,17 +115,26 @@ module Solve
       end
     end
 
-    OPERATORS = {
-      "~>" => method(:compare_aprox),
-      ">=" => method(:compare_gte),
-      "<=" => method(:compare_lte),
-      "=" => method(:compare_equal),
-      "~" => method(:compare_aprox),
-      ">" => method(:compare_gt),
-      "<" => method(:compare_lt)
+    OPERATOR_TYPES = {
+      "~>" => :approx,
+      "~"  => :approx,
+      ">=" => :greater_than_equal,
+      "<=" => :less_than_equal,
+      "="  => :equal,
+      ">"  => :greater_than,
+      "<"  => :less_than,
     }.freeze
 
-    REGEXP = /^(#{OPERATORS.keys.join('|')})\s?(.+)$/
+    COMPARE_FUNS = {
+      approx: method(:compare_approx),
+      greater_than_equal: method(:compare_gte),
+      greater_than: method(:compare_gt),
+      less_than_equal: method(:compare_lte),
+      less_than: method(:compare_lt),
+      equal: method(:compare_equal)
+    }.freeze
+
+    REGEXP = /^(#{OPERATOR_TYPES.keys.join('|')})\s?(.+)$/
 
     attr_reader :operator
     attr_reader :major
@@ -141,9 +150,8 @@ module Solve
       end
 
       @operator, @major, @minor, @patch, @pre_release, @build = self.class.split(constraint)
-      @compare_fun = OPERATORS.fetch(self.operator)
 
-      unless @compare_fun == self.class.method(:compare_aprox)
+      unless operator_type == :approx
         @minor ||= 0
         @patch ||= 0
       end
@@ -165,6 +173,15 @@ module Solve
       )
     end
 
+    # @return [Symbol]
+    def operator_type
+      unless type = OPERATOR_TYPES.fetch(operator)
+        raise RuntimeError, "unknown operator type: #{operator}"
+      end
+
+      type
+    end
+
     # Returns true or false if the given version would be satisfied by
     # the version constraint.
     #
@@ -178,7 +195,7 @@ module Solve
         return false
       end
 
-      @compare_fun.call(self, target_version)
+      compare(target_version)
     end
 
     # @param [Object] other
@@ -199,5 +216,14 @@ module Solve
       str += "+#{build}" if build
       str
     end
+
+    private
+
+      # @param [Solve::Version] target
+      #
+      # @return [Boolean]
+      def compare(target)
+        COMPARE_FUNS.fetch(operator_type).call(self, target)
+      end
   end
 end
