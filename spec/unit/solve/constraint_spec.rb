@@ -49,15 +49,27 @@ describe Solve::Constraint do
         end
       end
 
-      context "given a constraint that does not include a minor version" do
+      context "given a constraint that does not include a minor version (~>)" do
         it "has a nil value for minor" do
           subject.new(">= 1").minor.should be_nil
         end
       end
 
-      context "given a constraint that does not include a patch version" do
+      context "given a constraint that does not include a minor version (=)" do
+        it "has a 0 for minor" do
+          subject.new("= 1").minor.should eq('0')
+        end
+      end
+
+      context "given a constraint that does not include a patch version (~>)" do
         it "has a nil value for patch" do
           subject.new("~> 1.2").patch.should be_nil
+        end
+      end
+
+      context "given a constraint that does not include a patch version (=)" do
+        it "has a 0 for patch" do
+          subject.new("~> 1.2").patch.should eq('0')
         end
       end
 
