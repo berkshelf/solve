@@ -51,7 +51,11 @@ describe Solve::Constraint do
 
       context "given a constraint that does not include a minor version (~>)" do
         it "has a nil value for minor" do
-          subject.new("~> 1").minor.should be_nil
+          expect(subject.new("~> 1").minor).to be_nil
+        end
+
+        it "has a nil value for patch" do
+          expect(subject.new("~> 1").patch).to be_nil
         end
       end
 
@@ -482,7 +486,7 @@ describe Solve::Constraint do
 
     it { should eq(constraint_string) }
 
-    context "when the constraint does not contain a minor value" do
+    context "when the constraint does not contain a minor or patch value" do
       let(:constraint_string) { "~> 1" }
       it { should eq(constraint_string) }
     end
