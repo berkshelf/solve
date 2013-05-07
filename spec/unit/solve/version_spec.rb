@@ -261,7 +261,7 @@ describe Solve::Version do
         end
 
         it "returns 0 as the second element" do
-          subject.split("1")[2].should eql(0)
+          subject.split("1")[1].should eql(0)
         end
 
         it "returns 0 as the third element" do
