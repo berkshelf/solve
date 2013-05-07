@@ -441,7 +441,6 @@ describe Solve::Constraint do
   end
 
   describe "#eql?" do
-
     subject { Solve::Constraint.new("= 1.0.0") }
 
     it "returns true if the other object is a Solve::Constraint with the same operator and version" do
@@ -462,6 +461,28 @@ describe Solve::Constraint do
     it "returns false if the other object is not a Solve::Constraint" do
       other = "chicken"
       subject.should_not eql(other)
+    end
+  end
+
+  describe "#to_s" do
+    let(:constraint_string) { ">= 1.2.3-alpha+123" }
+    subject { described_class.new(constraint_string).to_s }
+
+    it { eq(constraint_string) }
+
+    context "when the constraint does not contain a patch value" do
+      let(:constraint_string) { ">= 1.2" }
+      it { eq(constraint_string) }
+    end
+
+    context "when the constraint does not contain a build value" do
+      let(:constraint_string) { ">= 1.2.0-alpha"}
+      it { eq(constraint_string) }
+    end
+
+    context "when the constraint contains a pre_release value" do
+      let(:constraint_string) { ">= 1.2.0+123"}
+      it { eq(constraint_string) }
     end
   end
 end

@@ -187,8 +187,8 @@ module Solve
     alias_method :eql?, :==
 
     def to_s
-      str = operator
-      str += " #{major}.#{minor}.#{patch}"
+      str = "#{operator} #{major}.#{minor}"
+      str += ".#{patch}" if patch
       str += "-#{pre_release}" if pre_release
       str += "+#{build}" if build
       str
