@@ -142,6 +142,11 @@ module Solve
 
       @operator, @major, @minor, @patch, @pre_release, @build = self.class.split(constraint)
       @compare_fun = OPERATORS.fetch(self.operator)
+
+      unless @compare_fun == self.class.method(:compare_aprox)
+        @minor ||= 0
+        @patch ||= 0
+      end
     end
 
     # Return the Solve::Version representation of the major, minor, and patch
