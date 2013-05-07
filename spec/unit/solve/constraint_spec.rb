@@ -470,6 +470,11 @@ describe Solve::Constraint do
 
     it { should eq(constraint_string) }
 
+    context "when the constraint does not contain a minor value" do
+      let(:constraint_string) { ">= 1" }
+      it { should eq(constraint_string) }
+    end
+
     context "when the constraint does not contain a patch value" do
       let(:constraint_string) { ">= 1.2" }
       it { should eq(constraint_string) }
