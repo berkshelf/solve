@@ -49,15 +49,31 @@ describe Solve::Constraint do
         end
       end
 
-      context "given a constraint that does not include a minor version" do
+      context "given a constraint that does not include a minor version (~>)" do
         it "has a nil value for minor" do
-          subject.new(">= 1").minor.should be_nil
+          expect(subject.new("~> 1").minor).to be_nil
+        end
+
+        it "has a nil value for patch" do
+          expect(subject.new("~> 1").patch).to be_nil
         end
       end
 
-      context "given a constraint that does not include a patch version" do
+      context "given a constraint that does not include a minor version (=)" do
+        it "has a 0 for minor" do
+          subject.new("= 1").minor.should eq(0)
+        end
+      end
+
+      context "given a constraint that does not include a patch version (~>)" do
         it "has a nil value for patch" do
           subject.new("~> 1.2").patch.should be_nil
+        end
+      end
+
+      context "given a constraint that does not include a patch version (=)" do
+        it "has a 0 for patch" do
+          subject.new("= 1.2").patch.should eq(0)
         end
       end
 
@@ -468,21 +484,26 @@ describe Solve::Constraint do
     let(:constraint_string) { ">= 1.2.3-alpha+123" }
     subject { described_class.new(constraint_string).to_s }
 
-    it { eq(constraint_string) }
+    it { should eq(constraint_string) }
+
+    context "when the constraint does not contain a minor or patch value" do
+      let(:constraint_string) { "~> 1" }
+      it { should eq(constraint_string) }
+    end
 
     context "when the constraint does not contain a patch value" do
-      let(:constraint_string) { ">= 1.2" }
-      it { eq(constraint_string) }
+      let(:constraint_string) { "~> 1.2" }
+      it { should eq(constraint_string) }
     end
 
     context "when the constraint does not contain a build value" do
       let(:constraint_string) { ">= 1.2.0-alpha"}
-      it { eq(constraint_string) }
+      it { should eq(constraint_string) }
     end
 
     context "when the constraint contains a pre_release value" do
       let(:constraint_string) { ">= 1.2.0+123"}
-      it { eq(constraint_string) }
+      it { should eq(constraint_string) }
     end
   end
 end
