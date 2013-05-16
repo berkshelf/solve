@@ -1,4 +1,5 @@
 # Solve
+[![Gem Version](https://badge.fury.io/rb/solve.png)](http://badge.fury.io/rb/solve)
 [![Build Status](https://secure.travis-ci.org/reset/solve.png?branch=master)](http://travis-ci.org/reset/solve)
 [![Dependency Status](https://gemnasium.com/reset/solve.png?travis)](https://gemnasium.com/reset/solve)
 [![Code Climate](https://codeclimate.com/badge.png)](https://codeclimate.com/github/reset/solve)
