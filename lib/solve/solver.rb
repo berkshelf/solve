@@ -136,15 +136,21 @@ module Solve
                   # Compute the possible versions for an item based on the currently known constraints
                   possible_values = possible_values_for(variable)
 
+                  dependents = variable_table.get_dependents(variable.artifact)
+
                   if possible_values.length == 0
                     # There are no possible versions, so we check if there are any in the graph
                     versions = @graph.versions(variable.artifact)
                     if versions.length == 0
                       # If not, the dependency is just plain missing
-                      solution[variable.artifact] = { :state => :missing }
+                      solution[variable.artifact] = { :state => :missing, :dependency_of => dependents }
                     else
                       # Otherwise, the constraints are incompatible with whatever version we may have
-                      solution[variable.artifact] = { :state => :bad_version, :constraints => constraint_table.constraints_on_artifact(variable.artifact).collect {|c| c.to_s} }
+                      solution[variable.artifact] = {
+                          :state => :bad_version,
+                          :dependency_of => dependents,
+                          :constraints => constraint_table.constraints_on_artifact(variable.artifact).collect {|c| c.to_s}
+                        }
                     end
                   else
                     # In the case we have one or more possible versions, the problem comes from a dependency
@@ -159,7 +165,7 @@ module Solve
                         # Aggregating the known constraints on that broken dependency
                         constraints = possible_artifact.dependencies.select { |d| d.name == dependency.name }.collect { |d| d.constraint.to_s} +
                         constraint_table.constraints_on_artifact(dependency.name).collect {|c| c.to_s}
-                        solution[dependency.name] = { :state => :bad_version, :constraints => constraints }
+                        solution[dependency.name] = { :state => :bad_version, :constraints => constraints, :dependency_of => dependents }
                       end
                     end
                   end
