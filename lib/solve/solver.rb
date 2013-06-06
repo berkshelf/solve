@@ -90,7 +90,9 @@ module Solve
 
     # @return [Hash]
     def resolve
-      @errors = []
+
+      best_bad_solution = {}
+
       trace("Attempting to find a solution")
       seed_demand_dependencies
 
@@ -102,7 +104,7 @@ module Solve
           trace("\t#{constraint}")
         end
         trace("Possible values are #{possible_values_for_unbound}")
-        
+
         while possible_value = possible_values_for_unbound.shift
           possible_artifact = graph.get_artifact(unbound_variable.artifact, possible_value.version)
           possible_dependencies = possible_artifact.dependencies
@@ -117,13 +119,72 @@ module Solve
 
         unless unbound_variable.bound?
           trace("Could not find an acceptable value for #{unbound_variable.artifact}")
-          backtrack(unbound_variable) 
+
+          # This is very hackish but that's my best attempt at finding the least bad solution
+          # Every time we need to backtrack, we check how many items have been found
+          # If that number is bigger than has been found yet, we generate a broken solution
+          if variable_table.rows.length > best_bad_solution.length
+            best_bad_solution = {}.tap do |solution|
+              variable_table.rows.each do |variable|
+
+                if variable.value.nil?
+                  # variable.value contains the item version that we know works so far.
+                  # If it's nil the item is either broken or not yet evaluated
+
+                  # Need to clear the possible values so they can be recomputed
+                  possible_values[variable.artifact] = nil
+                  # Compute the possible versions for an item based on the currently known constraints
+                  possible_values = possible_values_for(variable)
+
+                  dependents = variable_table.get_dependents(variable.artifact)
+
+                  if possible_values.length == 0
+                    # There are no possible versions, so we check if there are any in the graph
+                    versions = @graph.versions(variable.artifact)
+                    if versions.length == 0
+                      # If not, the dependency is just plain missing
+                      solution[variable.artifact] = { :state => :missing, :dependency_of => dependents }
+                    else
+                      # Otherwise, the constraints are incompatible with whatever version we may have
+                      solution[variable.artifact] = {
+                          :state => :bad_version,
+                          :dependency_of => dependents,
+                          :constraints => constraint_table.constraints_on_artifact(variable.artifact).collect {|c| c.to_s}
+                        }
+                    end
+                  else
+                    # In the case we have one or more possible versions, the problem comes from a dependency
+                    # So we arbitrarily pick the first possible version
+                    possible_artifact = graph.get_artifact(variable.artifact, possible_values.first.version)
+                    # and record it as ok
+                    solution[variable.artifact] = { :state => :found, :version => possible_values.first.version.to_s }
+                    # then we look at its dependencies
+                    possible_artifact.dependencies.each do |dependency|
+                      # Ignoring the valid dependencies because for now we want to focus on the ones which are broken for sure
+                      unless can_add_new_constraint?(dependency)
+                        # Aggregating the known constraints on that broken dependency
+                        constraints = possible_artifact.dependencies.select { |d| d.name == dependency.name }.collect { |d| d.constraint.to_s} +
+                        constraint_table.constraints_on_artifact(dependency.name).collect {|c| c.to_s}
+                        solution[dependency.name] = { :state => :bad_version, :constraints => constraints, :dependency_of => dependents }
+                      end
+                    end
+                  end
+                else
+                  # this is if we had a valid version
+                  solution[variable.artifact] = { :state => :found, :version => variable.value.version.to_s }
+                end
+              end
+            end
+          end
+
+          # When we can't backtrack anymore, we return the longest broken solution
+          return best_bad_solution unless backtrack(unbound_variable)
         end
       end
 
       solution = {}.tap do |solution|
         variable_table.rows.each do |variable|
-          solution[variable.artifact] = variable.value.version.to_s
+          solution[variable.artifact] = { :state => :found, :version => variable.value.version.to_s }
         end
       end
 
@@ -216,7 +277,6 @@ module Solve
         current_binding = variable_table.find_artifact(dependency.name)
         #haven't seen it before, haven't bound it yet or the binding is ok
         return true if current_binding.nil? || current_binding.value.nil? || dependency.constraint.satisfies?(current_binding.value.version)
-        @errors << "Selected #{dependency.name} version #{current_binding.value.version} but it does not satisfy additional constraint #{dependency.constraint.to_s}."
         false
       end
 
@@ -229,14 +289,6 @@ module Solve
             remaining_values.reject { |value| !constraint.satisfies?(value.version) }
           end
           possible_values[variable.artifact] = possible_values_for_variable
-
-          if possible_values_for_variable.empty?
-            versions = all_values_for_variable.map {|d| d.version.to_s}.join ', '
-            versions = 'none' if versions.empty?
-            constraints = constraints_for_variable.map{|c| "[#{c.to_s}]"}.join ', '
-            constraints = 'none' if constraints.empty?
-            @errors << "No appropriate version of #{variable.artifact} found. Available versions: #{versions}, constraints: #{constraints}"
-          end
         end
         possible_values_for_variable
       end
@@ -272,7 +324,7 @@ module Solve
 
         if previous_variable.nil?
           trace("Cannot backtrack any further")
-          raise Errors::NoSolutionError.new @errors.uniq
+          return false
         end
 
         trace("Unbinding #{previous_variable.artifact}")
@@ -291,6 +343,8 @@ module Solve
         variable_table.all_after(previous_variable.artifact).each do |variable| 
           new_possibles = reset_possible_values_for(variable)
         end
+
+        true
       end
 
       def trace(message)
