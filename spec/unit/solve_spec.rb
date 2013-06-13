@@ -10,7 +10,7 @@ describe Solve do
       end
     end
 
-    describe "#it!" do      
+    describe "#it!" do
       it "raises NoSolutionError if a solution does not exist" do
         pending
       end

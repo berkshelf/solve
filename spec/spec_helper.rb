@@ -4,9 +4,9 @@ require 'spork'
 
 Spork.prefork do
   require 'rspec'
-  
+
   APP_ROOT = File.expand_path('../../', __FILE__)
-  
+
   Dir[File.join(APP_ROOT, "spec/support/**/*.rb")].each {|f| require f}
 
   RSpec.configure do |config|

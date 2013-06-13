@@ -80,7 +80,7 @@ describe Solve::Demand do
 
       subject.should_not eql(other)
     end
-    
+
     it "returns false when other is a Solve::Demand with the same constraint but a different name" do
       other = Solve::Demand.new(solver, "chicken", constraint)
 
