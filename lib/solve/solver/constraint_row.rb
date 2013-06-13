@@ -2,8 +2,6 @@ require 'forwardable'
 
 module Solve
   class Solver
-    # @author Andrew Garson <agarson@riotgames.com>
-    # @author Jamie Winsor <reset@riotgames.com>
     class ConstraintRow
       extend Forwardable
 

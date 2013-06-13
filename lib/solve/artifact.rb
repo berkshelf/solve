@@ -1,5 +1,4 @@
 module Solve
-  # @author Jamie Winsor <reset@riotgames.com>
   class Artifact
     include Comparable
 

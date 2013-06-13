@@ -1,6 +1,4 @@
 module Solve
-  # @author Jamie Winsor <reset@riotgames.com>
-  # @author Thibaud Guillaume-Gentil <thibaud@thibaud.me>
   class Constraint
     class << self
       # Split a constraint string into an Array of two elements. The first

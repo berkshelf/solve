@@ -5,8 +5,6 @@ require_relative 'solver/constraint_row'
 require_relative 'solver/serializer'
 
 module Solve
-  # @author Jamie Winsor <reset@riotgames.com>
-  # @author Andrew Garson <agarson@riotgames.com>
   class Solver
     class << self
       # Create a key to identify a demand on a Solver.

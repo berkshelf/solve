@@ -1,6 +1,4 @@
 module Solve
-  # @author Jamie Winsor <reset@riotgames.com>
-  # @author Thibaud Guillaume-Gentil <thibaud@thibaud.me>
   class Version
     class << self
       # @param [#to_s] version_string

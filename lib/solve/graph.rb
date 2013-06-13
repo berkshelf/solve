@@ -1,5 +1,4 @@
 module Solve
-  # @author Jamie Winsor <reset@riotgames.com>
   class Graph
     class << self
       # Create a key for a graph from an instance of an Artifact or Dependency

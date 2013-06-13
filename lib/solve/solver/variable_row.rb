@@ -1,7 +1,5 @@
 module Solve
   class Solver
-    # @author Andrew Garson <agarson@riotgames.com>
-    # @author Jamie Winsor <reset@riotgames.com>
     class VariableRow
       attr_reader :artifact
       attr_reader :value
