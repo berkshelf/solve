@@ -1,17 +1,14 @@
-require 'forwardable'
-require 'json'
-require 'solve/errors'
+require_relative 'solve/artifact'
+require_relative 'solve/constraint'
+require_relative 'solve/demand'
+require_relative 'solve/dependency'
+require_relative 'solve/errors'
+require_relative 'solve/graph'
+require_relative 'solve/solver'
+require_relative 'solve/version'
 
 # @author Jamie Winsor <reset@riotgames.com>
 module Solve
-  autoload :Version, 'solve/version'
-  autoload :Artifact, 'solve/artifact'
-  autoload :Constraint, 'solve/constraint'
-  autoload :Dependency, 'solve/dependency'
-  autoload :Graph, 'solve/graph'
-  autoload :Demand, 'solve/demand'
-  autoload :Solver, 'solve/solver'
-
   class << self
     # A quick solve. Given the "world" as we know it (the graph) and a list of
     # requirements (demands) which must be met. Return me the best solution of

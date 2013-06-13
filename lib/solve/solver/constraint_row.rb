@@ -1,3 +1,5 @@
+require 'forwardable'
+
 module Solve
   class Solver
     # @author Andrew Garson <agarson@riotgames.com>
