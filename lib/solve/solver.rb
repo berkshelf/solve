@@ -141,17 +141,11 @@ module Solve
                   if possible_values.length == 0
                     # There are no possible versions, so we check if there are any in the graph
                     versions = @graph.versions(variable.artifact)
-                    if versions.length == 0
-                      # If not, the dependency is just plain missing
-                      solution[variable.artifact] = { :state => :missing, :dependency_of => dependents }
-                    else
-                      # Otherwise, the constraints are incompatible with whatever version we may have
-                      solution[variable.artifact] = {
-                          :state => :bad_version,
-                          :dependency_of => dependents,
-                          :constraints => constraint_table.constraints_on_artifact(variable.artifact).collect {|c| c.to_s}
-                        }
-                    end
+                    solution[variable.artifact] = {
+                      :state => (versions.length > 0 && :bad_version) || :missing,
+                      :dependency_of => dependents,
+                      :constraints => constraint_table.constraints_on_artifact(variable.artifact).collect {|c| c.to_s}
+                    }
                   else
                     # In the case we have one or more possible versions, the problem comes from a dependency
                     # So we arbitrarily pick the first possible version
