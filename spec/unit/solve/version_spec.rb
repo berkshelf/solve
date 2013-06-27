@@ -294,6 +294,28 @@ describe Solve::Version do
     end
   end
 
+  describe "#zero?" do
+    context "major, minor and patch are equal to 0" do
+      subject { described_class.new("0.0.0").zero? }
+      it { should be_true }
+    end
+
+    context "major is not equal to 0" do
+      subject { described_class.new("1.0.0").zero? }
+      it { should be_false }
+    end
+
+    context "minor is not equal to 0" do
+      subject { described_class.new("0.1.0").zero? }
+      it { should be_false }
+    end
+
+    context "patch is not equal to 0" do
+      subject { described_class.new("0.0.1").zero? }
+      it { should be_false }
+    end
+  end
+
   describe "#to_s" do
     subject { Solve::Version.new("1.0.0-rc.1+build.1") }
 

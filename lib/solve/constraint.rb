@@ -189,9 +189,7 @@ module Solve
     def satisfies?(target_version)
       target_version = Version.new(target_version.to_s)
 
-      if target_version.pre_release? && !version.pre_release?
-        return false
-      end
+      return false if !version.zero? && greedy_match?(target_version)
 
       compare(target_version)
     end
@@ -216,6 +214,16 @@ module Solve
     end
 
     private
+
+      # Returns true if the given version is a pre-release and if the constraint
+      # does not include a pre-release and if the operator isn't < or <=.
+      # This avoids greedy matches, e.g. 2.0.0.alpha won't satisfy >= 1.0.0.
+      #
+      # @param [Solve::Version] target_version
+      #
+      def greedy_match?(target_version)
+        operator_type !~ /less/ && target_version.pre_release? && !version.pre_release?
+      end
 
       # @param [Solve::Version] target
       #
