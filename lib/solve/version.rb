@@ -93,6 +93,10 @@ module Solve
       !!pre_release
     end
 
+    def zero?
+      [major, minor, patch].all? { |n| n == 0 }
+    end
+
     # @return [Integer]
     def pre_release_and_build_presence_score
       pre_release ? 0 : (build.nil? ? 1 : 2)
