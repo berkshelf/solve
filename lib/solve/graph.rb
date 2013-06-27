@@ -157,11 +157,11 @@ module Solve
     end
     alias_method :eql?, :==
 
-      private
+    private
 
-        # @return [Array<Solve::Artifact>]
-        def artifact_collection
-          @artifacts.collect { |name, artifact| artifact }
-        end
+      # @return [Array<Solve::Artifact>]
+      def artifact_collection
+        @artifacts.collect { |name, artifact| artifact }
+      end
   end
 end

@@ -20,7 +20,7 @@ module Solve
     # @param [Solve::Constraint, #to_s] constraint
     def initialize(solver, name, constraint = ">= 0.0.0")
       @solver = solver
-      @name = name
+      @name   = name
       @constraint = if constraint.is_a?(Solve::Constraint)
         constraint
       else
@@ -33,7 +33,7 @@ module Solve
     # @return [Solve::Demand, nil]
     def delete
       unless solver.nil?
-        result = solver.remove_demand(self)
+        result  = solver.remove_demand(self)
         @solver = nil
         result
       end
