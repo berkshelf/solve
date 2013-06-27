@@ -2,9 +2,9 @@
 [![Gem Version](https://badge.fury.io/rb/solve.png)](http://badge.fury.io/rb/solve)
 [![Build Status](https://secure.travis-ci.org/reset/solve.png?branch=master)](http://travis-ci.org/reset/solve)
 [![Dependency Status](https://gemnasium.com/reset/solve.png?travis)](https://gemnasium.com/reset/solve)
-[![Code Climate](https://codeclimate.com/badge.png)](https://codeclimate.com/github/reset/solve)
+[![Code Climate](https://codeclimate.com/github/reset/solve.png)](https://codeclimate.com/github/reset/solve)
 
-A Ruby versioning constraint solver implementing [Semantic Versioning 2.0.0-rc.1](http://semver.org).
+A Ruby versioning constraint solver implementing [Semantic Versioning 2.0.0](http://semver.org).
 
 ## Installation
 

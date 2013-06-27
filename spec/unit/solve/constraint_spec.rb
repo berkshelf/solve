@@ -272,36 +272,130 @@ describe Solve::Constraint do
       should satisfies(Solve::Version.new("1.0.0"))
     end
 
-    context "when the constraint contains a pre-release value" do
-      subject { Solve::Constraint.new(">= 1.2.3-alpha") }
+    context "strictly greater than (>) pre-release constraint" do
+      subject { Solve::Constraint.new("> 1.0.0-alpha") }
 
-      it "is satisfied by pre-release versions" do
-        should satisfies("1.2.3-beta")
-      end
-    end
-
-    context "when the constraint does not contain a pre-release value" do
-      subject { Solve::Constraint.new(">= 1.2.3") }
-
-      it "is not satisfied by pre-release versions" do
-        should_not satisfies("1.2.3-beta")
-      end
+      it { should_not satisfies("0.9.9+build") }
+      it { should_not satisfies("1.0.0-alpha") }
+      it { should satisfies("1.0.0-alpha.2") }
+      it { should satisfies("1.0.0") }
+      it { should satisfies("1.0.0+build") }
+      it { should satisfies("1.0.1-beta") }
+      it { should satisfies("1.0.1") }
+      it { should satisfies("1.0.1+build.2") }
+      it { should satisfies("2.0.0") }
     end
 
     context "strictly greater than (>)" do
-      subject { Solve::Constraint.new("> 1.0.0-alpha") }
+      subject { Solve::Constraint.new("> 1.0.0") }
 
-      it { should satisfies("2.0.0") }
-      it { should satisfies("1.0.0") }
+      it { should_not satisfies("0.9.9+build") }
       it { should_not satisfies("1.0.0-alpha") }
+      it { should_not satisfies("1.0.0-alpha.2") }
+      it { should_not satisfies("1.0.0") }
+      it { should satisfies("1.0.0+build") }
+      it { should_not satisfies("1.0.1-beta") }
+      it { should satisfies("1.0.1") }
+      it { should satisfies("1.0.1+build.2") }
+      it { should satisfies("2.0.0") }
+    end
+
+    context "strictly greater than (>) build constraint" do
+      subject { Solve::Constraint.new("> 1.0.0+build") }
+
+      it { should_not satisfies("0.9.9+build") }
+      it { should_not satisfies("1.0.0-alpha") }
+      it { should_not satisfies("1.0.0-alpha.2") }
+      it { should_not satisfies("1.0.0") }
+      it { should_not satisfies("1.0.0+build") }
+      it { should_not satisfies("1.0.1-beta") }
+      it { should satisfies("1.0.1") }
+      it { should satisfies("1.0.1+build.2") }
+      it { should satisfies("2.0.0") }
+    end
+
+    context "greater than or equal to (>) zero pre-release constraint" do
+      subject { Solve::Constraint.new("> 0.0.0-alpha") }
+
+      it { should satisfies("0.9.9+build") }
+      it { should satisfies("1.0.0-alpha") }
+      it { should satisfies("1.0.0-alpha.2") }
+      it { should satisfies("1.0.0") }
+      it { should satisfies("1.0.0+build") }
+      it { should satisfies("1.0.1-beta") }
+      it { should satisfies("1.0.1") }
+      it { should satisfies("1.0.1+build.2") }
+      it { should satisfies("2.0.0") }
+    end
+
+    context "greater than or equal to (>) zero constraint" do
+      subject { Solve::Constraint.new("> 0.0.0") }
+
+      it { should satisfies("0.9.9+build") }
+      it { should satisfies("1.0.0-alpha") }
+      it { should satisfies("1.0.0-alpha.2") }
+      it { should satisfies("1.0.0") }
+      it { should satisfies("1.0.0+build") }
+      it { should satisfies("1.0.1-beta") }
+      it { should satisfies("1.0.1") }
+      it { should satisfies("1.0.1+build.2") }
+      it { should satisfies("2.0.0") }
+    end
+
+    context "greater than or equal to (>) zero build constraint" do
+      subject { Solve::Constraint.new("> 0.0.0+build") }
+
+      it { should satisfies("0.9.9+build") }
+      it { should satisfies("1.0.0-alpha") }
+      it { should satisfies("1.0.0-alpha.2") }
+      it { should satisfies("1.0.0") }
+      it { should satisfies("1.0.0+build") }
+      it { should satisfies("1.0.1-beta") }
+      it { should satisfies("1.0.1") }
+      it { should satisfies("1.0.1+build.2") }
+      it { should satisfies("2.0.0") }
+    end
+
+    context "strictly less than (<) pre-release constraint" do
+      subject { Solve::Constraint.new("< 1.0.0-alpha.3") }
+
+      it { should satisfies("0.9.9+build") }
+      it { should satisfies("1.0.0-alpha") }
+      it { should satisfies("1.0.0-alpha.2") }
+      it { should_not satisfies("1.0.0") }
+      it { should_not satisfies("1.0.0+build") }
+      it { should_not satisfies("1.0.1-beta") }
+      it { should_not satisfies("1.0.1") }
+      it { should_not satisfies("1.0.1+build.2") }
+      it { should_not satisfies("2.0.0") }
     end
 
     context "strictly less than (<)" do
+      subject { Solve::Constraint.new("< 1.0.0") }
+
+      it { should satisfies("0.9.9+build") }
+      it { should satisfies("1.0.0-alpha") }
+      it { should satisfies("1.0.0-alpha.2") }
+      it { should_not satisfies("1.0.0") }
+      it { should_not satisfies("1.0.0+build") }
+      it { should_not satisfies("1.0.1-beta") }
+      it { should_not satisfies("1.0.1") }
+      it { should_not satisfies("1.0.1+build.2") }
+      it { should_not satisfies("2.0.0") }
+    end
+
+    context "strictly less than (<) build constraint" do
       subject { Solve::Constraint.new("< 1.0.0+build.20") }
 
-      it { should satisfies("0.1.0") }
+      it { should satisfies("0.9.9+build") }
+      it { should satisfies("1.0.0-alpha") }
+      it { should satisfies("1.0.0-alpha.2") }
       it { should satisfies("1.0.0") }
-      it { should_not satisfies("1.0.0+build.21") }
+      it { should satisfies("1.0.0+build") }
+      it { should_not satisfies("1.0.1-beta") }
+      it { should_not satisfies("1.0.1") }
+      it { should_not satisfies("1.0.1+build.2") }
+      it { should_not satisfies("2.0.0") }
     end
 
     context "strictly equal to (=)" do
@@ -313,24 +407,129 @@ describe Solve::Constraint do
       it { should_not satisfies("1.0.0-alpha") }
     end
 
+    context "greater than or equal to (>=) pre-release constraint" do
+      subject { Solve::Constraint.new(">= 1.0.0-alpha") }
+
+      it { should_not satisfies("0.9.9+build") }
+      it { should satisfies("1.0.0-alpha") }
+      it { should satisfies("1.0.0-alpha.2") }
+      it { should satisfies("1.0.0") }
+      it { should satisfies("1.0.0+build") }
+      it { should satisfies("1.0.1-beta") }
+      it { should satisfies("1.0.1") }
+      it { should satisfies("1.0.1+build.2") }
+      it { should satisfies("2.0.0") }
+    end
+
     context "greater than or equal to (>=)" do
       subject { Solve::Constraint.new(">= 1.0.0") }
 
       it { should_not satisfies("0.9.9+build") }
       it { should_not satisfies("1.0.0-alpha") }
+      it { should_not satisfies("1.0.0-alpha.2") }
       it { should satisfies("1.0.0") }
+      it { should satisfies("1.0.0+build") }
+      it { should_not satisfies("1.0.1-beta") }
       it { should satisfies("1.0.1") }
+      it { should satisfies("1.0.1+build.2") }
       it { should satisfies("2.0.0") }
     end
 
-    context "greater than or equal to (<=)" do
+    context "greater than or equal to (>=) build constraint" do
+      subject { Solve::Constraint.new(">= 1.0.0+build") }
+
+      it { should_not satisfies("0.9.9+build") }
+      it { should_not satisfies("1.0.0-alpha") }
+      it { should_not satisfies("1.0.0-alpha.2") }
+      it { should_not satisfies("1.0.0") }
+      it { should satisfies("1.0.0+build") }
+      it { should_not satisfies("1.0.1-beta") }
+      it { should satisfies("1.0.1") }
+      it { should satisfies("1.0.1+build.2") }
+      it { should satisfies("2.0.0") }
+    end
+
+    context "greater than or equal to (>=) zero pre-release constraint" do
+      subject { Solve::Constraint.new(">= 0.0.0-alpha") }
+
+      it { should satisfies("0.9.9+build") }
+      it { should satisfies("1.0.0-alpha") }
+      it { should satisfies("1.0.0-alpha.2") }
+      it { should satisfies("1.0.0") }
+      it { should satisfies("1.0.0+build") }
+      it { should satisfies("1.0.1-beta") }
+      it { should satisfies("1.0.1") }
+      it { should satisfies("1.0.1+build.2") }
+      it { should satisfies("2.0.0") }
+    end
+
+    context "greater than or equal to (>=) zero constraint" do
+      subject { Solve::Constraint.new(">= 0.0.0") }
+
+      it { should satisfies("0.9.9+build") }
+      it { should satisfies("1.0.0-alpha") }
+      it { should satisfies("1.0.0-alpha.2") }
+      it { should satisfies("1.0.0") }
+      it { should satisfies("1.0.0+build") }
+      it { should satisfies("1.0.1-beta") }
+      it { should satisfies("1.0.1") }
+      it { should satisfies("1.0.1+build.2") }
+      it { should satisfies("2.0.0") }
+    end
+
+    context "greater than or equal to (>=) zero build constraint" do
+      subject { Solve::Constraint.new(">= 0.0.0+build") }
+
+      it { should satisfies("0.9.9+build") }
+      it { should satisfies("1.0.0-alpha") }
+      it { should satisfies("1.0.0-alpha.2") }
+      it { should satisfies("1.0.0") }
+      it { should satisfies("1.0.0+build") }
+      it { should satisfies("1.0.1-beta") }
+      it { should satisfies("1.0.1") }
+      it { should satisfies("1.0.1+build.2") }
+      it { should satisfies("2.0.0") }
+    end
+
+    context "lower than or equal to (<=) pre-release constraint" do
       subject { Solve::Constraint.new("<= 1.0.0") }
 
       it { should satisfies("0.9.9+build") }
-      it { should_not satisfies("1.0.0-alpha") }
+      it { should satisfies("1.0.0-alpha") }
+      it { should satisfies("1.0.0-alpha.2") }
       it { should satisfies("1.0.0") }
       it { should_not satisfies("1.0.0+build") }
+      it { should_not satisfies("1.0.1-beta") }
       it { should_not satisfies("1.0.1") }
+      it { should_not satisfies("1.0.1+build.2") }
+      it { should_not satisfies("2.0.0") }
+    end
+
+    context "lower than or equal to (<=)" do
+      subject { Solve::Constraint.new("<= 1.0.0-alpha") }
+
+      it { should satisfies("0.9.9+build") }
+      it { should satisfies("1.0.0-alpha") }
+      it { should_not satisfies("1.0.0-alpha.2") }
+      it { should_not satisfies("1.0.0") }
+      it { should_not satisfies("1.0.0+build") }
+      it { should_not satisfies("1.0.1-beta") }
+      it { should_not satisfies("1.0.1") }
+      it { should_not satisfies("1.0.1+build.2") }
+      it { should_not satisfies("2.0.0") }
+    end
+
+    context "lower than or equal to (<=) build constraint" do
+      subject { Solve::Constraint.new("<= 1.0.0+build") }
+
+      it { should satisfies("0.9.9+build") }
+      it { should satisfies("1.0.0-alpha") }
+      it { should satisfies("1.0.0-alpha.2") }
+      it { should satisfies("1.0.0") }
+      it { should satisfies("1.0.0+build") }
+      it { should_not satisfies("1.0.1-beta") }
+      it { should_not satisfies("1.0.1") }
+      it { should_not satisfies("1.0.1+build.2") }
       it { should_not satisfies("2.0.0") }
     end
 
