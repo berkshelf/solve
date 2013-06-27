@@ -62,20 +62,27 @@ module Solve
       end
 
       private
-        def find_roots(row, roots)
 
-          if row.sources.any? { |source| source == :root }
-            roots << row.artifact unless roots.include? row.artifact
-            return roots
-          end
+      MAX_RECURSION_DEPTH = 100
 
-          row.sources.each do |source|
-            source_row = @rows.detect { |row| row.artifact == source.name }
-            find_roots(source_row, roots)
-          end
-
-          roots
+      def find_roots(row, roots, recursion_counter = 0)
+        if recursion_counter > MAX_RECURSION_DEPTH
+          raise ::Solve::Errors::NoSolutionError,
+                Array('Infinite recursion detected')
         end
+
+        if row.sources.any? { |source| source == :root }
+          roots << row.artifact unless roots.include? row.artifact
+          return roots
+        end
+
+        row.sources.each do |source|
+          source_row = @rows.detect { |row| row.artifact == source.name }
+          find_roots(source_row, roots, recursion_counter + 1)
+        end
+
+        roots
+      end
     end
   end
 end
