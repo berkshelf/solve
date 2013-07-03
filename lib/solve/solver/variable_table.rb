@@ -58,24 +58,27 @@ module Solve
         return [] if artifact == :root
         row = @rows.detect { |row| row.artifact == artifact }
         roots = []
-        find_roots(row, roots)
+        find_roots(row, [row], roots)        
       end
 
       private
-        def find_roots(row, roots)
 
-          if row.sources.any? { |source| source == :root }
-            roots << row.artifact unless roots.include? row.artifact
-            return roots
-          end
-
-          row.sources.each do |source|
-            source_row = @rows.detect { |row| row.artifact == source.name }
-            find_roots(source_row, roots)
-          end
-
-          roots
+      def find_roots(row, checked_rows, roots)
+        if row.sources.any? { |source| source == :root }
+          roots << row.artifact unless roots.include? row.artifact
+          return roots
         end
+
+        row.sources.each do |source|
+          source_row = @rows.detect { |row| row.artifact == source.name }
+          unless checked_rows.include?(source_row)
+            checked_rows << source_row
+            find_roots(source_row, checked_rows, roots) 
+          end
+        end
+
+        roots
+      end
     end
   end
 end
