@@ -1,0 +1,10 @@
+ruby do
+  version  'ree-1.8.7-2011.12'
+  gemset   'solve'
+end
+bundler do
+  version     '1.3.5'
+  exclusions  'deployment'
+  bundle_path File.join(ENV["HOME"], '.rightscale_bundle', 'solve')
+end
+
