@@ -204,6 +204,10 @@ module Solve
     end
     alias_method :eql?, :==
 
+    def inspect
+      "#<#{self.class.to_s} #{to_s}>"
+    end
+
     def to_s
       str = "#{operator} #{major}"
       str += ".#{minor}" if minor
