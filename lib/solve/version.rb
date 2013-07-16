@@ -127,7 +127,7 @@ module Solve
     end
 
     def inspect
-      to_s
+      "#<#{self.class.to_s} #{to_s}>"
     end
 
     def to_s
