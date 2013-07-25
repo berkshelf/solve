@@ -31,6 +31,11 @@ And now solve the graph with some demands
 
     Solve.it!(graph, ['nginx', '>= 0.100.0'])
 
+Or, if you want a topologically sorted solution
+NOTE: This will raise Solve::Errors::UnsortableSolutionError if the solution contains a cycle (which can happen with ruby packages)
+
+    Solve.it!(graph, ['nginx', '>= 0.100.0'], { :sorted => true })
+
 ### Removing an artifact, or dependency from the graph
 
     graph.artifacts("nginx", "1.0.0").delete

@@ -18,13 +18,15 @@ module Solve
     #
     # @param [Solve::Graph] graph
     # @param [Array<Solve::Demand>, Array<String, String>] demands
-    # @param [#say, nil] ui (nil)
+    #
+    # @option options [#say] :ui (nil) a ui object for output
+    # @option options [Boolean] :sorted (false) should the output be a sorted list rather than a Hash
     #
     # @raise [NoSolutionError]
     #
     # @return [Hash]
-    def it!(graph, demands, ui = nil)
-      Solver.new(graph, demands, ui).resolve
+    def it!(graph, demands, options = {})
+      Solver.new(graph, demands, options[:ui]).resolve(options)
     end
   end
 end
