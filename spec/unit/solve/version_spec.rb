@@ -261,7 +261,7 @@ describe Solve::Version do
         end
 
         it "returns 0 as the second element" do
-          subject.split("1")[2].should eql(0)
+          subject.split("1")[1].should eql(0)
         end
 
         it "returns 0 as the third element" do
@@ -279,6 +279,40 @@ describe Solve::Version do
           subject.split("hello")
         }.should raise_error(Solve::Errors::InvalidVersionFormat)
       end
+    end
+  end
+
+  describe "#pre_release?" do
+    context "when a pre-release value is set" do
+      subject { described_class.new("1.2.3-alpha").pre_release? }
+      it { should be_true }
+    end
+
+    context "when no pre-release value is set" do
+      subject { described_class.new("1.2.3").pre_release? }
+      it { should be_false }
+    end
+  end
+
+  describe "#zero?" do
+    context "major, minor and patch are equal to 0" do
+      subject { described_class.new("0.0.0").zero? }
+      it { should be_true }
+    end
+
+    context "major is not equal to 0" do
+      subject { described_class.new("1.0.0").zero? }
+      it { should be_false }
+    end
+
+    context "minor is not equal to 0" do
+      subject { described_class.new("0.1.0").zero? }
+      it { should be_false }
+    end
+
+    context "patch is not equal to 0" do
+      subject { described_class.new("0.0.1").zero? }
+      it { should be_false }
     end
   end
 

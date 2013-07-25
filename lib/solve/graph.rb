@@ -1,5 +1,4 @@
 module Solve
-  # @author Jamie Winsor <jamie@vialstudios.com>
   class Graph
     class << self
       # Create a key for a graph from an instance of an Artifact or Dependency
@@ -158,11 +157,11 @@ module Solve
     end
     alias_method :eql?, :==
 
-      private
+    private
 
-        # @return [Array<Solve::Artifact>]
-        def artifact_collection
-          @artifacts.collect { |name, artifact| artifact }
-        end
+      # @return [Array<Solve::Artifact>]
+      def artifact_collection
+        @artifacts.collect { |name, artifact| artifact }
+      end
   end
 end

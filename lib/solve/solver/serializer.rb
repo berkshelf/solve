@@ -1,3 +1,5 @@
+require 'json'
+
 module Solve
   class Solver
     class Serializer
@@ -46,7 +48,7 @@ module Solve
             list << format_dependency(dependency)
           end
 
-          { 
+          {
             "name" => artifact.name,
             "version" => artifact.version.to_s,
             "dependencies" => dependencies
@@ -54,21 +56,21 @@ module Solve
         end
 
         def format_dependency(dependency)
-          { 
-            "name" => dependency.name, 
+          {
+            "name" => dependency.name,
             "constraint" => dependency.constraint.to_s
           }
         end
 
         def format_demands(demands)
-          demands_list = demands.inject([]) do |list, demand| 
-            list << format_demand(demand) 
+          demands_list = demands.inject([]) do |list, demand|
+            list << format_demand(demand)
           end
           { "demands" => demands_list }
         end
 
         def format_demand(demand)
-          { 
+          {
             "name" => demand.name,
             "constraint" => demand.constraint.to_s
           }

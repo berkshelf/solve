@@ -1,5 +1,4 @@
 module Solve
-  # @author Jamie Winsor <jamie@vialstudios.com>
   class Dependency
     # A reference to the artifact this dependency belongs to
     #

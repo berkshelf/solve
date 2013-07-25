@@ -18,7 +18,7 @@ describe Solve::Solver::Serializer do
 
     solver.graph.should eql(deserialized.graph)
     solver.demands.should eql(deserialized.demands)
-    
+
     result = solver.resolve
     deserialized_result = deserialized.resolve
     result.should eql(deserialized_result)

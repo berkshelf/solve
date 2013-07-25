@@ -1,6 +1,4 @@
 module Solve
-  # @author Jamie Winsor <jamie@vialstudios.com>
-  # @author Thibaud Guillaume-Gentil <thibaud@thibaud.me>
   class Version
     class << self
       # @param [#to_s] version_string
@@ -57,9 +55,11 @@ module Solve
         @major, @minor, @patch, @pre_release, @build = self.class.split(args.first.to_s)
       end
 
-      @major ||= 0
-      @minor ||= 0
-      @patch ||= 0
+      @major       ||= 0
+      @minor       ||= 0
+      @patch       ||= 0
+      @pre_release ||= nil
+      @build       ||= nil
     end
 
     # @param [Solve::Version] other
@@ -87,6 +87,14 @@ module Solve
       send(release).to_s.split('.').map do |str|
         str.to_i.to_s == str ? str.to_i : str
       end
+    end
+
+    def pre_release?
+      !!pre_release
+    end
+
+    def zero?
+      [major, minor, patch].all? { |n| n == 0 }
     end
 
     # @return [Integer]
@@ -119,7 +127,7 @@ module Solve
     end
 
     def inspect
-      to_s
+      "#<#{self.class.to_s} #{to_s}>"
     end
 
     def to_s

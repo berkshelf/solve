@@ -1,14 +1,12 @@
 require 'tsort'
+require_relative 'solver/variable_table'
+require_relative 'solver/variable_row'
+require_relative 'solver/constraint_table'
+require_relative 'solver/constraint_row'
+require_relative 'solver/serializer'
 
 module Solve
-  # @author Jamie Winsor <jamie@vialstudios.com>
   class Solver
-    autoload :VariableTable, 'solve/solver/variable_table'
-    autoload :VariableRow, 'solve/solver/variable_row'
-    autoload :ConstraintTable, 'solve/solver/constraint_table'
-    autoload :ConstraintRow, 'solve/solver/constraint_row'
-    autoload :Serializer, 'solve/solver/serializer'
-
     class << self
       # Create a key to identify a demand on a Solver.
       #
@@ -75,7 +73,7 @@ module Solve
     # @param [Solve::Graph] graph
     # @param [Array<String>, Array<Array<String, String>>] demands
     # @param [#say] ui
-    def initialize(graph, demands = Array.new, ui=nil) 
+    def initialize(graph, demands = Array.new, ui=nil)
       @graph = graph
       @demands = Hash.new
       @ui = ui.respond_to?(:say) ? ui : nil
@@ -107,14 +105,14 @@ module Solve
           trace("\t#{constraint}")
         end
         trace("Possible values are #{possible_values_for_unbound}")
-        
+
         while possible_value = possible_values_for_unbound.shift
           possible_artifact = graph.get_artifact(unbound_variable.artifact, possible_value.version)
           possible_dependencies = possible_artifact.dependencies
           all_ok = possible_dependencies.all? { |dependency| can_add_new_constraint?(dependency) }
           if all_ok
             trace("Attempting to use #{possible_artifact}")
-            add_dependencies(possible_dependencies, possible_artifact) 
+            add_dependencies(possible_dependencies, possible_artifact)
             unbound_variable.bind(possible_value)
             break
           end
@@ -122,7 +120,7 @@ module Solve
 
         unless unbound_variable.bound?
           trace("Could not find an acceptable value for #{unbound_variable.artifact}")
-          backtrack(unbound_variable) 
+          backtrack(unbound_variable)
         end
       end
 
@@ -319,7 +317,7 @@ module Solve
           trace("Removed constraint #{removed_constraint.name} #{removed_constraint.constraint}")
         end
         previous_variable.unbind
-        variable_table.all_after(previous_variable.artifact).each do |variable| 
+        variable_table.all_after(previous_variable.artifact).each do |variable|
           new_possibles = reset_possible_values_for(variable)
         end
       end
