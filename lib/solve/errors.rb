@@ -32,12 +32,13 @@ module Solve
 
     class NoSolutionError < SolveError; end
 
-    class UnsortableSolutionError < SolveError 
+    class UnsortableSolutionError < SolveError
       attr_reader :internal_exception
       attr_reader :unsorted_solution
+
       def initialize(internal_exception, unsorted_solution)
         @internal_exception = internal_exception
-        @unsorted_solution = unsorted_solution
+        @unsorted_solution  = unsorted_solution
       end
 
       def to_s

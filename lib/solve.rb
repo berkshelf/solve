@@ -19,8 +19,10 @@ module Solve
     # @param [Solve::Graph] graph
     # @param [Array<Solve::Demand>, Array<String, String>] demands
     #
-    # @option options [#say] :ui (nil) a ui object for output
-    # @option options [Boolean] :sorted (false) should the output be a sorted list rather than a Hash
+    # @option options [#say] :ui (nil)
+    #   a ui object for output
+    # @option options [Boolean] :sorted (false)
+    #   should the output be a sorted list rather than a Hash
     #
     # @raise [NoSolutionError]
     #

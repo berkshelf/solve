@@ -91,9 +91,9 @@ module Solve
     # @option options [Boolean] :sorted
     #   return the solution as a sorted list instead of a Hash
     #
-    # @return [Hash, List] Returns a hash like { "Artifact Name" => "Version",... } 
+    # @return [Hash, List] Returns a hash like { "Artifact Name" => "Version",... }
     #   unless options[:sorted], then it returns a list like [["Artifact Name", "Version],...]
-    def resolve(options={})
+    def resolve(options = {})
       trace("Attempting to find a solution")
       seed_demand_dependencies
 
@@ -148,13 +148,13 @@ module Solve
       end
 
       # Modified from http://ruby-doc.org/stdlib-1.9.3/libdoc/tsort/rdoc/TSort.html
-      class << nodes                                                             
-        include TSort                                                            
-        alias tsort_each_node each_key                                           
-        def tsort_each_child(node, &block)                                       
-          fetch(node).each(&block)                                               
-        end                                                                      
-      end 
+      class << nodes
+        include TSort
+        alias tsort_each_node each_key
+        def tsort_each_child(node, &block)
+          fetch(node).each(&block)
+        end
+      end
       begin
         sorted_names = nodes.tsort
       rescue TSort::Cyclic => e

@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe "Solutions" do
-
   it "chooses the correct artifact for the demands" do
     graph = Solve::Graph.new
     graph.artifacts("mysql", "2.0.0")
@@ -253,7 +252,6 @@ describe "Solutions" do
             "C" => "1.0.0",
           })
         }
-
       end
     end
   end
