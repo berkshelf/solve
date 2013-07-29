@@ -1,7 +1,7 @@
 module Solve
   module Tracers
     class << self
-      # @param [#say]
+      # @param [#say] ui
       def human_readable(ui)
         unless ui.respond_to?(:say)
           Solve::Tracers::Silent.new
