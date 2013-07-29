@@ -8,8 +8,13 @@ module Solve
   require_relative 'solve/graph'
   require_relative 'solve/solver'
   require_relative 'solve/version'
+  require_relative 'solve/tracers'
 
   class << self
+
+    # @return [Solve::Formatter]
+    attr_reader :tracer
+
     # A quick solve. Given the "world" as we know it (the graph) and a list of
     # requirements (demands) which must be met. Return me the best solution of
     # artifacts and verisons that I should use.
@@ -28,7 +33,9 @@ module Solve
     #
     # @return [Hash]
     def it!(graph, demands, options = {})
+      @tracer = Solve::Tracers.human_readable(options[:ui])
       Solver.new(graph, demands, options[:ui]).resolve(options)
     end
+
   end
 end
