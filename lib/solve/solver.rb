@@ -94,24 +94,20 @@ module Solve
     # @return [Hash, List] Returns a hash like { "Artifact Name" => "Version",... }
     #   unless options[:sorted], then it returns a list like [["Artifact Name", "Version],...]
     def resolve(options = {})
-      trace("Attempting to find a solution")
+      Solve.tracer.start
       seed_demand_dependencies
 
       while unbound_variable = variable_table.first_unbound
         possible_values_for_unbound = possible_values_for(unbound_variable)
-        trace("Searching for a value for #{unbound_variable.artifact}")
-        trace("Constraints are")
-        constraint_table.constraints_on_artifact(unbound_variable.artifact).each do |constraint|
-          trace("\t#{constraint}")
-        end
-        trace("Possible values are #{possible_values_for_unbound}")
+        constraints = constraint_table.constraints_on_artifact(unbound_variable.artifact)
+        Solve.tracer.searching_for(unbound_variable, constraints, possible_values)
 
         while possible_value = possible_values_for_unbound.shift
           possible_artifact = graph.get_artifact(unbound_variable.artifact, possible_value.version)
           possible_dependencies = possible_artifact.dependencies
           all_ok = possible_dependencies.all? { |dependency| can_add_new_constraint?(dependency) }
           if all_ok
-            trace("Attempting to use #{possible_artifact}")
+            Solve.tracer.trying(possible_artifact)
             add_dependencies(possible_dependencies, possible_artifact)
             unbound_variable.bind(possible_value)
             break
@@ -119,15 +115,13 @@ module Solve
         end
 
         unless unbound_variable.bound?
-          trace("Could not find an acceptable value for #{unbound_variable.artifact}")
           backtrack(unbound_variable)
         end
       end
 
       solution = (options[:sorted]) ? build_sorted_solution : build_unsorted_solution
 
-      trace("Found Solution")
-      trace(solution)
+      Solve.tracer.solution(solution)
 
       solution
     end
@@ -266,7 +260,7 @@ module Solve
 
       def add_dependencies(dependencies, source)
         dependencies.each do |dependency|
-          trace("Adding constraint #{dependency.name} #{dependency.constraint} from #{source}")
+          Solve.tracer.add_constraint(dependency, source)
           variable_table.add(dependency.name, source)
           constraint_table.add(dependency, source)
           dependency_domain = graph.versions(dependency.name, dependency.constraint)
@@ -289,41 +283,39 @@ module Solve
       end
 
       def reset_possible_values_for(variable)
-        trace("Resetting possible values for #{variable.artifact}")
+        Solve.tracer.reset_domain(variable)
         possible_values[variable.artifact] = nil
-        x = possible_values_for(variable)
-        trace("Possible values are #{x}")
-        x
+        possible_values_for(variable).tap { |values|
+          Solve.tracer.possible_values(values)
+        }
       end
 
       def backtrack(unbound_variable)
+
+        Solve.tracer.backtrack(unbound_variable)
         previous_variable = variable_table.before(unbound_variable.artifact)
 
         if previous_variable.nil?
-          trace("Cannot backtrack any further")
+          Solve.tracer.cannot_backtrack
           raise Errors::NoSolutionError
         end
 
-        trace("Unbinding #{previous_variable.artifact}")
+        Solve.tracer.unbind(previous_variable)
 
         source = previous_variable.value
         removed_variables = variable_table.remove_all_with_only_this_source!(source)
         removed_variables.each do |removed_variable|
           possible_values[removed_variable.artifact] = nil
-          trace("Removed variable #{removed_variable.artifact}")
+          Solve.tracer.remove_variable(removed_variable)
         end
         removed_constraints = constraint_table.remove_constraints_from_source!(source)
         removed_constraints.each do |removed_constraint|
-          trace("Removed constraint #{removed_constraint.name} #{removed_constraint.constraint}")
+          Solve.tracer.remove_constraint(removed_constraint)
         end
         previous_variable.unbind
         variable_table.all_after(previous_variable.artifact).each do |variable|
           new_possibles = reset_possible_values_for(variable)
         end
-      end
-
-      def trace(message)
-        ui.say(message) unless ui.nil?
       end
   end
 end
