@@ -36,7 +36,7 @@ module Solve
     #
     # @return [Hash]
     def it!(graph, demands, options = {})
-      @tracer = options[:tracer] || Solve::Tracers.human_readable(options[:ui])
+      @tracer = options[:tracer] || Solve::Tracers.build(options[:ui])
       Solver.new(graph, demands, options[:ui]).resolve(options)
     end
 

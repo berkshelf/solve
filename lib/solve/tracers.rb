@@ -2,7 +2,9 @@ module Solve
   module Tracers
     class << self
       # @param [#say] ui
-      def human_readable(ui)
+      #
+      # @returns [AbstractTracer]
+      def build(ui)
         unless ui.respond_to?(:say)
           Solve::Tracers::Silent.new
         else
