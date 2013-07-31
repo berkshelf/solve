@@ -11,7 +11,6 @@ module Solve
   require_relative 'solve/tracers'
 
   class << self
-
     # @return [Solve::Formatter]
     attr_reader :tracer
 
@@ -25,7 +24,7 @@ module Solve
     # @param [Array<Solve::Demand>, Array<String, String>] demands
     #
     # @option options [#say] :ui (nil)
-    #   a ui object for output, this will be used to output from a Solve::Tracers::HumanReadable if 
+    #   a ui object for output, this will be used to output from a Solve::Tracers::HumanReadable if
     #   no other tracer is provided in options[:tracer]
     # @option options [AbstractTracer] :tracer (nil)
     #   a Tracer object that is used to format and output tracing information
@@ -39,6 +38,5 @@ module Solve
       @tracer = options[:tracer] || Solve::Tracers.build(options[:ui])
       Solver.new(graph, demands, options[:ui]).resolve(options)
     end
-
   end
 end

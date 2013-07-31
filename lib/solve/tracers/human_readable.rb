@@ -1,8 +1,13 @@
 module Solve
   module Tracers
     class HumanReadable < AbstractTracer
+      extend Forwardable
 
       attr_reader :ui
+
+      def_delegator :ui, :say
+
+      # @param [#say] ui
       def initialize(ui)
         @ui = ui
       end
@@ -57,11 +62,6 @@ module Solve
       def remove_constraint(constraint)
         say("Removed constraint #{constraint.name} #{constraint.constraint}")
       end
-
-      private
-        def say(message)
-          ui.say(message)
-        end
     end
   end
 end

@@ -14,6 +14,18 @@ module Solve
     end
 
     class AbstractTracer
+      class << self
+        private
+
+          def must_define(*args)
+            args.each do |method|
+              define_method(method.to_sym) do |*args|
+                raise AbstractFunction, "##{method} must be defined on #{self.class}"
+              end
+            end
+          end
+      end
+
       TRACER_METHODS = [
         :start,
         :searching_for,
@@ -28,17 +40,6 @@ module Solve
         :remove_variable,
         :remove_constraint,
       ]
-      class << self
-
-        private
-          def must_define(*args)
-            args.each do |method|
-              define_method(method.to_sym) do |*args|
-                raise AbstractFunction, "##{method} must be defined on #{self.class}"
-              end
-            end
-          end
-      end
 
       must_define *TRACER_METHODS
     end

@@ -285,13 +285,10 @@ module Solve
       def reset_possible_values_for(variable)
         Solve.tracer.reset_domain(variable)
         possible_values[variable.artifact] = nil
-        possible_values_for(variable).tap { |values|
-          Solve.tracer.possible_values(values)
-        }
+        possible_values_for(variable).tap { |values| Solve.tracer.possible_values(values) }
       end
 
       def backtrack(unbound_variable)
-
         Solve.tracer.backtrack(unbound_variable)
         previous_variable = variable_table.before(unbound_variable.artifact)
 

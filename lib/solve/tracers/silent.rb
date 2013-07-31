@@ -1,7 +1,6 @@
 module Solve
   module Tracers
     class Silent < AbstractTracer
-
       class << self
         def empty_method(*args)
           args.each do |method|
