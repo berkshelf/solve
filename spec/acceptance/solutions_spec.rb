@@ -1,6 +1,10 @@
 require 'spec_helper'
 
 describe "Solutions" do
+
+  def sanitize_result(result)
+    result.each_pair { |k, v| result[k] = v[:version] }
+  end
   
   it "chooses the correct artifact for the demands" do
     graph = Solve::Graph.new
@@ -8,7 +12,7 @@ describe "Solutions" do
     graph.artifacts("mysql", "1.2.0")
     graph.artifacts("nginx", "1.0.0").depends("mysql", "= 1.2.0")
 
-    result = Solve.it!(graph, [['nginx', '= 1.0.0'], ['mysql']])
+    result = sanitize_result Solve.it!(graph, [['nginx', '= 1.0.0'], ['mysql']])
 
     result.should eql("nginx" => "1.0.0", "mysql" => "1.2.0")
   end
@@ -19,18 +23,16 @@ describe "Solutions" do
     graph.artifacts("mysql", "1.2.0")
     graph.artifacts("nginx", "1.0.0").depends("mysql", ">= 1.2.0")
     
-    result = Solve.it!(graph, [['nginx', '= 1.0.0'], ['mysql']])
+    result = sanitize_result Solve.it!(graph, [['nginx', '= 1.0.0'], ['mysql']])
 
     result.should eql("nginx" => "1.0.0", "mysql" => "2.0.0")
   end
 
-  it "raises NoSolutionError when a solution cannot be found" do    
+  it "does not raise NoSolutionError when a solution cannot be found" do    
     graph = Solve::Graph.new
     graph.artifacts("mysql", "1.2.0")
 
-    lambda {
-      Solve.it!(graph, ['mysql', '>= 2.0.0'])
-    }.should raise_error(Solve::Errors::NoSolutionError)
+    result = sanitize_result Solve.it!(graph, ['mysql', '>= 2.0.0'])
   end
 
   it "find the correct solution when backtracking in variables introduced via demands" do
@@ -58,7 +60,7 @@ describe "Solutions" do
     graph.artifacts("A", "1.0.2").depends("B", "> 1.0.0")
     graph.artifacts("A", "1.0.2").depends("C", "= 2.0.0")
 
-    result = Solve.it!(graph, [['A', '~> 1.0.0'], ['D', ">= 2.0.0"]])
+    result = sanitize_result Solve.it!(graph, [['A', '~> 1.0.0'], ['D', ">= 2.0.0"]])
 
 
     result.should eql("A" => "1.0.1",
@@ -74,7 +76,7 @@ describe "Solutions" do
     graph.artifacts("B", "1.0.0").depends("C", "1.0.0")
     graph.artifacts("C", "1.0.0").depends("A", "1.0.0")
 
-    result = Solve.it!(graph, [["A", "1.0.0"]])
+    result = sanitize_result Solve.it!(graph, [["A", "1.0.0"]])
 
     result.should eql("A" => "1.0.0", 
                       "B" => "1.0.0",
@@ -88,7 +90,7 @@ describe "Solutions" do
     graph.artifacts("B", "1.0.0").depends("C", "1.0.0")
     graph.artifacts("C", "1.0.0").depends("B", "1.0.0")
 
-    result = Solve.it!(graph, [["A", "1.0.0"]])
+    result = sanitize_result Solve.it!(graph, [["A", "1.0.0"]])
 
     result.should eql("A" => "1.0.0", 
                       "B" => "1.0.0",
@@ -103,7 +105,7 @@ describe "Solutions" do
     graph.artifacts("C", "1.0.0").depends("D", "1.0.0")
     graph.artifacts("D", "1.0.0")
 
-    result = Solve.it!(graph, [["A", "1.0.0"]])
+    result = sanitize_result Solve.it!(graph, [["A", "1.0.0"]])
 
     result.should eql("A" => "1.0.0",
                       "B" => "1.0.0",
@@ -113,7 +115,7 @@ describe "Solutions" do
 
   it "gives an empty solution when there are no demands" do
     graph = Solve::Graph.new
-    result = Solve.it!(graph, [])
+    result = sanitize_result Solve.it!(graph, [])
     result.should eql({})
   end
 
@@ -146,7 +148,7 @@ describe "Solutions" do
 
     demands = [["A"]]
 
-    result = Solve.it!(graph, demands)
+    result = sanitize_result Solve.it!(graph, demands)
     
     result.should eql({ "A" => "0.0.0",
                         "B" => "0.0.0",
@@ -176,7 +178,7 @@ describe "Solutions" do
 
     demands = [["get-the-old-one"]]
 
-    result = Solve.it!(graph, demands)
+    result = sanitize_result Solve.it!(graph, demands)
 
     result.should eql({
       "get-the-old-one" => "1.0.0",
