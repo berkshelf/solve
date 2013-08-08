@@ -160,6 +160,8 @@ module Solve
                         constraints = possible_artifact.dependencies.select { |d| d.name == dependency.name }.collect { |d| d.constraint.to_s} +
                         constraint_table.constraints_on_artifact(dependency.name).collect {|c| c.to_s}
                         solution[dependency.name] = { :state => :bad_version, :constraints => constraints, :dependency_of => dependents }
+                      else
+                        add_dependencies([dependency], possible_artifact)
                       end
                     end
                   end
