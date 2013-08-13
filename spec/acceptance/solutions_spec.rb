@@ -3,7 +3,13 @@ require 'spec_helper'
 describe "Solutions" do
 
   def sanitize_result(result)
-    result.each_pair { |k, v| result[k] = v[:version] }
+    result.each_pair do |k, v|
+      if v[:state] == :found
+        result[k] = v[:version]
+      else
+        result[k] = v[:constraints]
+      end
+    end
   end
   
   it "chooses the correct artifact for the demands" do
@@ -28,7 +34,7 @@ describe "Solutions" do
     result.should eql("nginx" => "1.0.0", "mysql" => "2.0.0")
   end
 
-  it "does not raise NoSolutionError when a solution cannot be found" do    
+  it "does not raise NoSolutionError when a solution cannot be found" do
     graph = Solve::Graph.new
     graph.artifacts("mysql", "1.2.0")
 
@@ -67,6 +73,33 @@ describe "Solutions" do
                       "B" => "2.1.0",
                       "C" => "2.1.0",
                       "D" => "2.1.0")
+  end
+
+  it "reports all broken dependencies, regardless of the ordering" do
+    graph = Solve::Graph.new
+
+    graph.artifacts("A", "1.0.0").depends("B", "2.0.0")
+    graph.artifacts("B", "1.0.0")
+    graph.artifacts("C", "1.0.0").depends("D", "1.0.0")
+
+    result = sanitize_result Solve.it!(graph, [["A", "1.0.0"], ["C", "1.0.0"]])
+
+    result.should eql("A" => "1.0.0",
+                      "B" => ["= 2.0.0"],
+                      "C" => "1.0.0",
+                      "D" => ["= 1.0.0"])
+  end
+
+  it "normalizes all broken dependencies constraints" do
+    graph = Solve::Graph.new
+
+    graph.artifacts("A", "1.0.0").depends("B", "2.0.0")
+    graph.artifacts("B", "1.0.0")
+    graph.artifacts("C", "1.0.0").depends("B", "1.0.0")
+
+    result = sanitize_result Solve.it!(graph, [["A", "1.0.0"], ["B", "1.0.0"], ["C", "1.0.0"]])
+
+    result["B"].size.should eql(2)
   end
 
   it "finds the correct solution when there is a circular dependency" do

@@ -144,7 +144,7 @@ module Solve
                     solution[variable.artifact] = {
                       :state => (versions.length > 0 && :bad_version) || :missing,
                       :dependency_of => dependents,
-                      :constraints => constraint_table.constraints_on_artifact(variable.artifact).collect {|c| c.to_s}
+                      :constraints => (constraint_table.constraints_on_artifact(variable.artifact).collect {|c| c.to_s}).to_set.to_a
                     }
                   else
                     # In the case we have one or more possible versions, the problem comes from a dependency
@@ -157,8 +157,10 @@ module Solve
                       # Ignoring the valid dependencies because for now we want to focus on the ones which are broken for sure
                       unless can_add_new_constraint?(dependency)
                         # Aggregating the known constraints on that broken dependency
-                        constraints = possible_artifact.dependencies.select { |d| d.name == dependency.name }.collect { |d| d.constraint.to_s} +
-                        constraint_table.constraints_on_artifact(dependency.name).collect {|c| c.to_s}
+                        constraints = (
+                          possible_artifact.dependencies.select { |d| d.name == dependency.name }.collect { |d| d.constraint.to_s} +
+                          constraint_table.constraints_on_artifact(dependency.name).collect {|c| c.to_s}
+                        ).to_set.to_a
                         solution[dependency.name] = { :state => :bad_version, :constraints => constraints, :dependency_of => dependents }
                       else
                         add_dependencies([dependency], possible_artifact)
