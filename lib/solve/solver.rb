@@ -127,6 +127,8 @@ module Solve
             best_bad_solution = {}.tap do |solution|
               variable_table.rows.each do |variable|
 
+                dependents = variable_table.get_dependents(variable.artifact)
+
                 if variable.value.nil?
                   # variable.value contains the item version that we know works so far.
                   # If it's nil the item is either broken or not yet evaluated
@@ -135,8 +137,6 @@ module Solve
                   possible_values[variable.artifact] = nil
                   # Compute the possible versions for an item based on the currently known constraints
                   possible_values = possible_values_for(variable)
-
-                  dependents = variable_table.get_dependents(variable.artifact)
 
                   if possible_values.length == 0
                     # There are no possible versions, so we check if there are any in the graph
@@ -151,7 +151,11 @@ module Solve
                     # So we arbitrarily pick the first possible version
                     possible_artifact = graph.get_artifact(variable.artifact, possible_values.first.version)
                     # and record it as ok
-                    solution[variable.artifact] = { :state => :found, :version => possible_values.first.version.to_s }
+                    solution[variable.artifact] = { 
+                      :state => :found, 
+                      :version => possible_values.first.version.to_s, 
+                      :dependency_of => dependents 
+                    }
                     # then we look at its dependencies
                     possible_artifact.dependencies.each do |dependency|
                       # Ignoring the valid dependencies because for now we want to focus on the ones which are broken for sure
@@ -169,7 +173,7 @@ module Solve
                   end
                 else
                   # this is if we had a valid version
-                  solution[variable.artifact] = { :state => :found, :version => variable.value.version.to_s }
+                  solution[variable.artifact] = { :state => :found, :version => variable.value.version.to_s, :dependency_of => dependents }
                 end
               end
             end
@@ -182,7 +186,8 @@ module Solve
 
       solution = {}.tap do |solution|
         variable_table.rows.each do |variable|
-          solution[variable.artifact] = { :state => :found, :version => variable.value.version.to_s }
+          dependents = variable_table.get_dependents(variable.artifact)
+          solution[variable.artifact] = { :state => :found, :version => variable.value.version.to_s, :dependency_of => dependents }
         end
       end
 
