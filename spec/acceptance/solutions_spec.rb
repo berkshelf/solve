@@ -114,6 +114,19 @@ describe "Solutions" do
                       "D" => "1.0.0")
   end
 
+  it "fails with a self dependency" do
+    graph = Solve::Graph.new
+
+    graph.artifacts("bottom", "1.0.0")
+    graph.artifacts("middle", "1.0.0").depends("top", "= 1.0.0").depends("middle")
+
+    demands = [["bottom", "1.0.0"],["middle", "1.0.0"]]
+
+    expect { Solve.it!(graph, demands, { :sorted => true  } ) }.to raise_error { |error|
+      error.should be_a(Solve::Errors::NoSolutionError)
+    }
+  end
+
   it "gives an empty solution when there are no demands" do
     graph = Solve::Graph.new
     result = Solve.it!(graph, [])
