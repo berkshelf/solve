@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.email                 = ["jamie@vialstudios.com", "agarson@riotgames.com", "thibaud@thibaud.me"]
   s.description           = %q{A Ruby version constraint solver}
   s.summary               = %q{A Ruby version constraint solver implementing Semantic Versioning 2.0.0-rc.1}
-  s.homepage              = "https://github.com/RiotGames/solve"
+  s.homepage              = "https://github.com/berkshelf/solve"
   s.license               = "Apache 2.0"
 
   s.files                 = `git ls-files`.split($\)

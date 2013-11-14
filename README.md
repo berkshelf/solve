@@ -1,7 +1,7 @@
 # Solve
 [![Gem Version](https://badge.fury.io/rb/solve.png)](http://badge.fury.io/rb/solve)
-[![Build Status](https://secure.travis-ci.org/RiotGames/solve.png?branch=master)](http://travis-ci.org/RiotGames/solve)
-[![Dependency Status](https://gemnasium.com/RiotGames/solve.png?travis)](https://gemnasium.com/RiotGames/solve)
+[![Build Status](https://secure.travis-ci.org/berkshelf/solve.png?branch=master)](http://travis-ci.org/berkshelf/solve)
+[![Dependency Status](https://gemnasium.com/berkshelf/solve.png?travis)](https://gemnasium.com/berkshelf/solve)
 
 A Ruby versioning constraint solver implementing [Semantic Versioning 2.0.0](http://semver.org).
 
