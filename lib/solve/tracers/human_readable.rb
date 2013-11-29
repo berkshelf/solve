@@ -40,7 +40,7 @@ module Solve
 
       def solution(solution)
         say("Found Solution")
-        say(solution)
+        say(solution.inspect)
       end
 
       def add_constraint(dependency, source)
