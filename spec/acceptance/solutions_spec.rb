@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'timeout'
 
 describe "Solutions" do
   it "chooses the correct artifact for the demands" do
@@ -29,6 +30,22 @@ describe "Solutions" do
 
     lambda {
       Solve.it!(graph, ['mysql', '>= 2.0.0'])
+    }.should raise_error(Solve::Errors::NoSolutionError)
+  end
+
+  it "detects an impossible solution in a reasonable time" do
+    graph = Solve::Graph.new
+    %w[a b].each do |artifact|
+      100.times do |i|
+        graph.artifacts(artifact, "1.0.#{i}")
+      end
+    end
+    graph.artifacts('c', '1.0.0').depends('a', '< 1.0.0')
+
+    lambda {
+      Timeout.timeout(0.1) do
+        Solve.it!(graph, %w[a b c])
+      end
     }.should raise_error(Solve::Errors::NoSolutionError)
   end
 
@@ -235,7 +252,7 @@ describe "Solutions" do
         graph.artifacts("A", "1.0.0").depends("C", "= 1.0.0")
         graph.artifacts("C", "1.0.0")
 
-        demands = [["A"],["B"]] 
+        demands = [["A"],["B"]]
 
         result = Solve.it!(graph, demands, { :sorted => true  } )
 
