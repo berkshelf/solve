@@ -32,38 +32,6 @@ describe Solve::Demand do
   let(:constraint) { "~> 1.0.0" }
   subject { Solve::Demand.new(solver, name, constraint) }
 
-  describe "#delete" do
-    context "given the demand is related to a solver" do
-      subject { Solve::Demand.new(solver, name, constraint) }
-
-      before(:each) do
-        solver.should_receive(:remove_demand).with(subject).and_return(subject)
-      end
-
-      it "notifies the solver that the demand should be removed" do
-        subject.delete
-      end
-
-      it "sets the solver attribute to nil" do
-        subject.delete
-
-        subject.solver.should be_nil
-      end
-
-      it "returns the instance of demand deleted from the solver" do
-        subject.delete.should eql(subject)
-      end
-    end
-
-    context "given the demand is not the member of a solver" do
-      subject { Solve::Demand.new(nil, name, constraint) }
-
-      it "returns nil" do
-        subject.delete.should be_nil
-      end
-    end
-  end
-
   describe "equality" do
     it "returns true when other is a Solve::Demand with the same name and constriant" do
       other = Solve::Demand.new(solver, name, constraint)

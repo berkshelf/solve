@@ -214,13 +214,6 @@ module Solve
     end
     alias_method :demand, :add_demand
 
-    # @param [Solve::Demand, nil] demand
-    def remove_demand(demand)
-      if has_demand?(demand)
-        @demands.delete(self.class.demand_key(demand))
-      end
-    end
-
     # @param [Solve::Demand] demand
     #
     # @return [Boolean]

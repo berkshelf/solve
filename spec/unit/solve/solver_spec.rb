@@ -261,28 +261,6 @@ describe Solve::Solver do
       subject.demands.should have(1).item
     end
   end
-
-  describe "#remove_demand" do
-    let(:demand) { Solve::Demand.new(double('graph'), 'ntp') }
-
-    context "given the demand is a member of the collection" do
-      before(:each) { subject.add_demand(demand) }
-
-      it "removes the Solve::Artifact from the collection of demands" do
-        subject.remove_demand(demand)
-
-        subject.demands.should have(0).items
-      end
-
-      it "returns the removed Solve::Artifact" do
-        subject.remove_demand(demand).should eql(demand)
-      end
-    end
-
-    context "given the demand is not a member of the collection" do
-      it "should return nil" do
-        subject.remove_demand(demand).should be_nil
-      end
     end
   end
 
