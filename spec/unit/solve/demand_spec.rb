@@ -4,27 +4,25 @@ describe Solve::Demand do
   let(:solver) { double('solver') }
   let(:name) { "league" }
 
-  describe "ClassMethods" do
-    subject { Solve::Demand }
+  describe "#initialize" do
+    it "accepts a string for the constraint parameter" do
+      demand = Solve::Demand.new(solver, name, "= 0.0.1")
+      expect(demand.constraint.to_s).to eq("= 0.0.1")
+    end
 
-    describe "::new" do
-      it "accepts a string for the constraint parameter" do
-        subject.new(solver, name, "= 0.0.1").constraint.to_s.should eql("= 0.0.1")
-      end
+    it "accepts a Solve::Constraint for the constraint parameter" do
+      constraint = Solve::Constraint.new("= 0.0.1")
+      demand = Solve::Demand.new(solver, name, constraint)
 
-      it "accepts a Solve::Constraint for the constraint parameter" do
-        constraint = Solve::Constraint.new("= 0.0.1")
+      expect(demand.constraint).to eq(constraint)
+    end
 
-        subject.new(solver, name, constraint).constraint.should eql(constraint)
-      end
+    context "when no value for 'constraint' is given" do
+      it "uses a default of >= 0.0.0" do
+        demand = Solve::Demand.new(solver, name)
 
-      context "when no value for 'constraint' is given" do
-        it "uses a default of >= 0.0.0" do
-          demand = subject.new(solver, name)
-
-          demand.constraint.operator.should eql(">=")
-          demand.constraint.version.to_s.should eql("0.0.0")
-        end
+        expect(demand.constraint.operator).to eq(">=")
+        expect(demand.constraint.version.to_s).to eq("0.0.0")
       end
     end
   end
@@ -35,24 +33,21 @@ describe Solve::Demand do
   describe "equality" do
     it "returns true when other is a Solve::Demand with the same name and constriant" do
       other = Solve::Demand.new(solver, name, constraint)
-
-      subject.should eql(other)
+      expect(subject).to eq(other)
     end
 
     it "returns false when other isn't a Solve::Demand" do
-      subject.should_not eql("chicken")
+      expect(subject).to_not eq("chicken")
     end
 
     it "returns false when other is a Solve::Demand with the same name but a different constraint" do
       other = Solve::Demand.new(solver, name, "< 3.4.5")
-
-      subject.should_not eql(other)
+      expect(subject).to_not eq(other)
     end
 
     it "returns false when other is a Solve::Demand with the same constraint but a different name" do
       other = Solve::Demand.new(solver, "chicken", constraint)
-
-      subject.should_not eql(other)
+      expect(subject).to_not eq(other)
     end
   end
 end

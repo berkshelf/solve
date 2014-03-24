@@ -1,13 +1,16 @@
 require 'spec_helper'
 
 describe Solve::Solver::Serializer do
-  it "deserializes a serialized solver to an equivalent solver" do
+  before do
+    Solve.stub(:tracer).and_return(Solve::Tracers::Silent.new)
+  end
 
+  it "deserializes a serialized solver to an equivalent solver" do
     graph = Solve::Graph.new
 
-    graph.artifacts("A", "1.0.0").depends("B", "1.0.0")
-    graph.artifacts("B", "1.0.0").depends("C", "1.0.0")
-    graph.artifacts("C", "1.0.0")
+    graph.artifact("A", "1.0.0").depends("B", "1.0.0")
+    graph.artifact("B", "1.0.0").depends("C", "1.0.0")
+    graph.artifact("C", "1.0.0")
 
     demands = [["A", "1.0.0"]]
 

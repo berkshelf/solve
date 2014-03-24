@@ -15,37 +15,29 @@ describe Solve::Constraint do
 
     describe "::new" do
       it "returns a new instance of Constraint" do
-        subject.new(valid_string).should be_a(Solve::Constraint)
+        expect(subject.new(valid_string)).to be_a(Solve::Constraint)
       end
 
       it "assigns the parsed operator to the operator attribute" do
-        subject.new(valid_string).operator.should eql(">=")
+        expect(subject.new(valid_string).operator).to eq(">=")
       end
 
       it "assigns the parsed operator to the operator attribute with no separation between operator and version" do
-        subject.new(">=0.0.0").operator.should eql(">=")
+        expect(subject.new(">=0.0.0").operator).to eq(">=")
       end
 
       it "assigns the parsed version string as an instance of Version to the version attribute" do
         result = subject.new(valid_string)
 
-        result.version.should be_a(Solve::Version)
-        result.version.to_s.should eql("0.0.0")
-      end
-
-      it "sets a default of '>= 0.0.0' if given a nil value" do
-        subject.new(nil).to_s.should eql(">= 0.0.0")
-      end
-
-      it "sets a default of '>= 0.0.0' if given a blank string" do
-        subject.new('').to_s.should eql(">= 0.0.0")
+        expect(result.version).to be_a(Solve::Version)
+        expect(result.version.to_s).to eq("0.0.0")
       end
 
       context "given a string that does not match the Constraint REGEXP" do
         it "raises an InvalidConstraintFormat error" do
-          lambda {
+          expect {
             subject.new(invalid_string)
-          }.should raise_error(Solve::Errors::InvalidConstraintFormat)
+          }.to raise_error(Solve::Errors::InvalidConstraintFormat)
         end
       end
 
@@ -61,31 +53,31 @@ describe Solve::Constraint do
 
       context "given a constraint that does not include a minor version (=)" do
         it "has a 0 for minor" do
-          subject.new("= 1").minor.should eq(0)
+          expect(subject.new("= 1").minor).to eq(0)
         end
       end
 
       context "given a constraint that does not include a patch version (~>)" do
         it "has a nil value for patch" do
-          subject.new("~> 1.2").patch.should be_nil
+          expect(subject.new("~> 1.2").patch).to be_nil
         end
       end
 
       context "given a constraint that does not include a patch version (=)" do
         it "has a 0 for patch" do
-          subject.new("= 1.2").patch.should eq(0)
+          expect(subject.new("= 1.2").patch).to eq(0)
         end
       end
 
       context "given a constraint that does not include a build version" do
         it "has a nil value for build" do
-          subject.new(">= 1.2.3-alpha").build.should be_nil
+          expect(subject.new(">= 1.2.3-alpha").build).to be_nil
         end
       end
 
       context "given a constraint that does not include a pre release version" do
         it "has a nil value for pre release" do
-          subject.new(">= 1.2.3+build").pre_release.should be_nil
+          expect(subject.new(">= 1.2.3+build").pre_release).to be_nil
         end
       end
     end
@@ -99,27 +91,27 @@ describe Solve::Constraint do
         let(:constraint_string) { ">= 1.2.3-alpha+build" }
 
         it "returns an array with the constraint operator at index 0" do
-          subject[0].should eql(">=")
+          expect(subject[0]).to eq(">=")
         end
 
         it "returns an array with the major version in index 1" do
-          subject[1].should eql(1)
+          expect(subject[1]).to eq(1)
         end
 
         it "returns an array with the minor version at index 2" do
-          subject[2].should eql(2)
+          expect(subject[2]).to eq(2)
         end
 
         it "returns an array with the patch version at index 3" do
-          subject[3].should eql(3)
+          expect(subject[3]).to eq(3)
         end
 
         it "returns an array with the pre release version at index 4" do
-          subject[4].should eql("alpha")
+          expect(subject[4]).to eq("alpha")
         end
 
         it "returns an array with the build version at index 5" do
-          subject[5].should eql("build")
+          expect(subject[5]).to eq("build")
         end
       end
 
@@ -127,27 +119,27 @@ describe Solve::Constraint do
         let(:constraint_string) { ">= 1.2.3-alpha" }
 
         it "returns an array with the constraint operator at index 0" do
-          subject[0].should eql(">=")
+          expect(subject[0]).to eq(">=")
         end
 
         it "returns an array with the major version in index 1" do
-          subject[1].should eql(1)
+          expect(subject[1]).to eq(1)
         end
 
         it "returns an array with the minor version at index 2" do
-          subject[2].should eql(2)
+          expect(subject[2]).to eq(2)
         end
 
         it "returns an array with the patch version at index 3" do
-          subject[3].should eql(3)
+          expect(subject[3]).to eq(3)
         end
 
         it "returns an array with the pre release version at index 4" do
-          subject[4].should eql("alpha")
+          expect(subject[4]).to eq("alpha")
         end
 
         it "returns an array with a nil value at index 5" do
-          subject[5].should be_nil
+          expect(subject[5]).to be_nil
         end
       end
 
@@ -155,27 +147,27 @@ describe Solve::Constraint do
         let(:constraint_string) { ">= 1.2.3" }
 
         it "returns an array with the constraint operator at index 0" do
-          subject[0].should eql(">=")
+          expect(subject[0]).to eq(">=")
         end
 
         it "returns an array with the major version in index 1" do
-          subject[1].should eql(1)
+          expect(subject[1]).to eq(1)
         end
 
         it "returns an array with the minor version at index 2" do
-          subject[2].should eql(2)
+          expect(subject[2]).to eq(2)
         end
 
         it "returns an array with the patch version at index 3" do
-          subject[3].should eql(3)
+          expect(subject[3]).to eq(3)
         end
 
         it "returns an array with a nil value at index 4" do
-          subject[4].should be_nil
+          expect(subject[4]).to be_nil
         end
 
         it "returns an array with a nil value at index 5" do
-          subject[5].should be_nil
+          expect(subject[5]).to be_nil
         end
       end
 
@@ -183,27 +175,27 @@ describe Solve::Constraint do
         let(:constraint_string) { ">= 1.2" }
 
         it "returns an array with the constraint operator at index 0" do
-          subject[0].should eql(">=")
+          expect(subject[0]).to eq(">=")
         end
 
         it "returns an array with the major version in index 1" do
-          subject[1].should eql(1)
+          expect(subject[1]).to eq(1)
         end
 
         it "returns an array with the minor version at index 2" do
-          subject[2].should eql(2)
+          expect(subject[2]).to eq(2)
         end
 
         it "returns an array with a nil value at index 3" do
-          subject[3].should be_nil
+          expect(subject[3]).to be_nil
         end
 
         it "returns an array with a nil value at index 4" do
-          subject[4].should be_nil
+          expect(subject[4]).to be_nil
         end
 
         it "returns an array with a nil value at index 5" do
-          subject[5].should be_nil
+          expect(subject[5]).to be_nil
         end
       end
 
@@ -211,27 +203,27 @@ describe Solve::Constraint do
         let(:constraint_string) { ">= 1" }
 
         it "returns an array with the constraint operator at index 0" do
-          subject[0].should eql(">=")
+          expect(subject[0]).to eq(">=")
         end
 
         it "returns an array with the major version in index 1" do
-          subject[1].should eql(1)
+          expect(subject[1]).to eq(1)
         end
 
         it "returns an array with a nil value at index 2" do
-          subject[2].should be_nil
+          expect(subject[2]).to be_nil
         end
 
         it "returns an array with a nil value at index 3" do
-          subject[3].should be_nil
+          expect(subject[3]).to be_nil
         end
 
         it "returns an array with a nil value at index 4" do
-          subject[4].should be_nil
+          expect(subject[4]).to be_nil
         end
 
         it "returns an array with a nil value at index 5" do
-          subject[5].should be_nil
+          expect(subject[5]).to be_nil
         end
       end
 
@@ -239,7 +231,7 @@ describe Solve::Constraint do
         let(:constraint_string) { "1.2.3" }
 
         it "returns an equality operator at index 0" do
-          subject[0].should eql("=")
+          expect(subject[0]).to eq("=")
         end
       end
 
@@ -257,7 +249,7 @@ describe Solve::Constraint do
         let(:constraint_string) { "1.2.3" }
 
         it "returns a constraint constraint with a default operator (=)" do
-          subject[0].should eql("=")
+          expect(subject[0]).to eq("=")
         end
       end
     end
@@ -267,10 +259,7 @@ describe Solve::Constraint do
     subject { Solve::Constraint.new("= 1.0.0") }
 
     it { should satisfies("1.0.0") }
-
-    it "accepts a Version for version" do
-      should satisfies(Solve::Version.new("1.0.0"))
-    end
+    it { should satisfies(Solve::Version.new("1.0.0")) }
 
     context "strictly greater than (>) pre-release constraint" do
       subject { Solve::Constraint.new("> 1.0.0-alpha") }
@@ -655,27 +644,27 @@ describe Solve::Constraint do
     end
   end
 
-  describe "#eql?" do
+  describe "#==" do
     subject { Solve::Constraint.new("= 1.0.0") }
 
     it "returns true if the other object is a Solve::Constraint with the same operator and version" do
       other = Solve::Constraint.new("= 1.0.0")
-      subject.should eql(other)
+      expect(subject).to eq(other)
     end
 
     it "returns false if the other object is a Solve::Constraint with the same operator and different version" do
       other = Solve::Constraint.new("= 9.9.9")
-      subject.should_not eql(other)
+      expect(subject).to_not eq(other)
     end
 
     it "returns false if the other object is a Solve::Constraint with the same version and different operator" do
       other = Solve::Constraint.new("> 1.0.0")
-      subject.should_not eql(other)
+      expect(subject).to_not eq(other)
     end
 
     it "returns false if the other object is not a Solve::Constraint" do
       other = "chicken"
-      subject.should_not eql(other)
+      expect(subject).to_not eq(other)
     end
   end
 
