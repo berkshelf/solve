@@ -216,12 +216,12 @@ module Solve
     end
 
     def to_s
-      str = "#{operator} #{major}"
-      str += ".#{minor}" if minor
-      str += ".#{patch}" if patch
-      str += "-#{pre_release}" if pre_release
-      str += "+#{build}" if build
-      str
+      out =  "#{operator} #{major}"
+      out << ".#{minor}" if minor
+      out << ".#{patch}" if patch
+      out << "-#{pre_release}" if pre_release
+      out << "+#{build}" if build
+      out
     end
 
     private
