@@ -18,14 +18,10 @@ module Solve
     # @param [Solve::Solver] solver
     # @param [#to_s] name
     # @param [Solve::Constraint, #to_s] constraint
-    def initialize(solver, name, constraint = ">= 0.0.0")
-      @solver = solver
-      @name   = name
-      @constraint = if constraint.is_a?(Solve::Constraint)
-        constraint
-      else
-        Constraint.new(constraint.to_s)
-      end
+    def initialize(solver, name, constraint = DEFAULT_CONSTRAINT)
+      @solver     = solver
+      @name       = name
+      @constraint = Constraint.coerce(constraint)
     end
 
     def to_s
