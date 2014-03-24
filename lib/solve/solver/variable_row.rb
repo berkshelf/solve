@@ -33,11 +33,6 @@ module Solve
       def bound?
         !@value.nil?
       end
-
-      # @param [String, Symbol] source
-      def remove_source(source)
-        @sources.delete(source)
-      end
     end
   end
 end

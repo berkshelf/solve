@@ -118,29 +118,6 @@ describe Solve::Artifact do
     end
   end
 
-  describe "#delete" do
-    context "given the artifact is a member of a graph" do
-      subject { Solve::Artifact.new(graph, name, version) }
-
-      before(:each) do
-        graph.should_receive(:remove_artifact).with(subject).and_return(subject)
-      end
-
-      it "notifies the graph that the artifact should be removed" do
-        subject.delete
-      end
-
-      it "sets the graph attribute to nil" do
-        subject.delete
-
-        subject.graph.should be_nil
-      end
-
-      it "returns the instance of artifact deleted from the graph" do
-        subject.delete.should eql(subject)
-      end
-    end
-
     context "given the artifact is not the member of a graph" do
       subject { Solve::Artifact.new(nil, name, version) }
 

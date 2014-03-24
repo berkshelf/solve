@@ -118,17 +118,6 @@ module Solve
         get_dependency(dependency.name, dependency.constraint)
       end
 
-      # Remove the matching dependency from the artifact
-      #
-      # @param [Solve::Dependency] dependency
-      #
-      # @return [Solve::Dependency, nil]
-      def remove_dependency(dependency)
-        if has_dependency?(dependency)
-          @dependencies.delete(Graph.key_for(dependency))
-        end
-      end
-
       # Check if the artifact has a dependency with the matching name and constraint
       #
       # @param [#to_s] name

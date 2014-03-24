@@ -28,17 +28,6 @@ module Solve
       end
     end
 
-    # Remove this demand from the solver it belongs to
-    #
-    # @return [Solve::Demand, nil]
-    def delete
-      unless solver.nil?
-        result  = solver.remove_demand(self)
-        @solver = nil
-        result
-      end
-    end
-
     def to_s
       "#{name} (#{constraint})"
     end

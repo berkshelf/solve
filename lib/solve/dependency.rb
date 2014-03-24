@@ -29,15 +29,6 @@ module Solve
       end
     end
 
-    # Remove this dependency from the artifact it belongs to
-    #
-    # @return [Solve::Dependency, nil]
-    def delete
-      unless artifact.nil?
-        result = artifact.remove_dependency(self)
-        @artifact = nil
-        result
-      end
     def to_s
       "#{name} (#{constraint})"
     end

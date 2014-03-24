@@ -113,13 +113,7 @@ module Solve
       @artifacts.fetch(self.class.artifact_key(name, version.to_s), nil)
     end
 
-    # Remove the given instance of artifact from the graph
     #
-    # @param [Solve::Artifact, nil] artifact
-    def remove_artifact(artifact)
-      if has_artifact?(artifact.name, artifact.version)
-        @artifacts.delete(self.class.key_for(artifact))
-      end
     end
 
     # Check if an artifact with a matching name and version is a member of this instance

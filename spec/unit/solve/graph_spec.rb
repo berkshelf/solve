@@ -188,28 +188,8 @@ describe Solve::Graph do
       subject.artifacts.should have(1).item
     end
   end
-
-  describe "#remove_artifact" do
-    let(:artifact) { Solve::Artifact.new(double('graph'), "nginx", "1.0.0") }
-
-    context "given the artifact is a member of the collection" do
-      before(:each) { subject.add_artifact(artifact) }
-
-      it "removes the Solve::Artifact from the collection of artifacts" do
-        subject.remove_artifact(artifact)
-
-        subject.artifacts.should have(0).items
-      end
-
-      it "returns the removed Solve::Artifact" do
-        subject.remove_artifact(artifact).should eql(artifact)
-      end
     end
 
-    context "given the artifact is not a member of the collection" do
-      it "should return nil" do
-        subject.remove_artifact(artifact).should be_nil
-      end
     end
   end
 
