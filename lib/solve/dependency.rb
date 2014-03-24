@@ -18,15 +18,10 @@ module Solve
     # @param [Solve::Artifact] artifact
     # @param [#to_s] name
     # @param [Solve::Constraint, #to_s] constraint
-    def initialize(artifact, name, constraint = ">= 0.0.0")
-      @artifact = artifact
-      @name = name
-      @constraint = case constraint
-      when Solve::Constraint
-        constraint
-      else
-        Constraint.new(constraint)
-      end
+    def initialize(artifact, name, constraint = DEFAULT_CONSTRAINT)
+      @artifact   = artifact
+      @name       = name
+      @constraint = Constraint.coerce(constraint)
     end
 
     def to_s
