@@ -9,23 +9,23 @@ describe Solve::Version do
         before(:each) { @version = subject.new("1.2.3-rc.1+build.1") }
 
         it "assigns a major value" do
-          @version.major.should eql(1)
+          expect(@version.major).to eq(1)
         end
 
         it "assigns a minor value" do
-          @version.minor.should eql(2)
+          expect(@version.minor).to eq(2)
         end
 
         it "assigns a patch value" do
-          @version.patch.should eql(3)
+          expect(@version.patch).to eq(3)
         end
 
         it "assigns a pre_release value" do
-          @version.pre_release.should eql('rc.1')
+          expect(@version.pre_release).to eq('rc.1')
         end
 
         it "assigns a build value" do
-          @version.build.should eql('build.1')
+          expect(@version.build).to eq('build.1')
         end
       end
 
@@ -33,23 +33,23 @@ describe Solve::Version do
         before(:each) { @version = subject.new("1.2.3+pre-build.11.e0f985a") }
 
         it "assigns a major value" do
-          @version.major.should eql(1)
+          expect(@version.major).to eq(1)
         end
 
         it "assigns a minor value" do
-          @version.minor.should eql(2)
+          expect(@version.minor).to eq(2)
         end
 
         it "assigns a patch value" do
-          @version.patch.should eql(3)
+          expect(@version.patch).to eq(3)
         end
 
         it "doesn't assigns a pre_release value" do
-          @version.pre_release.should be_nil
+          expect(@version.pre_release).to be_nil
         end
 
         it "assigns a build value" do
-          @version.build.should eql('pre-build.11.e0f985a')
+          expect(@version.build).to eq('pre-build.11.e0f985a')
         end
       end
 
@@ -57,23 +57,23 @@ describe Solve::Version do
         before(:each) { @version = subject.new("1.2.3") }
 
         it "assigns a major value" do
-          @version.major.should eql(1)
+          expect(@version.major).to eq(1)
         end
 
         it "assigns a minor value" do
-          @version.minor.should eql(2)
+          expect(@version.minor).to eq(2)
         end
 
         it "assigns a patch value" do
-          @version.patch.should eql(3)
+          expect(@version.patch).to eq(3)
         end
 
         it "doesn't assigns a pre_release value" do
-          @version.pre_release.should be_nil
+          expect(@version.pre_release).to be_nil
         end
 
         it "doesn't assigns a build value" do
-          @version.build.should be_nil
+          expect(@version.build).to be_nil
         end
       end
 
@@ -81,23 +81,23 @@ describe Solve::Version do
         before(:each) { @version = subject.new([1,2,3,nil,'build.1']) }
 
         it "assigns a major value" do
-          @version.major.should eql(1)
+          expect(@version.major).to eq(1)
         end
 
         it "assigns a minor value" do
-          @version.minor.should eql(2)
+          expect(@version.minor).to eq(2)
         end
 
         it "assigns a patch value" do
-          @version.patch.should eql(3)
+          expect(@version.patch).to eq(3)
         end
 
         it "doesn't assigns a pre_release value" do
-          @version.pre_release.should be_nil
+          expect(@version.pre_release).to be_nil
         end
 
         it "assigns a build value" do
-          @version.build.should eql('build.1')
+          expect(@version.build).to eq('build.1')
         end
       end
 
@@ -105,23 +105,23 @@ describe Solve::Version do
         before(:each) { @version = subject.new([1,2,3,'alpha.1']) }
 
         it "assigns a major value" do
-          @version.major.should eql(1)
+          expect(@version.major).to eq(1)
         end
 
         it "assigns a minor value" do
-          @version.minor.should eql(2)
+          expect(@version.minor).to eq(2)
         end
 
         it "assigns a patch value" do
-          @version.patch.should eql(3)
+          expect(@version.patch).to eq(3)
         end
 
         it "assigns a pre_release value" do
-          @version.pre_release.should eql('alpha.1')
+          expect(@version.pre_release).to eq('alpha.1')
         end
 
         it "doesn't assigns a build value" do
-          @version.build.should be_nil
+          expect(@version.build).to be_nil
         end
       end
 
@@ -129,23 +129,23 @@ describe Solve::Version do
         before(:each) { @version = subject.new([1,2,3]) }
 
         it "assigns a major value" do
-          @version.major.should eql(1)
+          expect(@version.major).to eq(1)
         end
 
         it "assigns a minor value" do
-          @version.minor.should eql(2)
+          expect(@version.minor).to eq(2)
         end
 
         it "assigns a patch value" do
-          @version.patch.should eql(3)
+          expect(@version.patch).to eq(3)
         end
 
         it "doesn't assigns a pre_release value" do
-          @version.pre_release.should be_nil
+          expect(@version.pre_release).to be_nil
         end
 
         it "doesn't assigns a build value" do
-          @version.build.should be_nil
+          expect(@version.build).to be_nil
         end
       end
 
@@ -153,23 +153,23 @@ describe Solve::Version do
         before(:each) { @version = subject.new([1,2]) }
 
         it "assigns a major value" do
-          @version.major.should eql(1)
+          expect(@version.major).to eq(1)
         end
 
         it "assigns a minor value" do
-          @version.minor.should eql(2)
+          expect(@version.minor).to eq(2)
         end
 
         it "sets the patch value to 0 (zero)" do
-          @version.patch.should eql(0)
+          expect(@version.patch).to eq(0)
         end
 
         it "doesn't assigns a pre_release value" do
-          @version.pre_release.should be_nil
+          expect(@version.pre_release).to be_nil
         end
 
         it "doesn't assigns a build value" do
-          @version.build.should be_nil
+          expect(@version.build).to be_nil
         end
       end
 
@@ -177,23 +177,23 @@ describe Solve::Version do
         before(:each) { @version = subject.new([1]) }
 
         it "assigns the major value" do
-          @version.major.should eql(1)
+          expect(@version.major).to eq(1)
         end
 
         it "sets the minor value to 0 (zero)" do
-          @version.minor.should eql(0)
+          expect(@version.minor).to eq(0)
         end
 
         it "sets the patch value to 0 (zero)" do
-          @version.patch.should eql(0)
+          expect(@version.patch).to eq(0)
         end
 
         it "doesn't assigns a pre_release value" do
-          @version.pre_release.should be_nil
+          expect(@version.pre_release).to be_nil
         end
 
         it "doesn't assigns a build value" do
-          @version.build.should be_nil
+          expect(@version.build).to be_nil
         end
       end
 
@@ -201,83 +201,83 @@ describe Solve::Version do
         before(:each) { @version = subject.new(Array.new) }
 
         it "sets the majro value to 0 (zero)" do
-          @version.major.should eql(0)
+          expect(@version.major).to eq(0)
         end
 
         it "sets the minor value to 0 (zero)" do
-          @version.minor.should eql(0)
+          expect(@version.minor).to eq(0)
         end
 
         it "sets the patch value to 0 (zero)" do
-          @version.patch.should eql(0)
+          expect(@version.patch).to eq(0)
         end
 
         it "doesn't assigns a pre_release value" do
-          @version.pre_release.should be_nil
+          expect(@version.pre_release).to be_nil
         end
 
         it "doesn't assigns a build value" do
-          @version.build.should be_nil
+          expect(@version.build).to be_nil
         end
       end
     end
 
     describe "::split" do
       it "returns an array containing 5 elements" do
-        subject.split("1.2.0-alpha.1").should have(5).items
+        expect(subject.split("1.2.0-alpha.1")).to have(5).items
       end
 
       context "given a string only containing a major, minor and patch version" do
         it "returns an array containing 4 elements" do
-          subject.split("1.2.3").should have(5).items
+          expect(subject.split("1.2.3")).to have(5).items
         end
 
         it "returns nil as fourth element" do
-          subject.split("1.2.3")[3].should be_nil
+          expect(subject.split("1.2.3")[3]).to be_nil
         end
 
         it "returns nil as fifth element" do
-          subject.split("1.2.3")[4].should be_nil
+          expect(subject.split("1.2.3")[4]).to be_nil
         end
       end
 
       context "given a string only containing a major and minor version" do
         it "returns an array containing 4 elements" do
-          subject.split("1.2").should have(3).items
+          expect(subject.split("1.2")).to have(3).items
         end
 
         it "returns 0 as the third element" do
-          subject.split("1.2")[2].should eql(0)
+          expect(subject.split("1.2")[2]).to eq(0)
         end
 
         it "converts the third element to 0 if it's nil or blank" do
-          subject.split("1.2.")[2].should eql(0)
+          expect(subject.split("1.2.")[2]).to eq(0)
         end
       end
 
       context "given a string with only a major version" do
         it "returns an array containing 3 elements" do
-          subject.split("1").should have(3).items
+          expect(subject.split("1")).to have(3).items
         end
 
         it "returns 0 as the second element" do
-          subject.split("1")[1].should eql(0)
+          expect(subject.split("1")[1]).to eq(0)
         end
 
         it "returns 0 as the third element" do
-          subject.split("1")[2].should eql(0)
+          expect(subject.split("1")[2]).to eq(0)
         end
 
         it "converts the second element to 0 if it's nil or blank" do
-          subject.split("1.")[1].should eql(0)
+          expect(subject.split("1.")[1]).to eq(0)
         end
       end
 
     context "given a string with an invalid version"
       it "raises an InvalidVersionFormat error" do
-        lambda {
+        expect {
           subject.split("hello")
-        }.should raise_error(Solve::Errors::InvalidVersionFormat)
+        }.to raise_error(Solve::Errors::InvalidVersionFormat)
       end
     end
   end
@@ -320,7 +320,7 @@ describe Solve::Version do
     subject { Solve::Version.new("1.0.0-rc.1+build.1") }
 
     it "returns a string containing the major.minor.patch-pre_release+build" do
-      subject.to_s.should eql("1.0.0-rc.1+build.1")
+      subject.to_s.should eq("1.0.0-rc.1+build.1")
     end
   end
 
@@ -347,7 +347,7 @@ describe Solve::Version do
         while shuffled_versions == versions
           shuffled_versions = shuffled_versions.shuffle
         end
-        shuffled_versions.sort.map(&:to_s).should == versions_list
+        expect(shuffled_versions.sort.map(&:to_s)).to eq(versions_list)
       end
     end
   end

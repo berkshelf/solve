@@ -11,8 +11,7 @@ describe Solve::Solver do
 
       it "adds a demand for each element in the array" do
         obj = subject.new(graph, demand_array)
-
-        obj.demands.should have(2).items
+        expect(obj.demands.size).to eq(2)
       end
 
       context "when demand_array is an array of array" do
@@ -21,10 +20,10 @@ describe Solve::Solver do
         it "creates a new demand with the name and constraint of each element in the array" do
           obj = subject.new(graph, demand_array)
 
-          obj.demands[0].name.should eql("nginx")
-          obj.demands[0].constraint.to_s.should eql("= 1.2.3")
-          obj.demands[1].name.should eql("ntp")
-          obj.demands[1].constraint.to_s.should eql("= 1.0.0")
+          expect(obj.demands[0].name).to eq("nginx")
+          expect(obj.demands[0].constraint.to_s).to eq("= 1.2.3")
+          expect(obj.demands[1].name).to eq("ntp")
+          expect(obj.demands[1].constraint.to_s).to eq("= 1.0.0")
         end
       end
 
@@ -34,10 +33,10 @@ describe Solve::Solver do
         it "creates a new demand with the name and a default constraint of each element in the array" do
           obj = subject.new(graph, demand_array)
 
-          obj.demands[0].name.should eql("nginx")
-          obj.demands[0].constraint.to_s.should eql(">= 0.0.0")
-          obj.demands[1].name.should eql("ntp")
-          obj.demands[1].constraint.to_s.should eql(">= 0.0.0")
+          expect(obj.demands[0].name).to eq("nginx")
+          expect(obj.demands[0].constraint.to_s).to eq(">= 0.0.0")
+          expect(obj.demands[1].name).to eq("ntp")
+          expect(obj.demands[1].constraint.to_s).to eq(">= 0.0.0")
         end
       end
 
@@ -47,10 +46,10 @@ describe Solve::Solver do
         it "creates a new demand with the name and default constraint or constraint of each element in the array" do
           obj = subject.new(graph, demand_array)
 
-          obj.demands[0].name.should eql("nginx")
-          obj.demands[0].constraint.to_s.should eql("= 1.2.3")
-          obj.demands[1].name.should eql("ntp")
-          obj.demands[1].constraint.to_s.should eql(">= 0.0.0")
+          expect(obj.demands[0].name).to eq("nginx")
+          expect(obj.demands[0].constraint.to_s).to eq("= 1.2.3")
+          expect(obj.demands[1].name).to eq("ntp")
+          expect(obj.demands[1].constraint.to_s).to eq(">= 0.0.0")
         end
       end
     end
@@ -59,7 +58,7 @@ describe Solve::Solver do
       let(:demand) { Solve::Demand.new(double('solver'), "nginx", "= 1.2.3") }
 
       it "returns a symbol containing the name and constraint of the demand" do
-        subject.demand_key(demand).should eql(:'nginx-= 1.2.3')
+        expect(subject.demand_key(demand)).to eq(:'nginx-= 1.2.3')
       end
     end
 
@@ -90,9 +89,9 @@ describe Solve::Solver do
       it "returns all of the versions which satisfy all of the given constraints" do
         solution = subject.satisfy_all(constraints, versions)
 
-        solution.should have(2).items
-        solution.should include(ver_one)
-        solution.should include(ver_two)
+        expect(solution.size).to eq(2)
+        expect(solution).to include(ver_one)
+        expect(solution).to include(ver_two)
       end
 
       context "given multiple duplicate versions" do
@@ -106,8 +105,7 @@ describe Solve::Solver do
 
         it "does not return duplicate satisfied versions" do
           solution = subject.satisfy_all(constraints, versions)
-
-          solution.should have(1).item
+          expect(solution.size).to eq(1)
         end
       end
     end
@@ -127,7 +125,8 @@ describe Solve::Solver do
       end
 
       it "returns the best possible match for the given constraints" do
-        subject.satisfy_best([">= 1.0.0", "< 4.1.0"], versions).to_s.should eql("3.1.2")
+        result = subject.satisfy_best([">= 1.0.0", "< 4.1.0"], versions)
+        expect(result.to_s).to eq("3.1.2")
       end
 
       context "given no version matches a constraint" do
@@ -138,9 +137,9 @@ describe Solve::Solver do
         end
 
         it "raises a NoSolutionError error" do
-          lambda {
+          expect {
             subject.satisfy_best(">= 5.0.0", versions)
-          }.should raise_error(Solve::Errors::NoSolutionError)
+          }.to raise_error(Solve::Errors::NoSolutionError)
         end
       end
     end
@@ -150,16 +149,16 @@ describe Solve::Solver do
 
   describe "#resolve" do
     let(:graph) { Solve::Graph.new }
-
     subject { Solve::Solver.new(graph) }
 
-    before(:each) do
-      graph.artifacts("nginx", "1.0.0")
+    before do
+      Solve.stub(:tracer).and_return(Solve::Tracers::Silent.new)
+      graph.artifact("nginx", "1.0.0")
       subject.demands("nginx", "= 1.0.0")
     end
 
     it "returns a solution in the form of a Hash" do
-      subject.resolve.should be_a(Hash)
+      expect(subject.resolve).to be_a(Hash)
     end
   end
 
@@ -170,76 +169,75 @@ describe Solve::Solver do
 
       context "given the artifact of the given name and constraint does not exist" do
         it "returns a Solve::Demand" do
-          subject.demands(name, constraint).should be_a(Solve::Demand)
+          expect(subject.demands(name, constraint)).to be_a(Solve::Demand)
         end
 
         it "the artifact has the given name" do
-          subject.demands(name, constraint).name.should eql(name)
+          expect(subject.demands(name, constraint).name).to eq(name)
         end
 
         it "the artifact has the given constraint" do
-          subject.demands(name, constraint).constraint.to_s.should eql(constraint)
+          expect(subject.demands(name, constraint).constraint.to_s).to eq(constraint)
         end
 
         it "adds an artifact to the demands collection" do
           subject.demands(name, constraint)
 
-          subject.demands.should have(1).item
+          expect(subject.demands).to have(1).item
         end
 
         it "the artifact added matches the given name" do
           subject.demands(name, constraint)
 
-          subject.demands[0].name.should eql(name)
+          expect(subject.demands[0].name).to eq(name)
         end
 
         it "the artifact added matches the given constraint" do
           subject.demands(name, constraint)
 
-          subject.demands[0].constraint.to_s.should eql(constraint)
+          expect(subject.demands[0].constraint.to_s).to eq(constraint)
         end
       end
     end
 
     context "given only a name argument" do
       it "returns a demand with a match all version constraint (>= 0.0.0)" do
-        subject.demands("nginx").constraint.to_s.should eql(">= 0.0.0")
+        expect(subject.demands("nginx").constraint.to_s).to eq(">= 0.0.0")
       end
     end
 
     context "given no arguments" do
       it "returns an array" do
-        subject.demands.should be_a(Array)
+        expect(subject.demands).to be_a(Array)
       end
 
       it "returns an empty array if no demands have been accessed" do
-        subject.demands.should have(0).items
+        expect(subject.demands).to have(0).items
       end
 
       it "returns an array containing a demand if one was accessed" do
         subject.demands("nginx", "~> 0.101.5")
-
-        subject.demands.should have(1).item
+        expect(subject.demands).to have(1).item
       end
     end
 
     context "given an unexpected number of arguments" do
       it "raises an ArgumentError if more than two are provided" do
-        lambda {
+        expect {
           subject.demands(1, 2, 3)
-        }.should raise_error(ArgumentError, "Unexpected number of arguments. You gave: 3. Expected: 2 or less.")
+        }.to raise_error(ArgumentError, "Unexpected number of arguments. You gave: 3. Expected: 2 or less.")
       end
 
       it "raises an ArgumentError if a name argument of nil is provided" do
-        lambda {
+        expect {
           subject.demands(nil)
-        }.should raise_error(ArgumentError, "A name must be specified. You gave: [nil].")
+        }.to raise_error(ArgumentError, "A name must be specified. You gave: [nil].")
       end
 
       it "raises an ArgumentError if a name and constraint argument are provided but name is nil" do
-        lambda {
+        expect {
           subject.demands(nil, "= 1.0.0")
-        }.should raise_error(ArgumentError, 'A name must be specified. You gave: [nil, "= 1.0.0"].')
+        }.to raise_error(ArgumentError, 'A name must be specified. You gave: [nil, "= 1.0.0"].')
       end
     end
   end
@@ -250,17 +248,15 @@ describe Solve::Solver do
     it "adds a Solve::Artifact to the collection of artifacts" do
       subject.add_demand(demand)
 
-      subject.should have_demand(demand)
-      subject.demands.should have(1).item
+      expect(subject).to have_demand(demand)
+      expect(subject.demands.size).to eq(1)
     end
 
-    it "should not add the same demand twice to the collection" do
+    it "does not add the same demand twice to the collection" do
       subject.add_demand(demand)
       subject.add_demand(demand)
 
-      subject.demands.should have(1).item
-    end
-  end
+      expect(subject.demands.size).to eq(1)
     end
   end
 
@@ -269,12 +265,11 @@ describe Solve::Solver do
 
     it "returns true if the given Solve::Artifact is a member of the collection" do
       subject.add_demand(demand)
-
-      subject.has_demand?(demand).should be_true
+      expect(subject).to have_demand(demand)
     end
 
     it "returns false if the given Solve::Artifact is not a member of the collection" do
-      subject.has_demand?(demand).should be_false
+      expect(subject).to_not have_demand(demand)
     end
   end
 end
