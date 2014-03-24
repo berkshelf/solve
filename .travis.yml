@@ -1,8 +1,13 @@
-script: "bundle exec thor spec"
-language: ruby
-bundler_args: --without development
 rvm:
-  - 1.9.2
   - 1.9.3
   - 2.0.0
+  - 2.1
   - jruby-19mode
+
+bundler_args: --without development --jobs 7
+
+script: bundle exec thor spec
+
+branches:
+  only:
+    - master
