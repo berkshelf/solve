@@ -186,15 +186,15 @@ module Solve
     # Returns true or false if the given version would be satisfied by
     # the version constraint.
     #
-    # @param [#to_s] target_version
+    # @param [Version, #to_s] target
     #
     # @return [Boolean]
-    def satisfies?(target_version)
-      target_version = Version.coerce(target_version)
+    def satisfies?(target)
+      target = Version.coerce(target)
 
-      return false if !version.zero? && greedy_match?(target_version)
+      return false if !version.zero? && greedy_match?(target)
 
-      compare(target_version)
+      compare(target)
     end
 
     # dep-selector uses include? to determine if a version matches the
