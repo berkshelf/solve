@@ -150,34 +150,28 @@ module Solve
     attr_reader :pre_release
     attr_reader :build
 
-    # @param [#to_s] constraint (">= 0.0.0")
-    def initialize(constraint = nil)
-      if constraint.nil? || constraint.empty?
-        constraint = ">= 0.0.0"
-      end
+    # Return the Solve::Version representation of the major, minor, and patch
+    # attributes of this instance
+    #
+    # @return [Solve::Version]
+    attr_reader :version
 
+    # @param [#to_s] constraint
+    def initialize(constraint = '>= 0.0.0')
       @operator, @major, @minor, @patch, @pre_release, @build = self.class.split(constraint)
 
       unless operator_type == :approx
         @minor ||= 0
         @patch ||= 0
       end
-    end
 
-    # Return the Solve::Version representation of the major, minor, and patch
-    # attributes of this instance
-    #
-    # @return [Solve::Version]
-    def version
-      @version ||= Version.new(
-        [
-          self.major,
-          self.minor,
-          self.patch,
-          self.pre_release,
-          self.build
-        ]
-      )
+      @version = Version.new([
+        self.major,
+        self.minor,
+        self.patch,
+        self.pre_release,
+        self.build,
+      ])
     end
 
     # @return [Symbol]
