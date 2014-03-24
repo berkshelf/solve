@@ -38,6 +38,8 @@ module Solve
         @artifact = nil
         result
       end
+    def to_s
+      "#{name} (#{constraint})"
     end
 
     # @param [Object] other
