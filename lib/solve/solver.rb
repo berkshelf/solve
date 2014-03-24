@@ -26,16 +26,18 @@ module Solve
       #
       # @return [Array<Solve::Version>]
       def satisfy_all(constraints, versions)
-        constraints = Array(constraints).collect do |con|
-          con.is_a?(Constraint) ? con : Constraint.new(con.to_s)
-        end.uniq
+        constraints = Array(constraints).inject({}) do |hash, constraint|
+          hash[Constraint.coerce(constraint)] ||= true
+          hash
+        end.keys
 
-        versions = Array(versions).collect do |ver|
-          ver.is_a?(Version) ? ver : Version.new(ver.to_s)
-        end.uniq
+        versions = Array(versions).inject({}) do |hash, version|
+          hash[Version.coerce(version)] ||= true
+          hash
+        end.keys
 
-        versions.select do |ver|
-          constraints.all? { |constraint| constraint.satisfies?(ver) }
+        versions.select do |version|
+          constraints.all? { |constraint| constraint.satisfies?(version) }
         end
       end
 
