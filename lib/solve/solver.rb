@@ -105,7 +105,7 @@ module Solve
         Solve.tracer.searching_for(unbound_variable, constraints, possible_values)
 
         while possible_value = possible_values_for_unbound.shift
-          possible_artifact = graph.get_artifact(unbound_variable.artifact, possible_value.version)
+          possible_artifact = graph.artifact(unbound_variable.artifact, possible_value.version)
           possible_dependencies = possible_artifact.dependencies
           all_ok = possible_dependencies.all? { |dependency| can_add_new_constraint?(dependency) }
           if all_ok
@@ -140,7 +140,7 @@ module Solve
       unsorted_solution = build_unsorted_solution
       nodes = Hash.new
       unsorted_solution.each do |name, version|
-        nodes[name] = @graph.get_artifact(name, version).dependencies.map(&:name)
+        nodes[name] = @graph.artifact(name, version).dependencies.map(&:name)
       end
 
       # Modified from http://ruby-doc.org/stdlib-1.9.3/libdoc/tsort/rdoc/TSort.html
