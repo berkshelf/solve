@@ -1,6 +1,15 @@
 module Solve
   class Constraint
     class << self
+      # Coerce the object into a constraint.
+      #
+      # @param [Constraint, String]
+      #
+      # @return [Constraint]
+      def coerce(object)
+        object.is_a?(self) ? object : new(object)
+      end
+
       # Split a constraint string into an Array of two elements. The first
       # element being the operator and second being the version string.
       #
