@@ -6,11 +6,6 @@ module Solve
     def initialize
       @artifacts = {}
       @artifacts_by_name = Hash.new { |hash, key| hash[key] = [] }
-
-      # Instead of creating new constraint objects for "common" constraints,
-      # like ">= 0.0.0", it is more perfomant to cache them. This hash key is
-      # the String constraint, and the value is a {Solve::Constraint} object.
-      @constraints = Hash.new { |hash, key| hash[key] = Constraint.new(key) }
     end
 
     # Check if an artifact with a matching name and version is a member of this instance
@@ -60,7 +55,7 @@ module Solve
     #
     # @return [Array<Solve::Artifact>]
     def versions(name, constraint = DEFAULT_CONSTRAINT)
-      constraint = constraint.is_a?(Constraint) ? constraint : @constraints[constraint]
+      constraint = Constraint.coerce(constraint)
 
       if constraint == DEFAULT_CONSTRAINT
         @artifacts_by_name[name]
