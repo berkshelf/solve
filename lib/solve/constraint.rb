@@ -7,7 +7,11 @@ module Solve
       #
       # @return [Constraint]
       def coerce(object)
-        object.is_a?(self) ? object : new(object)
+        if object.nil?
+          DEFAULT_CONSTRAINT
+        else
+          object.is_a?(self) ? object : new(object)
+        end
       end
 
       # Split a constraint string into an Array of two elements. The first
@@ -157,7 +161,8 @@ module Solve
     attr_reader :version
 
     # @param [#to_s] constraint
-    def initialize(constraint = '>= 0.0.0')
+    def initialize(constraint = nil)
+      constraint ||= '>= 0.0.0'
       @operator, @major, @minor, @patch, @pre_release, @build = self.class.split(constraint)
 
       unless operator_type == :approx

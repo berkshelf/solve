@@ -55,7 +55,7 @@ module Solve
     #
     # @return [Array<Solve::Artifact>]
     def versions(name, constraint = nil)
-      constraint = constraint ? Constraint.coerce(constraint) : DEFAULT_CONSTRAINT
+      constraint = Constraint.coerce(constraint)
 
       if constraint == DEFAULT_CONSTRAINT
         @artifacts_by_name[name]
