@@ -162,7 +162,10 @@ module Solve
 
     # @param [#to_s] constraint
     def initialize(constraint = nil)
-      constraint ||= '>= 0.0.0'
+      if constraint.nil? || constraint.empty?
+        constraint = '>= 0.0.0'
+      end
+
       @operator, @major, @minor, @patch, @pre_release, @build = self.class.split(constraint)
 
       unless operator_type == :approx
