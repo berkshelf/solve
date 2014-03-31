@@ -196,11 +196,18 @@ describe "Solutions" do
 
     result = Solve.it!(graph, demands)
 
+    # ruby solver result:
+    #
+    # "get-the-old-one" => "1.0.0",
+    # "locked-mid-1" => "2.0.0",
+    # "locked-mid-2" => "1.0.0",
+    # "old-bottom" => "2.0.0"
+
     result.should eql({
       "get-the-old-one" => "1.0.0",
-      "locked-mid-1" => "2.0.0",
-      "locked-mid-2" => "1.0.0",
-      "old-bottom" => "2.0.0"
+      "locked-mid-1" => "1.0.0",
+      "locked-mid-2" => "2.0.0",
+      "old-bottom" => "2.1.0"
     })
   end
 

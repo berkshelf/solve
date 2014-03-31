@@ -8,7 +8,6 @@ Gem::Specification.new do |s|
   s.summary               = %q{A Ruby version constraint solver implementing Semantic Versioning 2.0.0-rc.1}
   s.homepage              = "https://github.com/berkshelf/solve"
   s.license               = "Apache 2.0"
-
   s.files                 = `git ls-files`.split($\)
   s.executables           = s.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
   s.test_files            = s.files.grep(%r{^spec/})
@@ -16,4 +15,5 @@ Gem::Specification.new do |s|
   s.require_paths         = ["lib"]
   s.version               = Solve::VERSION
   s.required_ruby_version = ">= 1.9.1"
+  s.add_runtime_dependency "dep_selector", "~> 0.1.0"
 end

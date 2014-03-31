@@ -2,6 +2,8 @@ source 'https://rubygems.org'
 
 gemspec
 
+gem "dep_selector", :git => "git@github.com:opscode/dep-selector.git", :branch => "danfixes"
+
 group :development do
   gem 'fuubar'
   gem 'yard'
