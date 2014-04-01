@@ -114,6 +114,36 @@ describe "Solutions" do
                       "D" => "1.0.0")
   end
 
+  it "solves when packages and constraints have prerelease elements" do
+    graph = Solve::Graph.new
+
+    graph.artifacts("A", "1.0.0").depends("B", ">= 1.0.0-alpha")
+    graph.artifacts("B", "1.0.0-alpha").depends("C", "1.0.0")
+    graph.artifacts("C", "1.0.0")
+
+    result = Solve.it!(graph, [["A", "1.0.0"]])
+
+    result.should eql("A" => "1.0.0",
+                      "B" => "1.0.0-alpha",
+                      "C" => "1.0.0")
+
+  end
+
+  it "solves when packages and constraints have build elements" do
+    graph = Solve::Graph.new
+
+    graph.artifacts("A", "1.0.0").depends("B", ">= 1.0.0+build")
+    graph.artifacts("B", "1.0.0+build").depends("C", "1.0.0")
+    graph.artifacts("C", "1.0.0")
+
+    result = Solve.it!(graph, [["A", "1.0.0"]])
+
+    result.should eql("A" => "1.0.0",
+                      "B" => "1.0.0+build",
+                      "C" => "1.0.0")
+
+  end
+
   it "fails with a self dependency" do
     graph = Solve::Graph.new
 

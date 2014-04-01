@@ -3,11 +3,6 @@ require 'dep_selector'
 module Solve
   class GecodeSolver
 
-    class Error < StandardError
-    end
-
-    DEFAULT_CONSTRAINT = ">= 0.0.0".freeze
-
     # The Solve::Graph object for this problem
     attr_reader :solve_graph
 
@@ -49,8 +44,7 @@ module Solve
     def gecode_demands
       @gecode_demands ||= demands.map do |demands_item|
         item_name, constraint_with_operator = demands_item
-        constraint_with_operator ||= DEFAULT_CONSTRAINT
-        version_constraint = DepSelector::VersionConstraint.new(constraint_with_operator.to_s)
+        version_constraint = Constraint.new(constraint_with_operator)
         DepSelector::SolutionConstraint.new(graph.package(item_name), version_constraint)
       end
     end
@@ -79,10 +73,10 @@ module Solve
         version = artifact.version
         constraints = artifact.dependencies
 
-        package_version = graph.package(name).add_version(DepSelector::Version.new(version))
+        package_version = graph.package(name).add_version(Version.new(version))
         constraints.each do |dependency|
           dep_constraint_str = dependency.constraint.to_s
-          version_constraint = DepSelector::VersionConstraint.new(dep_constraint_str)
+          version_constraint = Constraint.new(dep_constraint_str)
           dependency = DepSelector::Dependency.new(graph.package(dependency.name), version_constraint)
           package_version.dependencies << dependency
         end

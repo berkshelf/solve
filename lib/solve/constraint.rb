@@ -194,6 +194,9 @@ module Solve
       compare(target_version)
     end
 
+    # dep-selector uses include?
+    alias :include? :satisfies?
+
     # @param [Object] other
     #
     # @return [Boolean]

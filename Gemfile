@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 
 gemspec
 
-gem "dep_selector", :git => "git@github.com:opscode/dep-selector.git", :branch => "danfixes"
+gem "dep_selector", :github => "opscode/dep-selector", :branch => "solve-integration"
 
 group :development do
   gem 'fuubar'
