@@ -1,93 +1,84 @@
+require 'set'
+require 'tsort'
+
 module Solve
   class Graph
-    #
-    #
-    #
+    include TSort
+
     def initialize
-      @artifacts = {}
-      @artifacts_by_name = Hash.new { |hash, key| hash[key] = [] }
+      @nodes = {}
     end
 
-    # Check if an artifact with a matching name and version is a member of this instance
-    # of graph
-    #
-    # @param [String] name
-    # @param [Solve::Version, #to_s] version
-    #
-    # @return [Boolean]
-    def artifact?(name, version)
-      !find(name, version).nil?
-    end
-    alias_method :has_artifact?, :artifact?
-
-    #
-    #
-    #
-    def find(name, version)
-      @artifacts["#{name}-#{version}"]
+    def node(object)
+      @nodes[object] ||= Set.new
+      self
     end
 
-    # Add an artifact to the graph
+    def nodes
+      @nodes.keys
+    end
+
+    def each_node(&block)
+      nodes.each(&block)
+    end
+    alias_method :tsort_each_node, :each_node
+
+    def edge(a, b)
+      node(a)
+      node(b)
+
+      @nodes[a].add(b)
+    end
+
+    def adjacencies(object)
+      @nodes[object] || Set.new
+    end
+
+    def each_adjacency(object, &block)
+      adjacencies(object).each(&block)
+    end
+    alias_method :tsort_each_child, :each_adjacency
+
+    def remove(object)
+      if node = @nodes.delete(object)
+        node.clear # Poor man's GC
+      end
+    end
+
     #
-    # @param [String] name
-    # @Param [String] version
-    def artifact(name, version)
-      unless artifact?(name, version)
-        artifact = Artifact.new(self, name, version)
-        @artifacts["#{name}-#{version}"] = artifact
-        @artifacts_by_name[name] << artifact
+    # Convert the current graph to a DOT. This is an intermediate step in
+    # generating a PNG.
+    #
+    # @return [String]
+    #
+    def to_dot
+      out = %|digraph Solve__Graph {\n|
+
+      nodes.each do |node|
+        out << %|  "#{node}" [ fontsize = 8, label = "#{node}" ]\n|
       end
 
-      @artifacts["#{name}-#{version}"]
-    end
-
-    # Return the collection of artifacts
-    #
-    # @return [Array<Solve::Artifact>]
-    def artifacts
-      @artifacts.values
-    end
-
-    # Return all the artifacts from the collection of artifacts
-    # with the given name.
-    #
-    # @param [String] name
-    #
-    # @return [Array<Solve::Artifact>]
-    def versions(name, constraint = DEFAULT_CONSTRAINT)
-      constraint = Constraint.coerce(constraint)
-
-      if constraint == DEFAULT_CONSTRAINT
-        @artifacts_by_name[name]
-      else
-        @artifacts_by_name[name].select do |artifact|
-          constraint.satisfies?(artifact.version)
+      nodes.each do |node|
+        adjacencies(node).each do |edge|
+          out << %|  "#{node}" -> "#{edge}" [ fontsize = 8 ]\n|
         end
       end
+
+      out << %|}|
+      out
     end
 
-    # @param [Object] other
     #
-    # @return [Boolean]
-    def ==(other)
-      return false unless other.is_a?(Graph)
-      return false unless artifacts.size == other.artifacts.size
+    # Save the graph visually as a PNG.
+    #
+    def to_png
+      contents = to_dot
 
-      self_artifacts = self.artifacts
-      other_artifacts = other.artifacts
+      File.open('graph.dot', 'w') do |f|
+        f.write(to_dot)
+      end
 
-      self_dependencies = self_artifacts.inject([]) do |list, artifact|
-        list << artifact.dependencies
-      end.flatten
-
-      other_dependencies = other_artifacts.inject([]) do |list, artifact|
-        list << artifact.dependencies
-      end.flatten
-
-      self_dependencies.size == other_dependencies.size &&
-      self_artifacts.all? { |artifact| other_artifacts.include?(artifact) } &&
-      self_dependencies.all? { |dependency| other_dependencies.include?(dependency) }
+      system('dot -T png graph.dot -o graph.png')
     end
-    alias_method :eql?, :==
   end
 end

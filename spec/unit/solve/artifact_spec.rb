@@ -1,22 +1,14 @@
 require 'spec_helper'
 
 describe Solve::Artifact do
-  let(:graph) do
-    package = double('package')
-    package_version = double('package_version')
-    package_version.stub(:dependencies).and_return([])
-    package.stub(:add_version).and_return(package_version)
-    double('graph', dep_graph: double('dep_graph', package: package))
-  end
-
   let(:name) { "league" }
   let(:version) { "1.0.0" }
-  subject { Solve::Artifact.new(graph, name, version) }
+  subject { Solve::Artifact.new(name, version) }
 
   describe "equality" do
     context "given an artifact with the same name and version" do
-      let(:one) { Solve::Artifact.new(graph, "riot", "1.0.0") }
-      let(:two) { Solve::Artifact.new(graph, "riot", "1.0.0") }
+      let(:one) { Solve::Artifact.new("riot", "1.0.0") }
+      let(:two) { Solve::Artifact.new("riot", "1.0.0") }
 
       it "is equal" do
         expect(one).to eq(two)
@@ -24,8 +16,8 @@ describe Solve::Artifact do
     end
 
     context "given an artifact with the same name but different version" do
-      let(:one) { Solve::Artifact.new(graph, "riot", "1.0.0") }
-      let(:two) { Solve::Artifact.new(graph, "riot", "2.0.0") }
+      let(:one) { Solve::Artifact.new("riot", "1.0.0") }
+      let(:two) { Solve::Artifact.new("riot", "2.0.0") }
 
       it "is not equal" do
         expect(one).to_not eq(two)
@@ -33,8 +25,8 @@ describe Solve::Artifact do
     end
 
     context "given an artifact with the same version but different name" do
-      let(:one) { Solve::Artifact.new(graph, "riot", "1.0.0") }
-      let(:two) { Solve::Artifact.new(graph, "league", "1.0.0") }
+      let(:one) { Solve::Artifact.new("riot", "1.0.0") }
+      let(:two) { Solve::Artifact.new("league", "1.0.0") }
 
       it "is not equal" do
         expect(one).to_not eq(two)
@@ -43,9 +35,9 @@ describe Solve::Artifact do
   end
 
   describe "sorting" do
-    let(:one) { Solve::Artifact.new(graph, "riot", "1.0.0") }
-    let(:two) { Solve::Artifact.new(graph, "riot", "2.0.0") }
-    let(:three) { Solve::Artifact.new(graph, "riot", "3.0.0") }
+    let(:one) { Solve::Artifact.new("riot", "1.0.0") }
+    let(:two) { Solve::Artifact.new("riot", "2.0.0") }
+    let(:three) { Solve::Artifact.new("riot", "3.0.0") }
 
     let(:artifacts) do
       [

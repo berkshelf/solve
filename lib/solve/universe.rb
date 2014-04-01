@@ -33,7 +33,7 @@ module Solve
     # @Param [String] version
     def artifact(name, version)
       unless artifact?(name, version)
-        artifact = Artifact.new(self, name, version)
+        artifact = Artifact.new(name, version)
         @artifacts["#{name}-#{version}"] = artifact
         @artifacts_by_name[name] << artifact
       end

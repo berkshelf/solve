@@ -2,11 +2,6 @@ module Solve
   class Artifact
     include Comparable
 
-    # A reference to the graph this artifact belongs to
-    #
-    # @return [Solve::Graph]
-    attr_reader :graph
-
     # The name of the artifact
     #
     # @return [String]
@@ -20,8 +15,7 @@ module Solve
     # @param [Solve::Graph] graph
     # @param [#to_s] name
     # @param [Solve::Version, #to_s] version
-    def initialize(graph, name, version)
-      @graph        = graph
+    def initialize(name, version)
       @name         = name
       @version      = Version.new(version)
       @dependencies = {}
@@ -84,6 +78,10 @@ module Solve
 
     def to_s
       "#{name}-#{version}"
+    end
+
+    def inspect
+      "#<#{self.class.name} #{name}-#{version}>"
     end
 
     # @param [Object] other
