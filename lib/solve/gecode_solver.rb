@@ -27,6 +27,25 @@ module Solve
       @graph ||= DepSelector::DependencyGraph.new
     end
 
+    # Dumps problem to ruby data structures so it can be used in benchmarks
+    def dump_problem
+      require 'pp'
+      puts "DEMANDS = "
+      pp demands.map {|d| d.map {|item| item.to_s} }
+
+      puts "ARTIFACTS = "
+
+      artifacts_by_name =
+        solve_graph.artifacts.inject({}) do |by_name, artifact|
+          by_name[artifact.name] ||= []
+          artifact_info = {:name => artifact.name, :version => artifact.version.to_s}
+          artifact_info[:dependencies] = artifact.dependencies.map {|d| [d.name, d.constraint.to_s ] }
+          by_name[artifact.name] << artifact_info
+          by_name
+        end
+      pp artifacts_by_name
+    end
+
     def gecode_demands
       @gecode_demands ||= demands.map do |demands_item|
         item_name, constraint_with_operator = demands_item
