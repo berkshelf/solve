@@ -4,18 +4,34 @@ require 'set'
 module Solve
   class GecodeSolver
 
+    # Graph object with references to all known artifacts and dependency
+    # constraints.
+    #
+    # @return [Solve::Graph]
     attr_reader :graph
+
+    # @example Demands are Arrays of Arrays with an artifact name and optional constraint:
+    #   [['nginx', '= 1.0.0'], ['mysql']]
+    # @return [Array<String>, Array<Array<String, String>>] demands
     attr_reader :demands
 
     # DepSelector::DependencyGraph object representing the problem.
     attr_reader :ds_graph
+    private :ds_graph
 
     # Timeout in milliseconds. Hardcoded to 1s for now.
     attr_reader :timeout_ms
-
-    private :ds_graph
     private :timeout_ms
 
+
+    # @example
+    #   graph = Solve::Graph.new
+    #   graph.artifacts("mysql", "1.2.0")
+    #   demands = [["mysql"]]
+    #   GecodeSolver.new(graph, demands)
+    # @param [Solve::Graph] graph
+    # @param [Array<String>, Array<Array<String, String>>] demands
+    # @param [#say] ui
     def initialize(graph, demands, ui=nil)
       @ds_graph = DepSelector::DependencyGraph.new
       @graph = graph
@@ -23,6 +39,16 @@ module Solve
       @timeout_ms = 1_000
     end
 
+    # @option options [Boolean] :sorted
+    #   return the solution as a sorted list instead of a Hash
+    #
+    # @return [Hash, List] Returns a hash like { "Artifact Name" => "Version",... }
+    #   unless the :sorted option is true, then it returns a list like [["Artifact Name", "Version],...]
+    # @raise [Errors::NoSolutionError] when the demands cannot be met for the
+    #   given graph.
+    # @raise [Errors::UnsortableSolutionError] when the :sorted option is true
+    #   and the demands have a solution, but the solution contains a cyclic
+    #   dependency
     def resolve(options={})
       solution = solve_demands(demands_as_constraints)
 
@@ -38,7 +64,19 @@ module Solve
       end
     end
 
-    def debug_demands
+    # TODO: decide whether this accesses the UI directly or if it instead
+    # returns an object describing which demands are satisfiable and which
+    # aren't.
+    #
+    # Builds up the list of demands one by one and attempts to solve them in
+    # order to find demands that are causing conflicts. The strategy is flawed
+    # in that it would pick different demands as unsatisfiable based on the
+    # order in which the demands are given, but it gives some information that
+    # is actionable to the user ("dependencies in artifact "X" are conflicting
+    # with some other package(s)"). In cases where dep-selector is unable to
+    # determine the exact cause of dependency conflicts, this is a lot better
+    # than nothing.
+    def find_unsatisfiable_demands
       puts "debugging invalid solution, hang on..."
 
       bad_demands_indices = []
@@ -66,6 +104,28 @@ module Solve
 
     private
 
+      # Runs the solver with the set of demands given. If any DepSelector
+      # exceptions are raised, they are rescued and re-raised 
+      def solve_demands(demands_as_constraints)
+        selector = DepSelector::Selector.new(ds_graph, (timeout_ms / 1000.0))
+        selector.find_solution(demands_as_constraints, all_artifacts)
+      rescue DepSelector::Exceptions::InvalidSolutionConstraints => e
+        report_invalid_constraints_error(e)
+      rescue DepSelector::Exceptions::NoSolutionExists => e
+        report_no_solution_error(e)
+      rescue DepSelector::Exceptions::TimeBoundExceeded
+        # DepSelector timed out trying to find the solution. There may or may
+        # not be a solution.
+        raise Solve::Errors::NoSolutionError.new(
+          "The dependency constraints could not be solved in the time allotted.")
+      rescue DepSelector::Exceptions::TimeBoundExceededNoSolution
+        # DepSelector determined there wasn't a solution to the problem, then
+        # timed out trying to determine which constraints cause the conflict.
+        raise Solve::Errors::NoSolutionError.new(
+          "There is a dependency conflict, but the solver could not determine the precise cause in the time allotted.")
+      end
+
+      # Maps demands to corresponding DepSelector::SolutionConstraint objects.
       def demands_as_constraints
         @demands_as_constraints ||= demands.map do |demands_item|
           item_name, constraint_with_operator = demands_item
@@ -74,13 +134,17 @@ module Solve
         end
       end
 
+      # Maps all artifacts in the graph to DepSelector::Package objects. If not
+      # already done, artifacts are added to the ds_graph as a necessary side effect.
       def all_artifacts
         return @all_artifacts if @all_artifacts
         populate_ds_graph!
         @all_artifacts
       end
 
-      # TODO :private
+      # Converts artifacts to DepSelector::Package objects and adds them to the
+      # DepSelector graph. This should only be called once; use #all_artifacts
+      # to safely get the set of all artifacts.
       def populate_ds_graph!
         @all_artifacts = Set.new
 
@@ -99,23 +163,6 @@ module Solve
         package_version
       end
 
-
-      def solve_demands(demands_as_constraints)
-        selector = DepSelector::Selector.new(ds_graph, (timeout_ms / 1000.0))
-        selector.find_solution(demands_as_constraints, all_artifacts)
-      rescue DepSelector::Exceptions::InvalidSolutionConstraints => e
-        report_invalid_constraints_error(e)
-      rescue DepSelector::Exceptions::NoSolutionExists => e
-        report_no_solution_error(e)
-      rescue DepSelector::Exceptions::TimeBoundExceeded,
-             DepSelector::Exceptions::TimeBoundExceededNoSolution => e
-        # While dep_selector differentiates between the two solutions, the opscode-chef
-        # API returns the same error regardless of the timeout type. We'll swallow the
-        # difference here and return a unified timeout to erchef
-        raise Solve::Errors::NoSolutionError.new("resolution_timeout: #{e.class} - #{e.message}")
-      end
-
-
       def report_invalid_constraints_error(e)
         non_existent_cookbooks = e.non_existent_packages.inject([]) do |list, constraint|
           list << constraint.package.name
@@ -133,7 +180,6 @@ module Solve
 
       def report_no_solution_error(e)
         most_constrained_cookbooks = e.disabled_most_constrained_packages.inject([]) do |list, package|
-          # WTF: this is the reported error format but I can't find this anywhere in the ruby code
           list << "#{package.name} = #{package.versions.first.to_s}"
         end
 
