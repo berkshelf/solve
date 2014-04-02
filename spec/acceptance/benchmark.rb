@@ -37,11 +37,13 @@ STATIC_GRAPH = create_graph
 
 def solve_gecode
   Solve::GecodeSolver.new(STATIC_GRAPH, demands, {}).resolve({})
+rescue Solve::Errors::NoSolutionError
 end
 
 def solve_ruby
   Solve.instance_variable_set(:@tracer, Solve::Tracers.build(nil))
   Solve::Solver.new(STATIC_GRAPH, demands, {}).resolve({})
+rescue Solve::Errors::NoSolutionError
 end
 
 
