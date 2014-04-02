@@ -64,26 +64,6 @@ module Solve
       viable_demands_to_report.each {|d| puts "  " + d }
     end
 
-
-    # Dumps problem to ruby data structures so it can be used in benchmarks
-    def dump_problem
-      require 'pp'
-      puts "DEMANDS = "
-      pp demands.map {|d| d.map {|item| item.to_s} }
-
-      puts "ARTIFACTS = "
-
-      artifacts_by_name =
-        graph.artifacts.inject({}) do |by_name, artifact|
-          by_name[artifact.name] ||= []
-          artifact_info = {:name => artifact.name, :version => artifact.version.to_s}
-          artifact_info[:dependencies] = artifact.dependencies.map {|d| [d.name, d.constraint.to_s ] }
-          by_name[artifact.name] << artifact_info
-          by_name
-        end
-      pp artifacts_by_name
-    end
-
     private
 
       def demands_as_constraints
