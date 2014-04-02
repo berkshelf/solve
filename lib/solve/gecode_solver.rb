@@ -13,7 +13,7 @@ module Solve
     # @example Demands are Arrays of Arrays with an artifact name and optional constraint:
     #   [['nginx', '= 1.0.0'], ['mysql']]
     # @return [Array<String>, Array<Array<String, String>>] demands
-    attr_reader :demands
+    attr_reader :demands_array
 
     # DepSelector::DependencyGraph object representing the problem.
     attr_reader :ds_graph
@@ -35,8 +35,16 @@ module Solve
     def initialize(graph, demands, ui=nil)
       @ds_graph = DepSelector::DependencyGraph.new
       @graph = graph
-      @demands = demands
+      @demands_array = demands
       @timeout_ms = 1_000
+    end
+
+    # The problem demands given as Demand model objects
+    # @return [Array<Solve::Demand>]
+    def demands
+      demands_array.map do |name, constraint|
+        Demand.new(self, name, constraint)
+      end
     end
 
     # @option options [Boolean] :sorted
@@ -121,13 +129,13 @@ module Solve
       rescue DepSelector::Exceptions::TimeBoundExceededNoSolution
         # DepSelector determined there wasn't a solution to the problem, then
         # timed out trying to determine which constraints cause the conflict.
-        raise Solve::Errors::NoSolutionError.new(
+        raise Solve::Errors::NoSolutionCauseUnknown.new(
           "There is a dependency conflict, but the solver could not determine the precise cause in the time allotted.")
       end
 
       # Maps demands to corresponding DepSelector::SolutionConstraint objects.
       def demands_as_constraints
-        @demands_as_constraints ||= demands.map do |demands_item|
+        @demands_as_constraints ||= demands_array.map do |demands_item|
           item_name, constraint_with_operator = demands_item
           version_constraint = Constraint.new(constraint_with_operator)
           DepSelector::SolutionConstraint.new(ds_graph.package(item_name), version_constraint)
@@ -172,10 +180,11 @@ module Solve
           list << constraint.to_s
         end
 
-        error_detail = [[:non_existent_cookbooks, non_existent_cookbooks],
-                                      [:constraints_not_met, constrained_to_no_versions]]
-
-        raise Solve::Errors::NoSolutionError.new([:invalid_constraints, error_detail].inspect)
+        raise Solve::Errors::NoSolutionError.new(
+          "Required artifacts do not exist at the desired version",
+          missing_artifacts: non_existent_cookbooks,
+          constraints_excluding_all_artifacts: constrained_to_no_versions
+        )
       end
 
       def report_no_solution_error(e)
@@ -187,12 +196,12 @@ module Solve
           list << package.name
         end
 
-        error_detail = [[:message, e.message],
-                                      [:unsatisfiable_demand, e.unsatisfiable_solution_constraint.to_s],
-                                      [:non_existent_cookbooks, non_existent_cookbooks],
-                                      [:most_constrained_cookbooks, most_constrained_cookbooks]]
-
-        raise Solve::Errors::NoSolutionError.new([:no_solution, error_detail].inspect)
+        raise Solve::Errors::NoSolutionError.new(
+          e.message,
+          unsatisfiable_demand: e.unsatisfiable_solution_constraint.to_s,
+          missing_artifacts: non_existent_cookbooks,
+          artifacts_with_no_satisfactory_version: most_constrained_cookbooks
+        )
       end
 
       def build_sorted_solution(unsorted_solution)
