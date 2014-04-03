@@ -63,44 +63,6 @@ module Solve
       end
     end
 
-    # TODO: decide whether this accesses the UI directly or if it instead
-    # returns an object describing which demands are satisfiable and which
-    # aren't.
-    #
-    # Builds up the list of demands one by one and attempts to solve them in
-    # order to find demands that are causing conflicts. The strategy is flawed
-    # in that it would pick different demands as unsatisfiable based on the
-    # order in which the demands are given, but it gives some information that
-    # is actionable to the user ("dependencies in artifact "X" are conflicting
-    # with some other package(s)"). In cases where dep-selector is unable to
-    # determine the exact cause of dependency conflicts, this is a lot better
-    # than nothing.
-    def find_unsatisfiable_demands
-      puts "debugging invalid solution, hang on..."
-
-      bad_demands_indices = []
-      viable_demands = nil
-
-      1.upto(demands.size) do |i|
-        trial_demands = demands_as_constraints[0,i]
-        bad_demands_indices.each {|bad_index| trial_demands.delete_at(bad_index) }
-
-        begin
-
-          solve_demands(trial_demands)
-          viable_demands = trial_demands
-        rescue Solve::Errors::NoSolutionError => e
-          puts "Demand conflicts: #{trial_demands.last} (#{e})"
-          # this has to be reverse sorted or else we'll delete the wrong
-          # demands when interating
-          bad_demands_indices.unshift(i - 1)
-        end
-      end
-      viable_demands_to_report = viable_demands.map {|d| d.to_s }
-      puts "These cookbooks are ok:"
-      viable_demands_to_report.each {|d| puts "  " + d }
-    end
-
     private
 
       # DepSelector::DependencyGraph object representing the problem.
