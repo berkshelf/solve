@@ -280,6 +280,21 @@ describe Solve::Version do
         }.should raise_error(Solve::Errors::InvalidVersionFormat)
       end
     end
+
+    describe "::coerce" do
+
+      it "coerces a String to a Version object" do
+        subject.coerce("1.0.0").should eql(subject.new("1.0.0"))
+      end
+
+      it "returns an object of the desired class without any additional processing" do
+        version = subject.new("1.0.0")
+        # we want object equality here to prove that the exact object was returned
+        subject.coerce(version).should equal(version)
+      end
+
+    end
+
   end
 
   describe "#pre_release?" do

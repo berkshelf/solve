@@ -187,7 +187,7 @@ module Solve
     #
     # @return [Boolean]
     def satisfies?(target_version)
-      target_version = Version.new(target_version.to_s) unless target_version.kind_of?(Version)
+      target_version = Version.coerce(target_version)
 
       return false if !version.zero? && greedy_match?(target_version)
 
