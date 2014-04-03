@@ -34,19 +34,28 @@ module Solve
 
       # Artifacts that don't exist at any version but are required for a valid
       # solution
+      # @return [Array<String>] Missing artifact names
       attr_reader :missing_artifacts
 
       # Constraints that eliminate all versions of an artifact, e.g. you ask
       # for mysql >= 2.0.0 but only 1.0.0 exists.
+      # @return [Array<String>] Invalid constraints as strings
       attr_reader :constraints_excluding_all_artifacts
 
       # A demand that has conflicting dependencies
+      # @return [String] the unsatisfiable demand
       attr_reader :unsatisfiable_demand
 
       # The artifact for which there are conflicting dependencies
+      # @return [Array<String>] The "most constrained" artifacts
       attr_reader :artifacts_with_no_satisfactory_version
 
-      def initialize(message=nil, causes={})
+      # @param [#to_s] message
+      # @option causes [Array<String>] :missing_artifacts ([])
+      # @option causes [Array<String>] :constraints_excluding_all_artifacts ([])
+      # @option causes [#to_s] :unsatisfiable_demand (nil)
+      # @option causes [Array<String>] :artifacts_with_no_satisfactory_version ([])
+      def initialize(message = nil, causes = {})
         super(message)
         @message = message
         @missing_artifacts = causes[:missing_artifacts] || []

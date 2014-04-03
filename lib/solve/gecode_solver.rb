@@ -15,16 +15,7 @@ module Solve
     # @return [Array<String>, Array<Array<String, String>>] demands
     attr_reader :demands_array
 
-    # DepSelector::DependencyGraph object representing the problem.
-    attr_reader :ds_graph
-    private :ds_graph
-
-    # Timeout in milliseconds. Hardcoded to 1s for now.
-    attr_reader :timeout_ms
-    private :timeout_ms
-
-
-    # @example
+    # @example Basic use:
     #   graph = Solve::Graph.new
     #   graph.artifacts("mysql", "1.2.0")
     #   demands = [["mysql"]]
@@ -111,6 +102,12 @@ module Solve
     end
 
     private
+
+      # DepSelector::DependencyGraph object representing the problem.
+      attr_reader :ds_graph
+
+      # Timeout in milliseconds. Hardcoded to 1s for now.
+      attr_reader :timeout_ms
 
       # Runs the solver with the set of demands given. If any DepSelector
       # exceptions are raised, they are rescued and re-raised 

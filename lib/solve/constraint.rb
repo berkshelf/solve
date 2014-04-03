@@ -194,8 +194,9 @@ module Solve
       compare(target_version)
     end
 
-    # dep-selector uses include?
-    alias :include? :satisfies?
+    # dep-selector uses include? to determine if a version matches the
+    # constriant.
+    alias_method :include?, :satisfies?
 
     # @param [Object] other
     #
