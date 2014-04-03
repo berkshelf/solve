@@ -20,6 +20,23 @@ module Solve
           raise Errors::InvalidVersionFormat.new(version_string)
         end
       end
+
+      # Convert the argument to a Version object if it isn't one already.
+      # Creating version objects from Strings involves expensive Regexp
+      # processing, so this improves performance when dealing with objects that
+      # may be instances of Version.
+      # @param version_or_string [Version, #to_s] the object to coerce to a
+      #   Version.
+      # @return [Version] either the version object you gave or a new one if
+      #   you gave a String.
+      def coerce(version_or_string)
+        if version_or_string.kind_of?(self)
+          version_or_string
+        else
+          new(version_or_string.to_s)
+        end
+      end
+
     end
 
     include Comparable

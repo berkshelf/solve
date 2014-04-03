@@ -1,3 +1,7 @@
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install libgecode-dev
+
 script: "bundle exec thor spec"
 language: ruby
 bundler_args: --without development
@@ -5,4 +9,3 @@ rvm:
   - 1.9.2
   - 1.9.3
   - 2.0.0
-  - jruby-19mode
