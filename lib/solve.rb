@@ -9,7 +9,6 @@ module Solve
   require_relative 'solve/solver'
   require_relative 'solve/version'
   require_relative 'solve/tracers'
-  require_relative 'solve/gecode_solver'
 
   class << self
     # @return [Solve::Formatter]
@@ -37,7 +36,7 @@ module Solve
     # @return [Hash]
     def it!(graph, demands, options = {})
       @tracer = options[:tracer] || Solve::Tracers.build(options[:ui])
-      GecodeSolver.new(graph, demands, options[:ui]).resolve(options)
+      Solver.new(graph, demands, options[:ui]).resolve(options)
     end
   end
 end

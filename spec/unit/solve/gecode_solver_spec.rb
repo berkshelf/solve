@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Solve::GecodeSolver do
+describe Solve::Solver do
 
   let(:graph) { double(Solve::Graph) }
   let(:demands) { [["mysql"], ["nginx"]] }

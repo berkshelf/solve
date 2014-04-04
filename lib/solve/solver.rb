@@ -2,7 +2,7 @@ require 'dep_selector'
 require 'set'
 
 module Solve
-  class GecodeSolver
+  class Solver
 
     # Graph object with references to all known artifacts and dependency
     # constraints.
@@ -19,7 +19,7 @@ module Solve
     #   graph = Solve::Graph.new
     #   graph.artifacts("mysql", "1.2.0")
     #   demands = [["mysql"]]
-    #   GecodeSolver.new(graph, demands)
+    #   Solver.new(graph, demands)
     # @param [Solve::Graph] graph
     # @param [Array<String>, Array<Array<String, String>>] demands
     # @param [#say] ui

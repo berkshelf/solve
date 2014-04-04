@@ -36,7 +36,7 @@ end
 STATIC_GRAPH = create_graph
 
 def solve_gecode
-  Solve::GecodeSolver.new(STATIC_GRAPH, demands, {}).resolve({})
+  Solve::Solver.new(STATIC_GRAPH, demands, {}).resolve({})
 rescue Solve::Errors::NoSolutionError
 end
 
