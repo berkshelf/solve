@@ -117,9 +117,11 @@ describe "Solutions" do
   it "solves when packages and constraints have prerelease elements" do
     graph = Solve::Graph.new
 
-    graph.artifacts("A", "1.0.0").depends("B", ">= 1.0.0-alpha")
-    graph.artifacts("B", "1.0.0-alpha").depends("C", "1.0.0")
-    graph.artifacts("C", "1.0.0")
+    graph.artifact("A", "1.0.0")
+      .depends("B", ">= 1.0.0-alpha")
+    graph.artifact("B", "1.0.0-alpha")
+      .depends("C", "1.0.0")
+    graph.artifact("C", "1.0.0")
 
     result = Solve.it!(graph, [["A", "1.0.0"]])
 
@@ -132,9 +134,11 @@ describe "Solutions" do
   it "solves when packages and constraints have build elements" do
     graph = Solve::Graph.new
 
-    graph.artifacts("A", "1.0.0").depends("B", ">= 1.0.0+build")
-    graph.artifacts("B", "1.0.0+build").depends("C", "1.0.0")
-    graph.artifacts("C", "1.0.0")
+    graph.artifact("A", "1.0.0")
+      .depends("B", ">= 1.0.0+build")
+    graph.artifact("B", "1.0.0+build")
+      .depends("C", "1.0.0")
+    graph.artifact("C", "1.0.0")
 
     result = Solve.it!(graph, [["A", "1.0.0"]])
 
