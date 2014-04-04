@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe Solve::Solver do
-
   let(:graph) { double(Solve::Graph) }
   let(:demands) { [["mysql"], ["nginx"]] }
   subject(:solver) { described_class.new(graph, demands) }
@@ -39,11 +38,9 @@ describe Solve::Solver do
     it "gives the solution in sorted form" do
       solver.resolve(sorted: true).should == [["A", "1.0.0"], ["B", "1.0.0"]]
     end
-
   end
 
   describe "when the constraints are not solvable" do
-
     let(:error) do
       begin
         solver.resolve
@@ -66,7 +63,6 @@ describe Solve::Solver do
       it "raises an error detailing the missing artifacts" do
         error.to_s.should include("Missing artifacts: Z")
       end
-
     end
 
     context "and dep-selector identifies constraints that exclude all known versions" do
@@ -82,7 +78,6 @@ describe Solve::Solver do
         error.to_s.should include("Required artifacts do not exist at the desired version")
         error.to_s.should include("Constraints that match no available version: (A > 1.0.0)")
       end
-
     end
 
     context "and dep-selector identifies dependency conflicts" do
@@ -102,11 +97,9 @@ describe Solve::Solver do
         error.to_s.should include("Demand that cannot be met: (A >= 0.0.0)")
         error.to_s.should include("Artifacts for which there are conflicting dependencies: D = 1.0.0 -> []")
       end
-
     end
 
     context "and dep-selector times out looking for a solution" do
-
       let(:selector) { double(DepSelector::Selector) }
 
       before do
@@ -118,11 +111,9 @@ describe Solve::Solver do
       it "raises an error explaining no solution could be found" do
         error.to_s.should include("The dependency constraints could not be solved in the time allotted.")
       end
-
     end
 
     context "and dep-selector times out looking for dependency conflicts" do
-
       let(:selector) { double(DepSelector::Selector) }
 
       before do
@@ -138,19 +129,14 @@ describe Solve::Solver do
       it "raises an error explaining that no solution exists but the cause could not be determined" do
         error.to_s.should include("There is a dependency conflict, but the solver could not determine the precise cause in the time allotted.")
       end
-
     end
-
   end
 
   describe "finding unsatisfiable demands" do
-
     it "partitions demands into satisfiable and not satisfiable"
-
   end
 
   describe "supporting Serializer interface" do
-
     let(:serializer) { Solve::Solver::Serializer.new }
 
     before do
@@ -167,8 +153,6 @@ describe Solve::Solver do
 
       problem_data["demands"].should =~ expected_demands
     end
-
   end
-
 end
 

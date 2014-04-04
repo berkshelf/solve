@@ -3,7 +3,6 @@ require 'set'
 
 module Solve
   class Solver
-
     # Graph object with references to all known artifacts and dependency
     # constraints.
     #
@@ -72,7 +71,7 @@ module Solve
       attr_reader :timeout_ms
 
       # Runs the solver with the set of demands given. If any DepSelector
-      # exceptions are raised, they are rescued and re-raised 
+      # exceptions are raised, they are rescued and re-raised
       def solve_demands(demands_as_constraints)
         selector = DepSelector::Selector.new(ds_graph, (timeout_ms / 1000.0))
         selector.find_solution(demands_as_constraints, all_artifacts)
@@ -187,6 +186,5 @@ module Solve
           [artifact, unsorted_solution[artifact]]
         end
       end
-
   end
 end
