@@ -1,6 +1,15 @@
 module Solve
   class Version
     class << self
+      # Coerce the object into a version.
+      #
+      # @param [Version, String]
+      #
+      # @return [Version]
+      def coerce(object)
+        object.is_a?(self) ? object : new(object)
+      end
+
       # @param [#to_s] version_string
       #
       # @raise [InvalidVersionFormat]

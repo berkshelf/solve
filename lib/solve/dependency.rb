@@ -18,26 +18,14 @@ module Solve
     # @param [Solve::Artifact] artifact
     # @param [#to_s] name
     # @param [Solve::Constraint, #to_s] constraint
-    def initialize(artifact, name, constraint = ">= 0.0.0")
-      @artifact = artifact
-      @name = name
-      @constraint = case constraint
-      when Solve::Constraint
-        constraint
-      else
-        Constraint.new(constraint)
-      end
+    def initialize(artifact, name, constraint = DEFAULT_CONSTRAINT)
+      @artifact   = artifact
+      @name       = name
+      @constraint = Constraint.coerce(constraint)
     end
 
-    # Remove this dependency from the artifact it belongs to
-    #
-    # @return [Solve::Dependency, nil]
-    def delete
-      unless artifact.nil?
-        result = artifact.remove_dependency(self)
-        @artifact = nil
-        result
-      end
+    def to_s
+      "#{name} (#{constraint})"
     end
 
     # @param [Object] other
@@ -45,8 +33,8 @@ module Solve
     # @return [Boolean]
     def ==(other)
       other.is_a?(self.class) &&
-        self.artifact == other.artifact &&
-        self.constraint == other.constraint
+      self.artifact == other.artifact &&
+      self.constraint == other.constraint
     end
     alias_method :eql?, :==
   end

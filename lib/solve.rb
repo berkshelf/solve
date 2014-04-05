@@ -9,6 +9,11 @@ module Solve
   require_relative 'solve/solver'
   require_relative 'solve/version'
 
+  # The default constraint.
+  #
+  # @return [String]
+  DEFAULT_CONSTRAINT = Constraint.new('>= 0.0.0').freeze
+
   class << self
     # @return [Solve::Formatter]
     attr_reader :tracer

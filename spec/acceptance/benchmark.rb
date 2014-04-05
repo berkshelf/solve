@@ -20,11 +20,11 @@ def create_graph
   graph = Solve::Graph.new
   artifacts.each do |name, all_artifact_versions|
     all_artifact_versions.each do |artifact|
-      graph.artifacts(name, artifact[:version])
+      graph.artifact(name, artifact[:version])
       artifact[:dependencies].each do |dep|
         dep_name, dep_constraint = dep
-        graph.artifacts(name, artifact[:version]).
-          depends(dep_name, dep_constraint)
+        graph.artifact(name, artifact[:version])
+          .depends(dep_name, dep_constraint)
       end
     end
   end
@@ -36,9 +36,10 @@ STATIC_GRAPH = create_graph
 
 def solve_gecode
   Solve::Solver.new(STATIC_GRAPH, demands, {}).resolve({})
-rescue Solve::Errors::NoSolutionError; end
+rescue Solve::Errors::NoSolutionError
+end
 
 Benchmark.bm(12) do |x|
-  x.report("create graph")   { N.times { create_graph } }
-  x.report("solve (gecode)") { N.times { solve_gecode } }
+  x.report("Create graph")   { N.times { create_graph } }
+  x.report("Solve Gecode") { N.times { solve_gecode } }
 end
