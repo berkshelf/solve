@@ -3,7 +3,6 @@ module Solve
   require_relative 'solve/constraint'
   require_relative 'solve/demand'
   require_relative 'solve/dependency'
-  require_relative 'solve/gecode_solver'
   require_relative 'solve/gem_version'
   require_relative 'solve/errors'
   require_relative 'solve/graph'
