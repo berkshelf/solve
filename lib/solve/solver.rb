@@ -1,9 +1,5 @@
 require 'dep_selector'
 require 'set'
-require_relative 'solver/variable_table'
-require_relative 'solver/variable_row'
-require_relative 'solver/constraint_table'
-require_relative 'solver/constraint_row'
 require_relative 'solver/serializer'
 
 module Solve
