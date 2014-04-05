@@ -1,8 +1,5 @@
 module Solve
   class Graph
-    #
-    #
-    #
     def initialize
       @artifacts = {}
       @artifacts_by_name = Hash.new { |hash, key| hash[key] = [] }
@@ -20,9 +17,6 @@ module Solve
     end
     alias_method :has_artifact?, :artifact?
 
-    #
-    #
-    #
     def find(name, version)
       @artifacts["#{name}-#{version}"]
     end
