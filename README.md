@@ -1,6 +1,9 @@
 # Solve
-[![Gem Version](https://badge.fury.io/rb/solve.png)](http://badge.fury.io/rb/solve)
-[![Build Status](https://secure.travis-ci.org/berkshelf/solve.png?branch=master)](http://travis-ci.org/berkshelf/solve)
+[![Gem Version](http://img.shields.io/gem/v/solve.svg)][gem]
+[![Build Status](http://img.shields.io/travis/berkshelf/solve.svg)][travis]
+
+[gem]: https://rubygems.org/gems/solve
+[travis]: http://travis-ci.org/berkshelf/solve
 
 A Ruby versioning constraint solver implementing [Semantic Versioning 2.0.0](http://semver.org).
 
