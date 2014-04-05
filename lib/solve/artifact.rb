@@ -46,7 +46,7 @@ module Solve
     #
     # @return [Solve::Artifact, nil]
     def dependency(name, constraint)
-      @dependencies["#{name}-#{constraint}"]
+      @dependencies["#{name}-#{constraint}"] = Dependency.new(self, name, constraint)
     end
 
     # Return the collection of dependencies on this instance of artifact
