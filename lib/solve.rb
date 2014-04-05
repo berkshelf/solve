@@ -8,7 +8,6 @@ module Solve
   require_relative 'solve/errors'
   require_relative 'solve/graph'
   require_relative 'solve/solver'
-  require_relative 'solve/universe'
   require_relative 'solve/version'
 
   # The default constraint.
