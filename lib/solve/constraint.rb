@@ -8,7 +8,7 @@ module Solve
       # @return [Constraint]
       def coerce(object)
         if object.nil?
-          DEFAULT_CONSTRAINT
+          Semverse::DEFAULT_CONSTRAINT
         else
           object.is_a?(self) ? object : new(object)
         end
@@ -63,64 +63,64 @@ module Solve
         [ operator, split_version ].flatten
       end
 
-      # @param [Solve::Constraint] constraint
-      # @param [Solve::Version] target_version
+      # @param [Semverse::Constraint] constraint
+      # @param [Semverse::Version] target_version
       #
       # @return [Boolean]
       def compare_equal(constraint, target_version)
         target_version == constraint.version
       end
 
-      # @param [Solve::Constraint] constraint
-      # @param [Solve::Version] target_version
+      # @param [Semverse::Constraint] constraint
+      # @param [Semverse::Version] target_version
       #
       # @return [Boolean]
       def compare_gt(constraint, target_version)
         target_version > constraint.version
       end
 
-      # @param [Solve::Constraint] constraint
-      # @param [Solve::Version] target_version
+      # @param [Semverse::Constraint] constraint
+      # @param [Semverse::Version] target_version
       #
       # @return [Boolean]
       def compare_lt(constraint, target_version)
         target_version < constraint.version
       end
 
-      # @param [Solve::Constraint] constraint
-      # @param [Solve::Version] target_version
+      # @param [Semverse::Constraint] constraint
+      # @param [Semverse::Version] target_version
       #
       # @return [Boolean]
       def compare_gte(constraint, target_version)
         target_version >= constraint.version
       end
 
-      # @param [Solve::Constraint] constraint
-      # @param [Solve::Version] target_version
+      # @param [Semverse::Constraint] constraint
+      # @param [Semverse::Version] target_version
       #
       # @return [Boolean]
       def compare_lte(constraint, target_version)
         target_version <= constraint.version
       end
 
-      # @param [Solve::Constraint] constraint
-      # @param [Solve::Version] target_version
+      # @param [Semverse::Constraint] constraint
+      # @param [Semverse::Version] target_version
       #
       # @return [Boolean]
       def compare_approx(constraint, target_version)
         min = constraint.version
         max = if constraint.patch.nil?
-          Version.new([min.major + 1, 0, 0, 0])
+          Semverse::Version.new([min.major + 1, 0, 0, 0])
         elsif constraint.build
           identifiers = constraint.version.identifiers(:build)
           replace     = identifiers.last.to_i.to_s == identifiers.last.to_s ? "-" : nil
-          Version.new([min.major, min.minor, min.patch, min.pre_release, identifiers.fill(replace, -1).join('.')])
+          Semverse::Version.new([min.major, min.minor, min.patch, min.pre_release, identifiers.fill(replace, -1).join('.')])
         elsif constraint.pre_release
           identifiers = constraint.version.identifiers(:pre_release)
           replace     = identifiers.last.to_i.to_s == identifiers.last.to_s ? "-" : nil
-          Version.new([min.major, min.minor, min.patch, identifiers.fill(replace, -1).join('.')])
+          Semverse::Version.new([min.major, min.minor, min.patch, identifiers.fill(replace, -1).join('.')])
         else
-          Version.new([min.major, min.minor + 1, 0, 0])
+          Semverse::Version.new([min.major, min.minor + 1, 0, 0])
         end
         min <= target_version && target_version < max
       end
@@ -154,10 +154,10 @@ module Solve
     attr_reader :pre_release
     attr_reader :build
 
-    # Return the Solve::Version representation of the major, minor, and patch
+    # Return the Semverse::Version representation of the major, minor, and patch
     # attributes of this instance
     #
-    # @return [Solve::Version]
+    # @return [Semverse::Version]
     attr_reader :version
 
     # @param [#to_s] constraint
@@ -174,7 +174,7 @@ module Solve
         @patch ||= 0
       end
 
-      @version = Version.new([
+      @version = Semverse::Version.new([
         self.major,
         self.minor,
         self.patch,
@@ -239,13 +239,13 @@ module Solve
       # does not include a pre-release and if the operator isn't < or <=.
       # This avoids greedy matches, e.g. 2.0.0.alpha won't satisfy >= 1.0.0.
       #
-      # @param [Solve::Version] target_version
+      # @param [Semverse::Version] target_version
       #
       def greedy_match?(target_version)
         operator_type !~ /less/ && target_version.pre_release? && !version.pre_release?
       end
 
-      # @param [Solve::Version] target
+      # @param [Semverse::Version] target
       #
       # @return [Boolean]
       def compare(target)

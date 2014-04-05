@@ -1,18 +1,13 @@
+require 'semverse'
+
 module Solve
   require_relative 'solve/artifact'
-  require_relative 'solve/constraint'
   require_relative 'solve/demand'
   require_relative 'solve/dependency'
   require_relative 'solve/gem_version'
   require_relative 'solve/errors'
   require_relative 'solve/graph'
   require_relative 'solve/solver'
-  require_relative 'solve/version'
-
-  # The default constraint.
-  #
-  # @return [String]
-  DEFAULT_CONSTRAINT = Constraint.new('>= 0.0.0').freeze
 
   class << self
     # @return [Solve::Formatter]

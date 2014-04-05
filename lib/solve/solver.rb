@@ -7,17 +7,17 @@ module Solve
     class << self
       # Returns all of the versions which satisfy all of the given constraints
       #
-      # @param [Array<Solve::Constraint>, Array<String>] constraints
-      # @param [Array<Solve::Version>, Array<String>] versions
+      # @param [Array<Semverse::Constraint>, Array<String>] constraints
+      # @param [Array<Semverse::Version>, Array<String>] versions
       #
-      # @return [Array<Solve::Version>]
+      # @return [Array<Semverse::Version>]
       def satisfy_all(constraints, versions)
         constraints = Array(constraints).collect do |con|
-          con.is_a?(Constraint) ? con : Constraint.new(con)
+          con.is_a?(Constraint) ? con : Semverse::Constraint.new(con)
         end.uniq
 
         versions = Array(versions).collect do |ver|
-          ver.is_a?(Version) ? ver : Version.new(ver)
+          ver.is_a?(Version) ? ver : Semverse::Version.new(ver)
         end.uniq
 
         versions.select do |ver|
@@ -27,12 +27,12 @@ module Solve
 
       # Return the best version from the given list of versions for the given list of constraints
       #
-      # @param [Array<Solve::Constraint>, Array<String>] constraints
-      # @param [Array<Solve::Version>, Array<String>] versions
+      # @param [Array<Semverse::Constraint>, Array<String>] constraints
+      # @param [Array<Semverse::Version>, Array<String>] versions
       #
       # @raise [NoSolutionError] if version matches the given constraints
       #
-      # @return [Solve::Version]
+      # @return [Semverse::Version]
       def satisfy_best(constraints, versions)
         solution = satisfy_all(constraints, versions)
 
@@ -136,7 +136,7 @@ module Solve
       def demands_as_constraints
         @demands_as_constraints ||= demands_array.map do |demands_item|
           item_name, constraint_with_operator = demands_item
-          version_constraint = Constraint.new(constraint_with_operator)
+          version_constraint = Semverse::Constraint.new(constraint_with_operator)
           DepSelector::SolutionConstraint.new(ds_graph.package(item_name), version_constraint)
         end
       end

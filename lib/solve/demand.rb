@@ -12,16 +12,16 @@ module Solve
 
     # The acceptable constraint of the artifact this demand is for
     #
-    # @return [Solve::Constraint]
+    # @return [Semverse::Constraint]
     attr_reader :constraint
 
     # @param [Solve::Solver] solver
     # @param [#to_s] name
-    # @param [Solve::Constraint, #to_s] constraint
-    def initialize(solver, name, constraint = DEFAULT_CONSTRAINT)
+    # @param [Semverse::Constraint, #to_s] constraint
+    def initialize(solver, name, constraint = Semverse::DEFAULT_CONSTRAINT)
       @solver     = solver
       @name       = name
-      @constraint = Constraint.coerce(constraint)
+      @constraint = Semverse::Constraint.coerce(constraint)
     end
 
     def to_s

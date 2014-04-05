@@ -85,7 +85,7 @@ describe Solve::Graph do
     end
 
     it "does not satisfy constraints if it is the default" do
-      constraint = Solve::Constraint.new(Solve::DEFAULT_CONSTRAINT.to_s)
+      constraint = Semverse::Constraint.new(Semverse::DEFAULT_CONSTRAINT.to_s)
       expect(constraint).to_not receive(:satisfies?)
       subject.versions("nginx")
     end

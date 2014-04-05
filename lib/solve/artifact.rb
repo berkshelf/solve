@@ -14,16 +14,16 @@ module Solve
 
     # The version of this artifact
     #
-    # @return [Solve::Version]
+    # @return [Semverse::Version]
     attr_reader :version
 
     # @param [Solve::Graph] graph
     # @param [#to_s] name
-    # @param [Solve::Version, #to_s] version
+    # @param [Semverse::Version, #to_s] version
     def initialize(graph, name, version)
       @graph        = graph
       @name         = name
-      @version      = Version.new(version)
+      @version      = Semverse::Version.new(version)
       @dependencies = {}
     end
 
@@ -96,7 +96,7 @@ module Solve
     end
     alias_method :eql?, :==
 
-    # @param [Solve::Version] other
+    # @param [Semverse::Version] other
     #
     # @return [Integer]
     def <=>(other)

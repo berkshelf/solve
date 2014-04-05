@@ -10,8 +10,8 @@ describe Solve::Demand do
       expect(demand.constraint.to_s).to eq("= 0.0.1")
     end
 
-    it "accepts a Solve::Constraint for the constraint parameter" do
-      constraint = Solve::Constraint.new("= 0.0.1")
+    it "accepts a Semverse::Constraint for the constraint parameter" do
+      constraint = Semverse::Constraint.new("= 0.0.1")
       demand = Solve::Demand.new(solver, name, constraint)
 
       expect(demand.constraint).to eq(constraint)

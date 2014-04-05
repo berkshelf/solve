@@ -15,5 +15,7 @@ Gem::Specification.new do |s|
   s.require_paths         = ["lib"]
   s.version               = Solve::VERSION
   s.required_ruby_version = ">= 1.9.1"
-  s.add_runtime_dependency "dep_selector", "~> 1.0.0.alpha"
+
+  s.add_dependency "semverse", "~> 1.0"
+  s.add_dependency "dep_selector", "~> 1.0.0.alpha"
 end

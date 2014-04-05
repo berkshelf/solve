@@ -9,7 +9,7 @@ module Solve
     # of graph
     #
     # @param [String] name
-    # @param [Solve::Version, #to_s] version
+    # @param [Semverse::Version, #to_s] version
     #
     # @return [Boolean]
     def artifact?(name, version)
@@ -48,10 +48,10 @@ module Solve
     # @param [String] name
     #
     # @return [Array<Solve::Artifact>]
-    def versions(name, constraint = DEFAULT_CONSTRAINT)
-      constraint = Constraint.coerce(constraint)
+    def versions(name, constraint = Semverse::DEFAULT_CONSTRAINT)
+      constraint = Semverse::Constraint.coerce(constraint)
 
-      if constraint == DEFAULT_CONSTRAINT
+      if constraint == Semverse::DEFAULT_CONSTRAINT
         @artifacts_by_name[name]
       else
         @artifacts_by_name[name].select do |artifact|
