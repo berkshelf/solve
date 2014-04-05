@@ -19,7 +19,7 @@ describe Solve::Artifact do
       let(:two) { Solve::Artifact.new(graph, "riot", "1.0.0") }
 
       it "is equal" do
-        one.should be_eql(two)
+        expect(one).to eq(two)
       end
     end
 
@@ -28,7 +28,7 @@ describe Solve::Artifact do
       let(:two) { Solve::Artifact.new(graph, "riot", "2.0.0") }
 
       it "is not equal" do
-        one.should_not be_eql(two)
+        expect(one).to_not eq(two)
       end
     end
 
@@ -37,7 +37,7 @@ describe Solve::Artifact do
       let(:two) { Solve::Artifact.new(graph, "league", "1.0.0") }
 
       it "is not equal" do
-        one.should_not be_eql(two)
+        expect(one).to_not eq(two)
       end
     end
   end
@@ -58,40 +58,69 @@ describe Solve::Artifact do
     it "orders artifacts by their version number" do
       sorted = artifacts.sort
 
-      sorted[0].should eql(one)
-      sorted[1].should eql(two)
-      sorted[2].should eql(three)
+      expect(sorted[0]).to eq(one)
+      expect(sorted[1]).to eq(two)
+      expect(sorted[2]).to eq(three)
+    end
+  end
+
+  describe "#dependency?" do
+    before { subject.depends("nginx", "1.0.0") }
+
+    it "returns false when the dependency does not exist" do
+      expect(subject).to have_dependency("nginx", "1.0.0")
+    end
+
+    it "returns true when the dependendency exists" do
+      expect(subject).to_not have_dependency("apache2", "2.0.0")
+    end
+  end
+
+  describe "#dependency" do
+    before { subject.depends("nginx", "~> 1.2.3") }
+
+    it "returns an instance of Solve::Dependency matching the given name and constraint" do
+      dependency = subject.dependency("nginx", "~> 1.2.3")
+
+      expect(dependency).to be_a(Solve::Dependency)
+      expect(dependency.name).to eq("nginx")
+      expect(dependency.constraint.to_s).to eq("~> 1.2.3")
     end
   end
 
   describe "#dependencies" do
-    context "given no arguments" do
-      it "returns an array" do
-        subject.dependencies.should be_a(Array)
-      end
+    it "returns an array" do
+      expect(subject.dependencies).to be_a(Array)
+    end
 
-      it "returns an empty array if no dependencies have been accessed" do
-        subject.dependencies.should have(0).items
-      end
+    it "returns an empty array if no dependencies have been accessed" do
+      expect(subject.dependencies).to be_empty
+    end
+
+    it "returns all dependencies" do
+      subject.depends("nginx", "1.0.0")
+      subject.depends("nginx", "~> 2.0.0")
+
+      expect(subject.dependencies.size).to eq(2)
     end
   end
 
   describe "#depends" do
     context "given a name and constraint argument" do
       let(:name) { "nginx" }
-      let(:constraint) { "~> 0.101.5" }
+      let(:constraint) { "~> 1.0.0" }
 
       context "given the dependency of the given name and constraint does not exist" do
         it "returns a Solve::Artifact" do
-          subject.depends(name, constraint).should be_a(Solve::Artifact)
+          expect(subject.depends(name, constraint)).to be_a(Solve::Artifact)
         end
 
         it "adds a dependency with the given name and constraint to the list of dependencies" do
           subject.depends(name, constraint)
 
-          subject.dependencies.should have(1).item
-          subject.dependencies.first.name.should eql(name)
-          subject.dependencies.first.constraint.to_s.should eql(constraint)
+          expect(subject.dependencies.size).to eq(1)
+          expect(subject.dependencies.first.name).to eq(name)
+          expect(subject.dependencies.first.constraint.to_s).to eq(constraint)
         end
       end
     end
@@ -100,52 +129,8 @@ describe Solve::Artifact do
       it "adds a dependency with a all constraint (>= 0.0.0)" do
         subject.depends("nginx")
 
-        subject.dependencies.should have(1).item
-        subject.dependencies.first.constraint.to_s.should eql(">= 0.0.0")
-      end
-    end
-  end
-
-  describe "::get_dependency" do
-    before(:each) { subject.depends("nginx", "~> 1.2.3") }
-
-    it "returns an instance of Solve::Dependency matching the given name and constraint" do
-      dependency = subject.get_dependency("nginx", "~> 1.2.3")
-
-      dependency.should be_a(Solve::Dependency)
-      dependency.name.should eql("nginx")
-      dependency.constraint.to_s.should eql("~> 1.2.3")
-    end
-  end
-
-  describe "#delete" do
-    context "given the artifact is a member of a graph" do
-      subject { Solve::Artifact.new(graph, name, version) }
-
-      before(:each) do
-        graph.should_receive(:remove_artifact).with(subject).and_return(subject)
-      end
-
-      it "notifies the graph that the artifact should be removed" do
-        subject.delete
-      end
-
-      it "sets the graph attribute to nil" do
-        subject.delete
-
-        subject.graph.should be_nil
-      end
-
-      it "returns the instance of artifact deleted from the graph" do
-        subject.delete.should eql(subject)
-      end
-    end
-
-    context "given the artifact is not the member of a graph" do
-      subject { Solve::Artifact.new(nil, name, version) }
-
-      it "returns nil" do
-        subject.delete.should be_nil
+        expect(subject.dependencies.size).to eq(1)
+        expect(subject.dependencies.first.constraint.to_s).to eq(">= 0.0.0")
       end
     end
   end

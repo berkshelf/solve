@@ -24,8 +24,8 @@ describe Solve::Solver do
   describe "when the constraints are solvable" do
     let(:graph) do
       graph = Solve::Graph.new
-      graph.artifacts("A", "1.0.0")
-      graph.artifacts("B", "1.0.0").depends("A")
+      graph.artifact("A", "1.0.0")
+      graph.artifact("B", "1.0.0").depends("A")
       graph
     end
 
@@ -54,7 +54,7 @@ describe Solve::Solver do
     context "and dep-selector identifies missing artifacts" do
       let(:graph) do
         graph = Solve::Graph.new
-        graph.artifacts("A", "1.0.0")
+        graph.artifact("A", "1.0.0")
         graph
       end
 
@@ -68,7 +68,7 @@ describe Solve::Solver do
     context "and dep-selector identifies constraints that exclude all known versions" do
       let(:graph) do
         graph = Solve::Graph.new
-        graph.artifacts("A", "1.0.0")
+        graph.artifact("A", "1.0.0")
         graph
       end
 
@@ -83,11 +83,11 @@ describe Solve::Solver do
     context "and dep-selector identifies dependency conflicts" do
       let(:graph) do
         graph = Solve::Graph.new
-        graph.artifacts("A", "1.0.0").depends("B").depends("C")
-        graph.artifacts("B", "1.0.0").depends("D", "= 1.0.0")
-        graph.artifacts("C", "1.0.0").depends("D", "= 2.0.0")
-        graph.artifacts("D", "1.0.0")
-        graph.artifacts("D", "2.0.0")
+        graph.artifact("A", "1.0.0").depends("B").depends("C")
+        graph.artifact("B", "1.0.0").depends("D", "= 1.0.0")
+        graph.artifact("C", "1.0.0").depends("D", "= 2.0.0")
+        graph.artifact("D", "1.0.0")
+        graph.artifact("D", "2.0.0")
         graph
       end
 

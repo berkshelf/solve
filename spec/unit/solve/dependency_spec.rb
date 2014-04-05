@@ -1,18 +1,12 @@
 require 'spec_helper'
 
 describe Solve::Dependency do
-  describe "ClassMethods" do
-    subject { Solve::Dependency }
+  describe "#initialize" do
+    it "uses a default of >= 0.0.0" do
+      dep = Solve::Dependency.new(double("artifact"), "ntp")
 
-    describe "::new" do
-      context "when no value for 'constraint' is given" do
-        it "uses a default of >= 0.0.0" do
-          dep = subject.new(double('artifact'), "ntp")
-
-          dep.constraint.operator.should eql(">=")
-          dep.constraint.version.to_s.should eql("0.0.0")
-        end
-      end
+      expect(dep.constraint.operator).to eq(">=")
+      expect(dep.constraint.version.to_s).to eq("0.0.0")
     end
   end
 
@@ -22,43 +16,10 @@ describe Solve::Dependency do
 
   subject { Solve::Dependency.new(artifact, name, constraint) }
 
-  describe "#delete" do
-    context "given the dependency is a member of an artifact" do
-      subject { Solve::Dependency.new(artifact, name, constraint) }
-
-      before(:each) do
-        artifact.should_receive(:remove_dependency).with(subject).and_return(subject)
-      end
-
-      it "notifies the artifact that the dependency should be removed" do
-        subject.delete
-      end
-
-      it "sets the artifact attribute to nil" do
-        subject.delete
-
-        subject.artifact.should be_nil
-      end
-
-      it "returns the instance of dependency deleted from the artifact" do
-        subject.delete.should eql(subject)
-      end
-    end
-
-    context "given the dependency is not the member of an artifact" do
-      subject { Solve::Dependency.new(nil, name, constraint) }
-
-      it "returns nil" do
-        subject.delete.should be_nil
-      end
-    end
-  end
-
-  describe "#eql?" do
+  describe "#==" do
     it "returns true if the other object is an instance of Solve::Dependency with the same constraint and artifact" do
       other = Solve::Dependency.new(artifact, name, constraint)
-
-      subject.should eql(other)
+      expect(subject).to eq(other)
     end
   end
 end

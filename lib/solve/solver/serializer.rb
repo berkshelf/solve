@@ -85,7 +85,7 @@ module Solve
         end
 
         def load_artifact(graph, artifact_spec)
-          artifact = graph.artifacts(artifact_spec["name"], artifact_spec["version"])
+          artifact = graph.artifact(artifact_spec["name"], artifact_spec["version"])
           artifact_spec["dependencies"].each do |dependency_spec|
             load_dependency(artifact, dependency_spec)
           end

@@ -1,6 +1,19 @@
 module Solve
   class Constraint
     class << self
+      # Coerce the object into a constraint.
+      #
+      # @param [Constraint, String]
+      #
+      # @return [Constraint]
+      def coerce(object)
+        if object.nil?
+          DEFAULT_CONSTRAINT
+        else
+          object.is_a?(self) ? object : new(object)
+        end
+      end
+
       # Split a constraint string into an Array of two elements. The first
       # element being the operator and second being the version string.
       #
@@ -141,10 +154,16 @@ module Solve
     attr_reader :pre_release
     attr_reader :build
 
-    # @param [#to_s] constraint (">= 0.0.0")
+    # Return the Solve::Version representation of the major, minor, and patch
+    # attributes of this instance
+    #
+    # @return [Solve::Version]
+    attr_reader :version
+
+    # @param [#to_s] constraint
     def initialize(constraint = nil)
       if constraint.nil? || constraint.empty?
-        constraint = ">= 0.0.0"
+        constraint = '>= 0.0.0'
       end
 
       @operator, @major, @minor, @patch, @pre_release, @build = self.class.split(constraint)
@@ -153,22 +172,14 @@ module Solve
         @minor ||= 0
         @patch ||= 0
       end
-    end
 
-    # Return the Solve::Version representation of the major, minor, and patch
-    # attributes of this instance
-    #
-    # @return [Solve::Version]
-    def version
-      @version ||= Version.new(
-        [
-          self.major,
-          self.minor,
-          self.patch,
-          self.pre_release,
-          self.build
-        ]
-      )
+      @version = Version.new([
+        self.major,
+        self.minor,
+        self.patch,
+        self.pre_release,
+        self.build,
+      ])
     end
 
     # @return [Symbol]
@@ -183,15 +194,15 @@ module Solve
     # Returns true or false if the given version would be satisfied by
     # the version constraint.
     #
-    # @param [#to_s] target_version
+    # @param [Version, #to_s] target
     #
     # @return [Boolean]
-    def satisfies?(target_version)
-      target_version = Version.coerce(target_version)
+    def satisfies?(target)
+      target = Version.coerce(target)
 
-      return false if !version.zero? && greedy_match?(target_version)
+      return false if !version.zero? && greedy_match?(target)
 
-      compare(target_version)
+      compare(target)
     end
 
     # dep-selector uses include? to determine if a version matches the
@@ -213,12 +224,12 @@ module Solve
     end
 
     def to_s
-      str = "#{operator} #{major}"
-      str += ".#{minor}" if minor
-      str += ".#{patch}" if patch
-      str += "-#{pre_release}" if pre_release
-      str += "+#{build}" if build
-      str
+      out =  "#{operator} #{major}"
+      out << ".#{minor}" if minor
+      out << ".#{patch}" if patch
+      out << "-#{pre_release}" if pre_release
+      out << "+#{build}" if build
+      out
     end
 
     private
