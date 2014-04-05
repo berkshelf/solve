@@ -42,5 +42,4 @@ end
 Benchmark.bm(12) do |x|
   x.report("Create graph")   { N.times { create_graph } }
   x.report("Solve Gecode") { N.times { solve_gecode } }
-  x.report("Solve Ruby  ")   { N.times { solve_ruby   } }
 end
