@@ -8,8 +8,6 @@ module Solve
   require_relative 'solve/graph'
   require_relative 'solve/solver'
   require_relative 'solve/version'
-  require_relative 'solve/tracers'
-  require_relative 'solve/gecode_solver'
 
   class << self
     # @return [Solve::Formatter]
@@ -25,10 +23,7 @@ module Solve
     # @param [Array<Solve::Demand>, Array<String, String>] demands
     #
     # @option options [#say] :ui (nil)
-    #   a ui object for output, this will be used to output from a Solve::Tracers::HumanReadable if
-    #   no other tracer is provided in options[:tracer]
-    # @option options [AbstractTracer] :tracer (nil)
-    #   a Tracer object that is used to format and output tracing information
+    #   a ui object for output
     # @option options [Boolean] :sorted (false)
     #   should the output be a sorted list rather than a Hash
     #
@@ -36,8 +31,7 @@ module Solve
     #
     # @return [Hash]
     def it!(graph, demands, options = {})
-      @tracer = options[:tracer] || Solve::Tracers.build(options[:ui])
-      GecodeSolver.new(graph, demands, options[:ui]).resolve(options)
+      Solver.new(graph, demands, options[:ui]).resolve(options)
     end
   end
 end

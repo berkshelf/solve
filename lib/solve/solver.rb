@@ -1,4 +1,5 @@
-require 'tsort'
+require 'dep_selector'
+require 'set'
 require_relative 'solver/variable_table'
 require_relative 'solver/variable_row'
 require_relative 'solver/constraint_table'
@@ -7,84 +8,37 @@ require_relative 'solver/serializer'
 
 module Solve
   class Solver
-    class << self
-      # Create a key to identify a demand on a Solver.
-      #
-      # @param [Solve::Demand] demand
-      #
-      # @raise [NoSolutionError]
-      #
-      # @return [Symbol]
-      def demand_key(demand)
-        "#{demand.name}-#{demand.constraint}".to_sym
-      end
-
-      # Returns all of the versions which satisfy all of the given constraints
-      #
-      # @param [Array<Solve::Constraint>, Array<String>] constraints
-      # @param [Array<Solve::Version>, Array<String>] versions
-      #
-      # @return [Array<Solve::Version>]
-      def satisfy_all(constraints, versions)
-        constraints = Array(constraints).collect do |con|
-          con.is_a?(Constraint) ? con : Constraint.new(con.to_s)
-        end.uniq
-
-        versions = Array(versions).collect do |ver|
-          ver.is_a?(Version) ? ver : Version.new(ver.to_s)
-        end.uniq
-
-        versions.select do |ver|
-          constraints.all? { |constraint| constraint.satisfies?(ver) }
-        end
-      end
-
-      # Return the best version from the given list of versions for the given list of constraints
-      #
-      # @param [Array<Solve::Constraint>, Array<String>] constraints
-      # @param [Array<Solve::Version>, Array<String>] versions
-      #
-      # @raise [NoSolutionError] if version matches the given constraints
-      #
-      # @return [Solve::Version]
-      def satisfy_best(constraints, versions)
-        solution = satisfy_all(constraints, versions)
-
-        if solution.empty?
-          raise Errors::NoSolutionError
-        end
-
-        solution.sort.last
-      end
-    end
-
-    # The world as we know it
+    # Graph object with references to all known artifacts and dependency
+    # constraints.
     #
     # @return [Solve::Graph]
     attr_reader :graph
-    attr_reader :demands
-    attr_reader :ui
 
-    attr_reader :domain
-    attr_reader :variable_table
-    attr_reader :constraint_table
-    attr_reader :possible_values
+    # @example Demands are Arrays of Arrays with an artifact name and optional constraint:
+    #   [['nginx', '= 1.0.0'], ['mysql']]
+    # @return [Array<String>, Array<Array<String, String>>] demands
+    attr_reader :demands_array
 
+    # @example Basic use:
+    #   graph = Solve::Graph.new
+    #   graph.artifacts("mysql", "1.2.0")
+    #   demands = [["mysql"]]
+    #   Solver.new(graph, demands)
     # @param [Solve::Graph] graph
     # @param [Array<String>, Array<Array<String, String>>] demands
     # @param [#say] ui
-    def initialize(graph, demands = Array.new, ui=nil)
+    def initialize(graph, demands, ui=nil)
+      @ds_graph = DepSelector::DependencyGraph.new
       @graph = graph
-      @demands = Hash.new
-      @ui = ui.respond_to?(:say) ? ui : nil
+      @demands_array = demands
+      @timeout_ms = 1_000
+    end
 
-      @domain = Hash.new
-      @possible_values = Hash.new
-      @constraint_table = ConstraintTable.new
-      @variable_table = VariableTable.new
-
-      Array(demands).each do |l_demand|
-        demands(*l_demand)
+    # The problem demands given as Demand model objects
+    # @return [Array<Solve::Demand>]
+    def demands
+      demands_array.map do |name, constraint|
+        Demand.new(self, name, constraint)
       end
     end
 
@@ -92,227 +46,149 @@ module Solve
     #   return the solution as a sorted list instead of a Hash
     #
     # @return [Hash, List] Returns a hash like { "Artifact Name" => "Version",... }
-    #   unless options[:sorted], then it returns a list like [["Artifact Name", "Version],...]
-    def resolve(options = {})
-      Solve.tracer.start
-      seed_demand_dependencies
+    #   unless the :sorted option is true, then it returns a list like [["Artifact Name", "Version],...]
+    # @raise [Errors::NoSolutionError] when the demands cannot be met for the
+    #   given graph.
+    # @raise [Errors::UnsortableSolutionError] when the :sorted option is true
+    #   and the demands have a solution, but the solution contains a cyclic
+    #   dependency
+    def resolve(options={})
+      solution = solve_demands(demands_as_constraints)
 
-      while unbound_variable = variable_table.first_unbound
-        possible_values_for_unbound = possible_values_for(unbound_variable)
-        constraints = constraint_table.constraints_on_artifact(unbound_variable.artifact)
-        Solve.tracer.searching_for(unbound_variable, constraints, possible_values)
-
-        while possible_value = possible_values_for_unbound.shift
-          possible_artifact = graph.get_artifact(unbound_variable.artifact, possible_value.version)
-          possible_dependencies = possible_artifact.dependencies
-          all_ok = possible_dependencies.all? { |dependency| can_add_new_constraint?(dependency) }
-          if all_ok
-            Solve.tracer.trying(possible_artifact)
-            add_dependencies(possible_dependencies, possible_artifact)
-            unbound_variable.bind(possible_value)
-            break
-          end
-        end
-
-        unless unbound_variable.bound?
-          backtrack(unbound_variable)
-        end
+      unsorted_solution = solution.inject({}) do |stringified_soln, (name, version)|
+        stringified_soln[name] = version.to_s
+        stringified_soln
       end
 
-      solution = (options[:sorted]) ? build_sorted_solution : build_unsorted_solution
-
-      Solve.tracer.solution(solution)
-
-      solution
-    end
-
-    def build_unsorted_solution
-      {}.tap do |solution|
-        variable_table.rows.each do |variable|
-          solution[variable.artifact] = variable.value.version.to_s
-        end
+      if options[:sorted]
+        build_sorted_solution(unsorted_solution)
+      else
+        unsorted_solution
       end
-    end
-
-    def build_sorted_solution
-      unsorted_solution = build_unsorted_solution
-      nodes = Hash.new
-      unsorted_solution.each do |name, version|
-        nodes[name] = @graph.get_artifact(name, version).dependencies.map(&:name)
-      end
-
-      # Modified from http://ruby-doc.org/stdlib-1.9.3/libdoc/tsort/rdoc/TSort.html
-      class << nodes
-        include TSort
-        alias tsort_each_node each_key
-        def tsort_each_child(node, &block)
-          fetch(node).each(&block)
-        end
-      end
-      begin
-        sorted_names = nodes.tsort
-      rescue TSort::Cyclic => e
-        raise Solve::Errors::UnsortableSolutionError.new(e, unsorted_solution)
-      end
-
-      sorted_names.map do |artifact|
-        [artifact, unsorted_solution[artifact]]
-      end
-    end
-
-    # @overload demands(name, constraint)
-    #   Return the Solve::Demand from the collection of demands
-    #   with the given name and constraint.
-    #
-    #   @param [#to_s]
-    #   @param [Solve::Constraint, #to_s]
-    #
-    #   @return [Solve::Demand]
-    # @overload demands(name)
-    #   Return the Solve::Demand from the collection of demands
-    #   with the given name.
-    #
-    #   @param [#to_s]
-    #
-    #   @return [Solve::Demand]
-    # @overload demands
-    #   Return the collection of demands
-    #
-    #   @return [Array<Solve::Demand>]
-    def demands(*args)
-      if args.empty?
-        return demand_collection
-      end
-      if args.length > 2
-        raise ArgumentError, "Unexpected number of arguments. You gave: #{args.length}. Expected: 2 or less."
-      end
-
-      name, constraint = args
-      constraint ||= ">= 0.0.0"
-
-      if name.nil?
-        raise ArgumentError, "A name must be specified. You gave: #{args}."
-      end
-
-      demand = Demand.new(self, name, constraint)
-      add_demand(demand)
-    end
-
-    # Add a Solve::Demand to the collection of demands and
-    # return the added Solve::Demand. No change will be made
-    # if the demand is already a member of the collection.
-    #
-    # @param [Solve::Demand] demand
-    #
-    # @return [Solve::Demand]
-    def add_demand(demand)
-      unless has_demand?(demand)
-        @demands[self.class.demand_key(demand)] = demand
-      end
-
-      demand
-    end
-    alias_method :demand, :add_demand
-
-    # @param [Solve::Demand, nil] demand
-    def remove_demand(demand)
-      if has_demand?(demand)
-        @demands.delete(self.class.demand_key(demand))
-      end
-    end
-
-    # @param [Solve::Demand] demand
-    #
-    # @return [Boolean]
-    def has_demand?(demand)
-      @demands.has_key?(self.class.demand_key(demand))
     end
 
     private
 
-      # @return [Array<Solve::Demand>]
-      def demand_collection
-        @demands.collect { |name, demand| demand }
+      # DepSelector::DependencyGraph object representing the problem.
+      attr_reader :ds_graph
+
+      # Timeout in milliseconds. Hardcoded to 1s for now.
+      attr_reader :timeout_ms
+
+      # Runs the solver with the set of demands given. If any DepSelector
+      # exceptions are raised, they are rescued and re-raised
+      def solve_demands(demands_as_constraints)
+        selector = DepSelector::Selector.new(ds_graph, (timeout_ms / 1000.0))
+        selector.find_solution(demands_as_constraints, all_artifacts)
+      rescue DepSelector::Exceptions::InvalidSolutionConstraints => e
+        report_invalid_constraints_error(e)
+      rescue DepSelector::Exceptions::NoSolutionExists => e
+        report_no_solution_error(e)
+      rescue DepSelector::Exceptions::TimeBoundExceeded
+        # DepSelector timed out trying to find the solution. There may or may
+        # not be a solution.
+        raise Solve::Errors::NoSolutionError.new(
+          "The dependency constraints could not be solved in the time allotted.")
+      rescue DepSelector::Exceptions::TimeBoundExceededNoSolution
+        # DepSelector determined there wasn't a solution to the problem, then
+        # timed out trying to determine which constraints cause the conflict.
+        raise Solve::Errors::NoSolutionCauseUnknown.new(
+          "There is a dependency conflict, but the solver could not determine the precise cause in the time allotted.")
       end
 
-      def seed_demand_dependencies
-        add_dependencies(demands, :root)
+      # Maps demands to corresponding DepSelector::SolutionConstraint objects.
+      def demands_as_constraints
+        @demands_as_constraints ||= demands_array.map do |demands_item|
+          item_name, constraint_with_operator = demands_item
+          version_constraint = Constraint.new(constraint_with_operator)
+          DepSelector::SolutionConstraint.new(ds_graph.package(item_name), version_constraint)
+        end
       end
 
-      def can_add_new_constraint?(dependency)
-        current_binding = variable_table.find_artifact(dependency.name)
-        #haven't seen it before, haven't bound it yet or the binding is ok
-        current_binding.nil? || current_binding.value.nil? || dependency.constraint.satisfies?(current_binding.value.version)
+      # Maps all artifacts in the graph to DepSelector::Package objects. If not
+      # already done, artifacts are added to the ds_graph as a necessary side effect.
+      def all_artifacts
+        return @all_artifacts if @all_artifacts
+        populate_ds_graph!
+        @all_artifacts
       end
 
-      def possible_values_for(variable)
-        possible_values_for_variable = possible_values[variable.artifact]
-        if possible_values_for_variable.nil?
-          constraints_for_variable = constraint_table.constraints_on_artifact(variable.artifact)
-          all_values_for_variable = domain[variable.artifact]
-          possible_values_for_variable = constraints_for_variable.inject(all_values_for_variable) do |remaining_values, constraint|
-            remaining_values.reject { |value| !constraint.satisfies?(value.version) }
+      # Converts artifacts to DepSelector::Package objects and adds them to the
+      # DepSelector graph. This should only be called once; use #all_artifacts
+      # to safely get the set of all artifacts.
+      def populate_ds_graph!
+        @all_artifacts = Set.new
+
+        graph.artifacts.each do |artifact|
+          add_artifact_to_ds_graph(artifact)
+          @all_artifacts << ds_graph.package(artifact.name)
+        end
+      end
+
+      def add_artifact_to_ds_graph(artifact)
+        package_version = ds_graph.package(artifact.name).add_version(artifact.version)
+        artifact.dependencies.each do |dependency|
+          dependency = DepSelector::Dependency.new(ds_graph.package(dependency.name), dependency.constraint)
+          package_version.dependencies << dependency
+        end
+        package_version
+      end
+
+      def report_invalid_constraints_error(e)
+        non_existent_cookbooks = e.non_existent_packages.inject([]) do |list, constraint|
+          list << constraint.package.name
+        end
+
+        constrained_to_no_versions = e.constrained_to_no_versions.inject([]) do |list, constraint|
+          list << constraint.to_s
+        end
+
+        raise Solve::Errors::NoSolutionError.new(
+          "Required artifacts do not exist at the desired version",
+          missing_artifacts: non_existent_cookbooks,
+          constraints_excluding_all_artifacts: constrained_to_no_versions
+        )
+      end
+
+      def report_no_solution_error(e)
+        most_constrained_cookbooks = e.disabled_most_constrained_packages.inject([]) do |list, package|
+          list << "#{package.name} = #{package.versions.first.to_s}"
+        end
+
+        non_existent_cookbooks = e.disabled_non_existent_packages.inject([]) do |list, package|
+          list << package.name
+        end
+
+        raise Solve::Errors::NoSolutionError.new(
+          e.message,
+          unsatisfiable_demand: e.unsatisfiable_solution_constraint.to_s,
+          missing_artifacts: non_existent_cookbooks,
+          artifacts_with_no_satisfactory_version: most_constrained_cookbooks
+        )
+      end
+
+      def build_sorted_solution(unsorted_solution)
+        nodes = Hash.new
+        unsorted_solution.each do |name, version|
+          nodes[name] = @graph.get_artifact(name, version).dependencies.map(&:name)
+        end
+
+        # Modified from http://ruby-doc.org/stdlib-1.9.3/libdoc/tsort/rdoc/TSort.html
+        class << nodes
+          include TSort
+          alias tsort_each_node each_key
+          def tsort_each_child(node, &block)
+            fetch(node).each(&block)
           end
-          possible_values[variable.artifact] = possible_values_for_variable
         end
-        possible_values_for_variable
-      end
-
-      def add_dependencies(dependencies, source)
-        dependencies.each do |dependency|
-          next if (source.respond_to?(:name) && dependency.name == source.name)
-          Solve.tracer.add_constraint(dependency, source)
-          variable_table.add(dependency.name, source)
-          constraint_table.add(dependency, source)
-          dependency_domain = graph.versions(dependency.name, dependency.constraint)
-          domain[dependency.name] = [(domain[dependency.name] || []), dependency_domain]
-          .flatten
-          .uniq
-          .sort { |left, right| right.version <=> left.version }
-
-          #if the variable we are constraining is still unbound, we want to filter
-          #its possible values, if its already bound, we know its ok to add this constraint because
-          #we can never change a previously bound value without removing this constraint and we check above
-          #whether or not its ok to add this constraint given the current value
-
-          variable = variable_table.find_artifact(dependency.name)
-          if variable.value.nil?
-            reset_possible_values_for(variable)
-          end
-
-        end
-      end
-
-      def reset_possible_values_for(variable)
-        Solve.tracer.reset_domain(variable)
-        possible_values[variable.artifact] = nil
-        possible_values_for(variable).tap { |values| Solve.tracer.possible_values(values) }
-      end
-
-      def backtrack(unbound_variable)
-        Solve.tracer.backtrack(unbound_variable)
-        previous_variable = variable_table.before(unbound_variable.artifact)
-
-        if previous_variable.nil?
-          Solve.tracer.cannot_backtrack
-          raise Errors::NoSolutionError
+        begin
+          sorted_names = nodes.tsort
+        rescue TSort::Cyclic => e
+          raise Solve::Errors::UnsortableSolutionError.new(e, unsorted_solution)
         end
 
-        Solve.tracer.unbind(previous_variable)
-
-        source = previous_variable.value
-        removed_variables = variable_table.remove_all_with_only_this_source!(source)
-        removed_variables.each do |removed_variable|
-          possible_values[removed_variable.artifact] = nil
-          Solve.tracer.remove_variable(removed_variable)
-        end
-        removed_constraints = constraint_table.remove_constraints_from_source!(source)
-        removed_constraints.each do |removed_constraint|
-          Solve.tracer.remove_constraint(removed_constraint)
-        end
-        previous_variable.unbind
-        variable_table.all_after(previous_variable.artifact).each do |variable|
-          new_possibles = reset_possible_values_for(variable)
+        sorted_names.map do |artifact|
+          [artifact, unsorted_solution[artifact]]
         end
       end
   end

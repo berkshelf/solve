@@ -1,302 +1,158 @@
 require 'spec_helper'
 
 describe Solve::Solver do
-  let(:graph) { double('graph') }
+  let(:graph) { double(Solve::Graph) }
+  let(:demands) { [["mysql"], ["nginx"]] }
+  subject(:solver) { described_class.new(graph, demands) }
 
-  describe "ClassMethods" do
-    subject { Solve::Solver }
+  it "has a list of demands as ruby literals" do
+    solver.demands_array.should == demands
+  end
 
-    describe "::new" do
-      let(:demand_array) { ["nginx", "ntp"] }
+  it "has a list of demands as model objects" do
+    expected = [
+      Solve::Demand.new(solver, "mysql"),
+      Solve::Demand.new(solver, "nginx")
+    ]
+    solver.demands.should == expected
+  end
 
-      it "adds a demand for each element in the array" do
-        obj = subject.new(graph, demand_array)
+  it "has a graph" do
+    solver.graph.should == graph
+  end
 
-        obj.demands.should have(2).items
-      end
+  describe "when the constraints are solvable" do
+    let(:graph) do
+      graph = Solve::Graph.new
+      graph.artifacts("A", "1.0.0")
+      graph.artifacts("B", "1.0.0").depends("A")
+      graph
+    end
 
-      context "when demand_array is an array of array" do
-        let(:demand_array) { [["nginx", "= 1.2.3"], ["ntp", "= 1.0.0"]] }
+    let(:demands) { [["A"], ["B"]] }
 
-        it "creates a new demand with the name and constraint of each element in the array" do
-          obj = subject.new(graph, demand_array)
+    it "gives the solution as a Hash" do
+      solver.resolve.should == {"A"=>"1.0.0", "B"=>"1.0.0"}
+    end
 
-          obj.demands[0].name.should eql("nginx")
-          obj.demands[0].constraint.to_s.should eql("= 1.2.3")
-          obj.demands[1].name.should eql("ntp")
-          obj.demands[1].constraint.to_s.should eql("= 1.0.0")
-        end
-      end
+    it "gives the solution in sorted form" do
+      solver.resolve(sorted: true).should == [["A", "1.0.0"], ["B", "1.0.0"]]
+    end
+  end
 
-      context "when demand_array is an array of strings" do
-        let(:demand_array) { ["nginx", "ntp"] }
-
-        it "creates a new demand with the name and a default constraint of each element in the array" do
-          obj = subject.new(graph, demand_array)
-
-          obj.demands[0].name.should eql("nginx")
-          obj.demands[0].constraint.to_s.should eql(">= 0.0.0")
-          obj.demands[1].name.should eql("ntp")
-          obj.demands[1].constraint.to_s.should eql(">= 0.0.0")
-        end
-      end
-
-      context "when demand_array is a mix between an array of arrays and an array of strings" do
-        let(:demand_array) { [["nginx", "= 1.2.3"], "ntp"] }
-
-        it "creates a new demand with the name and default constraint or constraint of each element in the array" do
-          obj = subject.new(graph, demand_array)
-
-          obj.demands[0].name.should eql("nginx")
-          obj.demands[0].constraint.to_s.should eql("= 1.2.3")
-          obj.demands[1].name.should eql("ntp")
-          obj.demands[1].constraint.to_s.should eql(">= 0.0.0")
-        end
+  describe "when the constraints are not solvable" do
+    let(:error) do
+      begin
+        solver.resolve
+      rescue => e
+        e
+      else
+        raise "Expected resolve to cause an error"
       end
     end
 
-    describe "::demand_key" do
-      let(:demand) { Solve::Demand.new(double('solver'), "nginx", "= 1.2.3") }
+    context "and dep-selector identifies missing artifacts" do
+      let(:graph) do
+        graph = Solve::Graph.new
+        graph.artifacts("A", "1.0.0")
+        graph
+      end
 
-      it "returns a symbol containing the name and constraint of the demand" do
-        subject.demand_key(demand).should eql(:'nginx-= 1.2.3')
+      let(:demands) { [ ["Z"] ] }
+
+      it "raises an error detailing the missing artifacts" do
+        error.to_s.should include("Missing artifacts: Z")
       end
     end
 
-    describe "::satisfy_all" do
-      let(:ver_one) { Solve::Version.new("3.1.1") }
-      let(:ver_two) { Solve::Version.new("3.1.2") }
-
-      let(:constraints) do
-        [
-          Solve::Constraint.new("> 3.0.0"),
-          Solve::Constraint.new("<= 3.1.2")
-        ]
+    context "and dep-selector identifies constraints that exclude all known versions" do
+      let(:graph) do
+        graph = Solve::Graph.new
+        graph.artifacts("A", "1.0.0")
+        graph
       end
 
-      let(:versions) do
-        [
-          Solve::Version.new("0.0.1"),
-          Solve::Version.new("0.1.0"),
-          Solve::Version.new("1.0.0"),
-          Solve::Version.new("2.0.0"),
-          Solve::Version.new("3.0.0"),
-          ver_one,
-          ver_two,
-          Solve::Version.new("4.1.0")
-        ].shuffle
-      end
+      let(:demands) { [ ["A", "> 1.0.0"] ] }
 
-      it "returns all of the versions which satisfy all of the given constraints" do
-        solution = subject.satisfy_all(constraints, versions)
-
-        solution.should have(2).items
-        solution.should include(ver_one)
-        solution.should include(ver_two)
-      end
-
-      context "given multiple duplicate versions" do
-        let(:versions) do
-          [
-            ver_one,
-            ver_one,
-            ver_one
-          ]
-        end
-
-        it "does not return duplicate satisfied versions" do
-          solution = subject.satisfy_all(constraints, versions)
-
-          solution.should have(1).item
-        end
+      it "raises an error detailing the missing artifacts" do
+        error.to_s.should include("Required artifacts do not exist at the desired version")
+        error.to_s.should include("Constraints that match no available version: (A > 1.0.0)")
       end
     end
 
-    describe "::satisfy_best" do
-      let(:versions) do
-        [
-          Solve::Version.new("0.0.1"),
-          Solve::Version.new("0.1.0"),
-          Solve::Version.new("1.0.0"),
-          Solve::Version.new("2.0.0"),
-          Solve::Version.new("3.0.0"),
-          Solve::Version.new("3.1.1"),
-          Solve::Version.new("3.1.2"),
-          Solve::Version.new("4.1.0")
-        ].shuffle
+    context "and dep-selector identifies dependency conflicts" do
+      let(:graph) do
+        graph = Solve::Graph.new
+        graph.artifacts("A", "1.0.0").depends("B").depends("C")
+        graph.artifacts("B", "1.0.0").depends("D", "= 1.0.0")
+        graph.artifacts("C", "1.0.0").depends("D", "= 2.0.0")
+        graph.artifacts("D", "1.0.0")
+        graph.artifacts("D", "2.0.0")
+        graph
       end
 
-      it "returns the best possible match for the given constraints" do
-        subject.satisfy_best([">= 1.0.0", "< 4.1.0"], versions).to_s.should eql("3.1.2")
+      let(:demands) { [ [ "A" ] ] }
+
+      it "raises an error detailing the missing artifacts" do
+        error.to_s.should include("Demand that cannot be met: (A >= 0.0.0)")
+        error.to_s.should include("Artifacts for which there are conflicting dependencies: D = 1.0.0 -> []")
+      end
+    end
+
+    context "and dep-selector times out looking for a solution" do
+      let(:selector) { double(DepSelector::Selector) }
+
+      before do
+        graph.stub(:artifacts).and_return([])
+        DepSelector::Selector.stub(:new).and_return(selector)
+        selector.stub(:find_solution).and_raise(DepSelector::Exceptions::TimeBoundExceeded)
       end
 
-      context "given no version matches a constraint" do
-        let(:versions) do
-          [
-            Solve::Version.new("4.1.0")
-          ]
-        end
+      it "raises an error explaining no solution could be found" do
+        error.to_s.should include("The dependency constraints could not be solved in the time allotted.")
+      end
+    end
 
-        it "raises a NoSolutionError error" do
-          lambda {
-            subject.satisfy_best(">= 5.0.0", versions)
-          }.should raise_error(Solve::Errors::NoSolutionError)
-        end
+    context "and dep-selector times out looking for dependency conflicts" do
+      let(:selector) { double(DepSelector::Selector) }
+
+      before do
+        graph.stub(:artifacts).and_return([])
+        DepSelector::Selector.stub(:new).and_return(selector)
+        selector.stub(:find_solution).and_raise(DepSelector::Exceptions::TimeBoundExceededNoSolution)
+      end
+
+      it "raises a NoSolutionCauseUnknown error to indicate that no debug info was generated" do
+        error.should be_a_kind_of(Solve::Errors::NoSolutionCauseUnknown)
+      end
+
+      it "raises an error explaining that no solution exists but the cause could not be determined" do
+        error.to_s.should include("There is a dependency conflict, but the solver could not determine the precise cause in the time allotted.")
       end
     end
   end
 
-  subject { Solve::Solver.new(graph) }
-
-  describe "#resolve" do
-    let(:graph) { Solve::Graph.new }
-
-    subject { Solve::Solver.new(graph) }
-
-    before(:each) do
-      graph.artifacts("nginx", "1.0.0")
-      subject.demands("nginx", "= 1.0.0")
-    end
-
-    it "returns a solution in the form of a Hash" do
-      subject.resolve.should be_a(Hash)
-    end
+  describe "finding unsatisfiable demands" do
+    it "partitions demands into satisfiable and not satisfiable"
   end
 
-  describe "#demands" do
-    context "given a name and constraint argument" do
-      let(:name) { "nginx" }
-      let(:constraint) { "~> 0.101.5" }
+  describe "supporting Serializer interface" do
+    let(:serializer) { Solve::Solver::Serializer.new }
 
-      context "given the artifact of the given name and constraint does not exist" do
-        it "returns a Solve::Demand" do
-          subject.demands(name, constraint).should be_a(Solve::Demand)
-        end
-
-        it "the artifact has the given name" do
-          subject.demands(name, constraint).name.should eql(name)
-        end
-
-        it "the artifact has the given constraint" do
-          subject.demands(name, constraint).constraint.to_s.should eql(constraint)
-        end
-
-        it "adds an artifact to the demands collection" do
-          subject.demands(name, constraint)
-
-          subject.demands.should have(1).item
-        end
-
-        it "the artifact added matches the given name" do
-          subject.demands(name, constraint)
-
-          subject.demands[0].name.should eql(name)
-        end
-
-        it "the artifact added matches the given constraint" do
-          subject.demands(name, constraint)
-
-          subject.demands[0].constraint.to_s.should eql(constraint)
-        end
-      end
+    before do
+      graph.stub(:artifacts).and_return([])
     end
 
-    context "given only a name argument" do
-      it "returns a demand with a match all version constraint (>= 0.0.0)" do
-        subject.demands("nginx").constraint.to_s.should eql(">= 0.0.0")
-      end
-    end
+    it "implements the required interface" do
+      json_string = serializer.serialize(solver)
+      problem_data = JSON.parse(json_string)
+      expected_demands = [
+        {"name" => "mysql", "constraint" => ">= 0.0.0"},
+        {"name" => "nginx", "constraint" => ">= 0.0.0"}
+      ]
 
-    context "given no arguments" do
-      it "returns an array" do
-        subject.demands.should be_a(Array)
-      end
-
-      it "returns an empty array if no demands have been accessed" do
-        subject.demands.should have(0).items
-      end
-
-      it "returns an array containing a demand if one was accessed" do
-        subject.demands("nginx", "~> 0.101.5")
-
-        subject.demands.should have(1).item
-      end
-    end
-
-    context "given an unexpected number of arguments" do
-      it "raises an ArgumentError if more than two are provided" do
-        lambda {
-          subject.demands(1, 2, 3)
-        }.should raise_error(ArgumentError, "Unexpected number of arguments. You gave: 3. Expected: 2 or less.")
-      end
-
-      it "raises an ArgumentError if a name argument of nil is provided" do
-        lambda {
-          subject.demands(nil)
-        }.should raise_error(ArgumentError, "A name must be specified. You gave: [nil].")
-      end
-
-      it "raises an ArgumentError if a name and constraint argument are provided but name is nil" do
-        lambda {
-          subject.demands(nil, "= 1.0.0")
-        }.should raise_error(ArgumentError, 'A name must be specified. You gave: [nil, "= 1.0.0"].')
-      end
-    end
-  end
-
-  describe "#add_demand" do
-    let(:demand) { Solve::Demand.new(double('graph'), 'ntp') }
-
-    it "adds a Solve::Artifact to the collection of artifacts" do
-      subject.add_demand(demand)
-
-      subject.should have_demand(demand)
-      subject.demands.should have(1).item
-    end
-
-    it "should not add the same demand twice to the collection" do
-      subject.add_demand(demand)
-      subject.add_demand(demand)
-
-      subject.demands.should have(1).item
-    end
-  end
-
-  describe "#remove_demand" do
-    let(:demand) { Solve::Demand.new(double('graph'), 'ntp') }
-
-    context "given the demand is a member of the collection" do
-      before(:each) { subject.add_demand(demand) }
-
-      it "removes the Solve::Artifact from the collection of demands" do
-        subject.remove_demand(demand)
-
-        subject.demands.should have(0).items
-      end
-
-      it "returns the removed Solve::Artifact" do
-        subject.remove_demand(demand).should eql(demand)
-      end
-    end
-
-    context "given the demand is not a member of the collection" do
-      it "should return nil" do
-        subject.remove_demand(demand).should be_nil
-      end
-    end
-  end
-
-  describe "#has_demand?" do
-    let(:demand) { Solve::Demand.new(double('graph'), 'ntp') }
-
-    it "returns true if the given Solve::Artifact is a member of the collection" do
-      subject.add_demand(demand)
-
-      subject.has_demand?(demand).should be_true
-    end
-
-    it "returns false if the given Solve::Artifact is not a member of the collection" do
-      subject.has_demand?(demand).should be_false
+      problem_data["demands"].should =~ expected_demands
     end
   end
 end
+
