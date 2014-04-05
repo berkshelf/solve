@@ -170,7 +170,7 @@ module Solve
       def build_sorted_solution(unsorted_solution)
         nodes = Hash.new
         unsorted_solution.each do |name, version|
-          nodes[name] = @graph.get_artifact(name, version).dependencies.map(&:name)
+          nodes[name] = @graph.artifact(name, version).dependencies.map(&:name)
         end
 
         # Modified from http://ruby-doc.org/stdlib-1.9.3/libdoc/tsort/rdoc/TSort.html

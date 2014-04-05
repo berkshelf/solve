@@ -10,7 +10,6 @@ module Solve
   require_relative 'solve/solver'
   require_relative 'solve/universe'
   require_relative 'solve/version'
-  require_relative 'solve/tracers'
 
   # The default constraint.
   #

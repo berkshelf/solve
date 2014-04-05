@@ -1,10 +1,6 @@
 require 'spec_helper'
 
 describe Solve::Solver::Serializer do
-  before do
-    Solve.stub(:tracer).and_return(Solve::Tracers::Silent.new)
-  end
-
   it "deserializes a serialized solver to an equivalent solver" do
     graph = Solve::Graph.new
 
