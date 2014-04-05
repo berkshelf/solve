@@ -162,6 +162,7 @@ module Solve
 
     # @param [#to_s] constraint
     def initialize(constraint = nil)
+      constraint = constraint.to_s
       if constraint.nil? || constraint.empty?
         constraint = '>= 0.0.0'
       end
