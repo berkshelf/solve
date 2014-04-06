@@ -23,7 +23,7 @@ module Solve
     # @param [Solve::Graph] graph
     # @param [Array<String>, Array<Array<String, String>>] demands
     # @param [#say] ui
-    def initialize(graph, demands, ui=nil)
+    def initialize(graph, demands, ui = nil)
       @ds_graph = DepSelector::DependencyGraph.new
       @graph = graph
       @demands_array = demands
@@ -48,7 +48,7 @@ module Solve
     # @raise [Errors::UnsortableSolutionError] when the :sorted option is true
     #   and the demands have a solution, but the solution contains a cyclic
     #   dependency
-    def resolve(options={})
+    def resolve(options = {})
       solution = solve_demands(demands_as_constraints)
 
       unsorted_solution = solution.inject({}) do |stringified_soln, (name, version)|
