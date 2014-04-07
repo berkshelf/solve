@@ -35,7 +35,7 @@ module Solve
     #
     # @return [Boolean]
     def dependency?(name, constraint)
-      !dependency(name, constraint).nil?
+      !get_dependency(name, constraint).nil?
     end
     alias_method :has_dependency?, :dependency?
 
@@ -46,7 +46,7 @@ module Solve
     #
     # @return [Solve::Artifact, nil]
     def dependency(name, constraint)
-      @dependencies["#{name}-#{constraint}"] = Dependency.new(self, name, constraint)
+      set_dependency(name, constraint)
     end
 
     # Return the collection of dependencies on this instance of artifact
@@ -76,7 +76,7 @@ module Solve
     # @return [Solve::Artifact]
     def depends(name, constraint = '>= 0.0.0')
       unless dependency?(name, constraint)
-        @dependencies["#{name}-#{constraint}"] = Dependency.new(self, name, constraint)
+        set_dependency(name, constraint)
       end
 
       self
@@ -102,5 +102,15 @@ module Solve
     def <=>(other)
       self.version <=> other.version
     end
+
+    private
+
+      def get_dependency(name, constraint)
+        @dependencies["#{name}-#{constraint}"]
+      end
+
+      def set_dependency(name, constraint)
+        @dependencies["#{name}-#{constraint}"] = Dependency.new(self, name, constraint)
+      end
   end
 end
