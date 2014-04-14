@@ -17,5 +17,5 @@ Gem::Specification.new do |s|
   s.required_ruby_version = ">= 1.9.1"
 
   s.add_dependency "semverse",     "~> 1.1"
-  s.add_dependency "dep_selector", "~> 1.0.0.rc"
+  s.add_dependency "dep_selector", "~> 1.0"
 end
