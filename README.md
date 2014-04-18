@@ -38,6 +38,14 @@ NOTE: This will raise Solve::Errors::UnsortableSolutionError if the solution con
 
     Solve.it!(graph, ['nginx', '>= 0.100.0'], sorted: true)
 
+### Increasing the solver's timeout
+
+By default the solver will wait 10 seconds before giving up on finding a solution. Under certain conditions a graph may be too complicated to solve within the alotted time. To increase the timeout you can set the "SOLVE_TIMEOUT" environment variable to the amount of seconds desired.
+
+    $ export SOLVE_TIMEOUT=30
+
+This will set the timeout to 30 seconds instead of 10 seconds.
+
 ## Authors
 
 * [Jamie Winsor](https://github.com/reset) (<jamie@vialstudios.com>)

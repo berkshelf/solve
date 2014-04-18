@@ -1,6 +1,24 @@
 require 'spec_helper'
 
 describe Solve::Solver do
+  describe "ClassMethods" do
+    describe "::timeout" do
+      subject { described_class.timeout }
+
+      it "returns 10,000 by default" do
+        expect(subject).to eql(10_000)
+      end
+
+      context "when the SOLVE_TIMEOUT env variable is set" do
+        before { ENV.stub(:[]).with("SOLVE_TIMEOUT") { "30" } }
+
+        it "returns the value multiplied by a thousand" do
+          expect(subject).to eql(30_000)
+        end
+      end
+    end
+  end
+
   let(:graph) { double(Solve::Graph) }
   let(:demands) { [["mysql"], ["nginx"]] }
   subject(:solver) { described_class.new(graph, demands) }

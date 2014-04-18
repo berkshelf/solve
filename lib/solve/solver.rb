@@ -4,6 +4,13 @@ require_relative 'solver/serializer'
 
 module Solve
   class Solver
+    class << self
+      def timeout
+        seconds = 10 unless seconds = ENV["SOLVE_TIMEOUT"]
+        seconds.to_i * 1_000
+      end
+    end
+
     # Graph object with references to all known artifacts and dependency
     # constraints.
     #
@@ -24,10 +31,10 @@ module Solve
     # @param [Array<String>, Array<Array<String, String>>] demands
     # @param [#say] ui
     def initialize(graph, demands, ui = nil)
-      @ds_graph = DepSelector::DependencyGraph.new
-      @graph = graph
+      @ds_graph      = DepSelector::DependencyGraph.new
+      @graph         = graph
       @demands_array = demands
-      @timeout_ms = 1_000
+      @timeout_ms    = self.class.timeout
     end
 
     # The problem demands given as Demand model objects
