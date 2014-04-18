@@ -5,6 +5,10 @@ require_relative 'solver/serializer'
 module Solve
   class Solver
     class << self
+      # The timeout (in seconds) to use when resolving graphs. Default is 10. This can be
+      # configured by setting the SOLVE_TIMEOUT environment variable.
+      #
+      # @return [Integer]
       def timeout
         seconds = 10 unless seconds = ENV["SOLVE_TIMEOUT"]
         seconds.to_i * 1_000
