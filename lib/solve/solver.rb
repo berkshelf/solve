@@ -33,8 +33,7 @@ module Solve
     #   Solver.new(graph, demands)
     # @param [Solve::Graph] graph
     # @param [Array<String>, Array<Array<String, String>>] demands
-    # @param [#say] ui
-    def initialize(graph, demands, ui = nil)
+    def initialize(graph, demands)
       @ds_graph      = DepSelector::DependencyGraph.new
       @graph         = graph
       @demands_array = demands

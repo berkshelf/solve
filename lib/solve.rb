@@ -22,8 +22,6 @@ module Solve
     # @param [Solve::Graph] graph
     # @param [Array<Solve::Demand>, Array<String, String>] demands
     #
-    # @option options [#say] :ui (nil)
-    #   a ui object for output
     # @option options [Boolean] :sorted (false)
     #   should the output be a sorted list rather than a Hash
     #
@@ -31,7 +29,7 @@ module Solve
     #
     # @return [Hash]
     def it!(graph, demands, options = {})
-      Solver.new(graph, demands, options[:ui]).resolve(options)
+      Solver.new(graph, demands).resolve(options)
     end
   end
 end
