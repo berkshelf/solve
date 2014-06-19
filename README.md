@@ -15,7 +15,7 @@ A Ruby versioning constraint solver implementing [Semantic Versioning 2.0.0](htt
 
 Create a new graph
 
-    graph = Graph.new
+    graph = Solve::Graph.new
 
 Add an artifact to the graph
 
