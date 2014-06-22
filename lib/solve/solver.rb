@@ -146,7 +146,7 @@ module Solve
         end
 
         constrained_to_no_versions = e.constrained_to_no_versions.inject([]) do |list, constraint|
-          list << constraint.to_s
+          list << [constraint.package.name, constraint.constraint.to_s]
         end
 
         raise Solve::Errors::NoSolutionError.new(
