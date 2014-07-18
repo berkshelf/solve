@@ -40,11 +40,11 @@ NOTE: This will raise Solve::Errors::UnsortableSolutionError if the solution con
 
 ### Increasing the solver's timeout
 
-By default the solver will wait 10 seconds before giving up on finding a solution. Under certain conditions a graph may be too complicated to solve within the alotted time. To increase the timeout you can set the "SOLVE_TIMEOUT" environment variable to the amount of seconds desired.
+By default the solver will wait 30 seconds before giving up on finding a solution. Under certain conditions a graph may be too complicated to solve within the alotted time. To increase the timeout you can set the "SOLVE_TIMEOUT" environment variable to the amount of seconds desired.
 
-    $ export SOLVE_TIMEOUT=30
+    $ export SOLVE_TIMEOUT=60
 
-This will set the timeout to 30 seconds instead of 10 seconds.
+This will set the timeout to 60 seconds instead of the default 30 seconds.
 
 ## Authors
 
