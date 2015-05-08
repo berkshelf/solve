@@ -35,11 +35,16 @@ end
 STATIC_GRAPH = create_graph
 
 def solve_gecode
-  Solve::Solver.new(STATIC_GRAPH, demands, {}).resolve({})
+  Solve::Solver.new(STATIC_GRAPH, demands).resolve({})
 rescue Solve::Errors::NoSolutionError
+end
+
+def solve_ruby
+  Solve::RubySolver.new(STATIC_GRAPH, demands).resolve({})
 end
 
 Benchmark.bm(12) do |x|
   x.report("Create graph")   { N.times { create_graph } }
   x.report("Solve Gecode") { N.times { solve_gecode } }
+  x.report("Solve Ruby") { N.times { solve_ruby } }
 end
