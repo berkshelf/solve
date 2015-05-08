@@ -18,4 +18,5 @@ Gem::Specification.new do |s|
 
   s.add_dependency "semverse",     "~> 1.1"
   s.add_dependency "dep_selector", "~> 1.0"
+  s.add_dependency "molinillo",    "~> 0.2.3"
 end
