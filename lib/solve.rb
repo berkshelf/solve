@@ -7,7 +7,7 @@ module Solve
   require_relative 'solve/version'
   require_relative 'solve/errors'
   require_relative 'solve/graph'
-  require_relative 'solve/solver'
+  require_relative 'solve/gecode_solver'
 
   class << self
     # @return [Solve::Formatter]
