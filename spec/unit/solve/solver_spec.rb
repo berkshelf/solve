@@ -5,8 +5,8 @@ describe Solve::Solver do
     describe "::timeout" do
       subject { described_class.timeout }
 
-      it "returns 10,000 by default" do
-        expect(subject).to eql(10_000)
+      it "returns 30,000 by default" do
+        expect(subject).to eql(30_000)
       end
 
       context "when the SOLVE_TIMEOUT env variable is set" do
