@@ -71,32 +71,24 @@ describe "Solutions when using the ruby solver" do
                       "D" => "2.1.0")
   end
 
-  it "finds the correct solution when there is a circular dependency" do
+  it "rejects a circular dependency with a circular dep error" do
     graph = Solve::Graph.new
 
     graph.artifact("A", "1.0.0").depends("B", "1.0.0")
     graph.artifact("B", "1.0.0").depends("C", "1.0.0")
     graph.artifact("C", "1.0.0").depends("A", "1.0.0")
 
-    result = Solve.it!(graph, [["A", "1.0.0"]])
-
-    result.should eql("A" => "1.0.0",
-                      "B" => "1.0.0",
-                      "C" => "1.0.0")
+    expect { Solve.it!(graph, [["A", "1.0.0"]]) }.to raise_error(Solve::Errors::NoSolutionError)
   end
 
-  it "finds the correct solution when there is a p shaped depenency chain" do
+  it "rejects a p shaped depenency chain with a circular dep error" do
     graph = Solve::Graph.new
 
     graph.artifact("A", "1.0.0").depends("B", "1.0.0")
     graph.artifact("B", "1.0.0").depends("C", "1.0.0")
     graph.artifact("C", "1.0.0").depends("B", "1.0.0")
 
-    result = Solve.it!(graph, [["A", "1.0.0"]])
-
-    result.should eql("A" => "1.0.0",
-                      "B" => "1.0.0",
-                      "C" => "1.0.0")
+    expect { Solve.it!(graph, [["A", "1.0.0"]]) }.to raise_error(Solve::Errors::NoSolutionError)
   end
 
   it "finds the correct solution when there is a diamond shaped dependency" do
@@ -299,7 +291,7 @@ describe "Solutions when using the ruby solver" do
     end
 
     describe "when the solution is cyclic" do
-      it "raises a Solve::Errors::UnsortableSolutionError which contains the unsorted solution" do
+      it "raises a Solve::Errors::NoSolutionError because Molinillo doesn't support circular deps" do
         graph = Solve::Graph.new
 
         graph.artifact("A", "1.0.0").depends("B", "= 1.0.0")
@@ -308,14 +300,7 @@ describe "Solutions when using the ruby solver" do
 
         demands = [["A"]]
 
-        expect { Solve.it!(graph, demands, { :sorted => true  } ) }.to raise_error { |error|
-          error.should be_a(Solve::Errors::UnsortableSolutionError)
-          error.unsorted_solution.should eql({
-            "A" => "1.0.0",
-            "B" => "1.0.0",
-            "C" => "1.0.0",
-          })
-        }
+        expect { Solve.it!(graph, demands, { :sorted => true  } ) }.to raise_error(Solve::Errors::NoSolutionError)
       end
     end
   end
