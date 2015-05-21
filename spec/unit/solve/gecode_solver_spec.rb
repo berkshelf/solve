@@ -1,5 +1,7 @@
 require 'spec_helper'
 
+require 'solve/gecode_solver'
+
 describe Solve::Solver do
   describe "ClassMethods" do
     describe "::timeout" do
