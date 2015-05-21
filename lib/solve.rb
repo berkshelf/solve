@@ -7,12 +7,40 @@ module Solve
   require_relative 'solve/version'
   require_relative 'solve/errors'
   require_relative 'solve/graph'
-  require_relative 'solve/gecode_solver'
   require_relative 'solve/ruby_solver'
 
   class << self
     # @return [Solve::Formatter]
     attr_reader :tracer
+
+    @engine = :ruby
+
+    # Returns the currently configured engine.
+    # @see #engine=
+    # @return [Symbol]
+    attr_reader :engine
+
+
+    # Sets the solving backend engine. Solve supports 2 engines:
+    # * `:ruby` - Molinillo, a pure ruby solver
+    # * `:gecode` - dep-selector, a wrapper around the Gecode CSP solver library
+    #
+    # Note that dep-selector is an optional dependency and may therefore not be
+    # available.
+    #
+    # @param [Symbol] selected_engine
+    # @return [Symbol] selected_engine
+    def engine=(selected_engine)
+      case selected_engine
+      when :gecode
+        require_relative 'solve/gecode_solver'
+      when :ruby
+        # we're good.
+      else
+        raise Errors::InvalidEngine, "Engine `#{selected_engine}` is not supported. Valid values are `:ruby`, `:gecode`"
+      end
+      @engine = selected_engine
+    end
 
     # A quick solve. Given the "world" as we know it (the graph) and a list of
     # requirements (demands) which must be met. Return me the best solution of
@@ -30,7 +58,18 @@ module Solve
     #
     # @return [Hash]
     def it!(graph, demands, options = {})
-      Solver.new(graph, demands).resolve(options)
+      solver_for_engine.new(graph, demands, options).resolve(options)
     end
+
+    def solver_for_engine
+      case engine
+      when :ruby
+        RubySolver
+      when :gecode
+        Solver
+      end
+    end
+
+    private :solver_for_engine
   end
 end

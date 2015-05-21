@@ -33,7 +33,8 @@ module Solve
     #   Solver.new(graph, demands)
     # @param [Solve::Graph] graph
     # @param [Array<String>, Array<Array<String, String>>] demands
-    def initialize(graph, demands)
+    # @param [Hash] options - unused, only present for API compatibility with RubySolver
+    def initialize(graph, demands, options = {})
       @ds_graph      = DepSelector::DependencyGraph.new
       @graph         = graph
       @demands_array = demands

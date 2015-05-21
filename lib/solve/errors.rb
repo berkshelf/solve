@@ -4,6 +4,9 @@ module Solve
       alias_method :mesage, :to_s
     end
 
+    class InvalidEngine < SolveError
+    end
+
     class NoSolutionError < SolveError
 
       # Artifacts that don't exist at any version but are required for a valid

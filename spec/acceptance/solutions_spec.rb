@@ -1,6 +1,11 @@
 require 'spec_helper'
 
 describe "Solutions" do
+
+  before do
+    Solve.engine = :gecode
+  end
+
   it "chooses the correct artifact for the demands" do
     graph = Solve::Graph.new
     graph.artifact("mysql", "2.0.0")
