@@ -3,7 +3,7 @@ require 'set'
 require_relative 'solver/serializer'
 
 module Solve
-  class Solver
+  class GecodeSolver
     class << self
       # The timeout (in seconds) to use when resolving graphs. Default is 10. This can be
       # configured by setting the SOLVE_TIMEOUT environment variable.
@@ -30,7 +30,7 @@ module Solve
     #   graph = Solve::Graph.new
     #   graph.artifacts("mysql", "1.2.0")
     #   demands = [["mysql"]]
-    #   Solver.new(graph, demands)
+    #   GecodeSolver.new(graph, demands)
     # @param [Solve::Graph] graph
     # @param [Array<String>, Array<Array<String, String>>] demands
     # @param [Hash] options - unused, only present for API compatibility with RubySolver

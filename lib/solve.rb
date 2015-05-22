@@ -66,7 +66,7 @@ module Solve
       when :ruby
         RubySolver
       when :gecode
-        Solver
+        GecodeSolver
       end
     end
 

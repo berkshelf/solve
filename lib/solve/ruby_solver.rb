@@ -30,7 +30,7 @@ module Solve
     #   graph = Solve::Graph.new
     #   graph.artifacts("mysql", "1.2.0")
     #   demands = [["mysql"]]
-    #   Solver.new(graph, demands)
+    #   RubySolver.new(graph, demands)
     # @param [Solve::Graph] graph
     # @param [Array<String>, Array<Array<String, String>>] demands
     def initialize(graph, demands, options = {})
