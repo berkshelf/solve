@@ -2,7 +2,6 @@ module Solve
   class Graph
     def initialize
       @artifacts = {}
-      #@artifacts_by_name = Hash.new { |hash, key| hash[key] = [] }
       @artifacts_by_name = Hash.new { |hash, key| hash[key] = [] }
     end
 
