@@ -38,6 +38,22 @@ NOTE: This will raise Solve::Errors::UnsortableSolutionError if the solution con
 
     Solve.it!(graph, [['nginx', '>= 0.100.0']], sorted: true)
 
+
+### Selecting A Resolver
+
+Solve supports two different resolvers. A pure Ruby solver implemented using [Molinillo](https://github.com/CocoaPods/Molinillo) and the same dependency resolver the Chef Server uses, [dep-selector](https://github.com/chef/dep-selector), which is a Ruby C extension for [Gecode](https://github.com/ampl/gecode).
+
+You can set the resolver by calling `Solver.engine=` with the symbol `:ruby` or `:gecode`.
+
+```ruby
+    Solver.engine = :ruby
+    Solver.engine = :gecode
+```
+
+The Ruby solver is installed and enabled by default. If you'd like to use the Gecode solver you can do so by installing the dep-selector gem or adding it to your Gemfile:
+
+    $ gem install dep_selector
+
 ### Increasing the solver's timeout
 
 By default the solver will wait 30 seconds before giving up on finding a solution. Under certain conditions a graph may be too complicated to solve within the alotted time. To increase the timeout you can set the "SOLVE_TIMEOUT" environment variable to the amount of seconds desired.
