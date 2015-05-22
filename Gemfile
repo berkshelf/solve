@@ -2,7 +2,14 @@ source 'https://rubygems.org'
 
 gemspec
 
-group :development do
+group :gecode do
+  gem "dep_selector", "~> 1.0"
+end
+
+# If this group is named "development", then `bundle install --without
+# development` automagically excludes development dependencies that are listed
+# in the gemspec, which will skip installing rspec and then we can't run tests.
+group :dev do
   gem 'fuubar'
   gem 'yard'
   gem 'redcarpet'
@@ -24,10 +31,3 @@ group :development do
   end
 end
 
-group :test do
-  gem 'thor', '>= 0.16.0'
-  gem 'rake', '>= 0.9.2.2'
-
-  gem 'spork'
-  gem 'rspec'
-end

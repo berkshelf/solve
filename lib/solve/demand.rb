@@ -2,7 +2,7 @@ module Solve
   class Demand
     # A reference to the solver this demand belongs to
     #
-    # @return [Solve::Solver]
+    # @return [Solve::RubySolver,Solve::GecodeSolver]
     attr_reader :solver
 
     # The name of the artifact this demand is for
@@ -15,7 +15,7 @@ module Solve
     # @return [Semverse::Constraint]
     attr_reader :constraint
 
-    # @param [Solve::Solver] solver
+    # @param [Solve::RubySolver,Solve::GecodeSolver] solver
     # @param [#to_s] name
     # @param [Semverse::Constraint, #to_s] constraint
     def initialize(solver, name, constraint = Semverse::DEFAULT_CONSTRAINT)

@@ -1,9 +1,9 @@
 require 'spec_helper'
 
-describe "Solutions", :gecode do
+describe "Solutions when using the ruby solver" do
 
   before do
-    Solve.engine = :gecode
+    Solve.engine = :ruby
   end
 
   it "chooses the correct artifact for the demands" do
@@ -71,32 +71,24 @@ describe "Solutions", :gecode do
                       "D" => "2.1.0")
   end
 
-  it "finds the correct solution when there is a circular dependency" do
+  it "rejects a circular dependency with a circular dep error" do
     graph = Solve::Graph.new
 
     graph.artifact("A", "1.0.0").depends("B", "1.0.0")
     graph.artifact("B", "1.0.0").depends("C", "1.0.0")
     graph.artifact("C", "1.0.0").depends("A", "1.0.0")
 
-    result = Solve.it!(graph, [["A", "1.0.0"]])
-
-    result.should eql("A" => "1.0.0",
-                      "B" => "1.0.0",
-                      "C" => "1.0.0")
+    expect { Solve.it!(graph, [["A", "1.0.0"]]) }.to raise_error(Solve::Errors::NoSolutionError)
   end
 
-  it "finds the correct solution when there is a p shaped depenency chain" do
+  it "rejects a p shaped depenency chain with a circular dep error" do
     graph = Solve::Graph.new
 
     graph.artifact("A", "1.0.0").depends("B", "1.0.0")
     graph.artifact("B", "1.0.0").depends("C", "1.0.0")
     graph.artifact("C", "1.0.0").depends("B", "1.0.0")
 
-    result = Solve.it!(graph, [["A", "1.0.0"]])
-
-    result.should eql("A" => "1.0.0",
-                      "B" => "1.0.0",
-                      "C" => "1.0.0")
+    expect { Solve.it!(graph, [["A", "1.0.0"]]) }.to raise_error(Solve::Errors::NoSolutionError)
   end
 
   it "finds the correct solution when there is a diamond shaped dependency" do
@@ -188,16 +180,21 @@ describe "Solutions", :gecode do
     graph.artifact("C", "1.0.1").depends("D", "1.0.0")
     graph.artifact("C", "1.0.2").depends("D", "1.0.0")
 
-    # ensure we can't find a solution in the above
-    graph.artifact("D", "1.0.0").depends("A", "< 0.0.0")
+    # Note:
+    # This test previously used two circular dependencies:
+    # (D 1.0.0) -> A < 0.0.0
+    # (D 0.0.0) -> A = 0.0.0
+    # But Molinillo doesn't support circular dependencies at all.
 
-    # Add a solution to the graph that should be reached only after
-    #   all of the others have been tried
-    #   it must be circular to ensure that no other branch can find it
+    # ensure we can't find a solution in the above
+    graph.artifact("D", "1.0.0").depends("E", "< 0.0.0")
+
+    # Add a solution to the graph that should be reached only after all of the
+    # others have been tried
     graph.artifact("A", "0.0.0").depends("B", "0.0.0")
     graph.artifact("B", "0.0.0").depends("C", "0.0.0")
     graph.artifact("C", "0.0.0").depends("D", "0.0.0")
-    graph.artifact("D", "0.0.0").depends("A", "0.0.0")
+    graph.artifact("D", "0.0.0")
 
     demands = [["A"]]
 
@@ -235,18 +232,18 @@ describe "Solutions", :gecode do
 
     result = Solve.it!(graph, demands)
 
-    # ruby solver result:
+    # Note: Gecode solver is different. It picks:
     #
     # "get-the-old-one" => "1.0.0",
-    # "locked-mid-1" => "2.0.0",
-    # "locked-mid-2" => "1.0.0",
-    # "old-bottom" => "2.0.0"
+    # "locked-mid-1" => "1.0.0",
+    # "locked-mid-2" => "2.0.0",
+    # "old-bottom" => "2.1.0"
 
     result.should eql({
       "get-the-old-one" => "1.0.0",
-      "locked-mid-1" => "1.0.0",
-      "locked-mid-2" => "2.0.0",
-      "old-bottom" => "2.1.0"
+      "locked-mid-1" => "2.0.0",
+      "locked-mid-2" => "1.0.0",
+      "old-bottom" => "2.0.0"
     })
   end
 
@@ -294,7 +291,7 @@ describe "Solutions", :gecode do
     end
 
     describe "when the solution is cyclic" do
-      it "raises a Solve::Errors::UnsortableSolutionError which contains the unsorted solution" do
+      it "raises a Solve::Errors::NoSolutionError because Molinillo doesn't support circular deps" do
         graph = Solve::Graph.new
 
         graph.artifact("A", "1.0.0").depends("B", "= 1.0.0")
@@ -303,14 +300,7 @@ describe "Solutions", :gecode do
 
         demands = [["A"]]
 
-        expect { Solve.it!(graph, demands, { :sorted => true  } ) }.to raise_error { |error|
-          error.should be_a(Solve::Errors::UnsortableSolutionError)
-          error.unsorted_solution.should eql({
-            "A" => "1.0.0",
-            "B" => "1.0.0",
-            "C" => "1.0.0",
-          })
-        }
+        expect { Solve.it!(graph, demands, { :sorted => true  } ) }.to raise_error(Solve::Errors::NoSolutionError)
       end
     end
   end

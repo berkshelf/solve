@@ -1,12 +1,12 @@
 require 'spec_helper'
 
-describe Solve::Solver do
+describe Solve::RubySolver do
   describe "ClassMethods" do
     describe "::timeout" do
       subject { described_class.timeout }
 
-      it "returns 10,000 by default" do
-        expect(subject).to eql(10_000)
+      it "returns 30,000 by default" do
+        expect(subject).to eql(30_000)
       end
 
       context "when the SOLVE_TIMEOUT env variable is set" do
@@ -17,11 +17,19 @@ describe Solve::Solver do
         end
       end
     end
+
+    describe "::activate" do
+
+      it "is a no-op" do
+        described_class.activate
+      end
+
+    end
   end
 
   let(:graph) { double(Solve::Graph) }
   let(:demands) { [["mysql"], ["nginx"]] }
-  subject(:solver) { described_class.new(graph, demands) }
+  subject(:solver) { described_class.new(graph, demands, dependency_source: "Berksfile") }
 
   it "has a list of demands as ruby literals" do
     solver.demands_array.should == demands
@@ -69,7 +77,7 @@ describe Solve::Solver do
       end
     end
 
-    context "and dep-selector identifies missing artifacts" do
+    context "and molinillo identifies missing artifacts" do
       let(:graph) do
         graph = Solve::Graph.new
         graph.artifact("A", "1.0.0")
@@ -79,11 +87,17 @@ describe Solve::Solver do
       let(:demands) { [ ["Z"] ] }
 
       it "raises an error detailing the missing artifacts" do
-        error.to_s.should include("Missing artifacts: Z")
+        expect(error).to be_a_kind_of(Solve::Errors::NoSolutionError)
+        expected_error = <<-ERROR_MESSAGE
+Unable to satisfy the following requirements:
+
+- `Z (>= 0.0.0)` required by `Berksfile`
+ERROR_MESSAGE
+        expect(error.to_s).to eq(expected_error)
       end
     end
 
-    context "and dep-selector identifies constraints that exclude all known versions" do
+    context "and molinillo identifies constraints that exclude all known versions" do
       let(:graph) do
         graph = Solve::Graph.new
         graph.artifact("A", "1.0.0")
@@ -93,12 +107,17 @@ describe Solve::Solver do
       let(:demands) { [ ["A", "> 1.0.0"] ] }
 
       it "raises an error detailing the missing artifacts" do
-        error.to_s.should include("Required artifacts do not exist at the desired version")
-        error.to_s.should include("Constraints that match no available version: (A > 1.0.0)")
+        expect(error).to be_a_kind_of(Solve::Errors::NoSolutionError)
+        expected_error = <<-ERROR_MESSAGE
+Unable to satisfy the following requirements:
+
+- `A (> 1.0.0)` required by `Berksfile`
+ERROR_MESSAGE
+        expect(error.to_s).to eq(expected_error)
       end
     end
 
-    context "and dep-selector identifies dependency conflicts" do
+    context "and molinillo identifies dependency conflicts" do
       let(:graph) do
         graph = Solve::Graph.new
         graph.artifact("A", "1.0.0").depends("B").depends("C")
@@ -112,46 +131,16 @@ describe Solve::Solver do
       let(:demands) { [ [ "A" ] ] }
 
       it "raises an error detailing the missing artifacts" do
-        error.to_s.should include("Demand that cannot be met: (A >= 0.0.0)")
-        error.to_s.should include("Artifacts for which there are conflicting dependencies: D = 1.0.0 -> []")
+        expect(error).to be_a_kind_of(Solve::Errors::NoSolutionError)
+        expected_error = <<-ERROR_MESSAGE
+Unable to satisfy the following requirements:
+
+- `D (= 1.0.0)` required by `B-1.0.0`
+- `D (= 2.0.0)` required by `C-1.0.0`
+ERROR_MESSAGE
+        expect(error.to_s).to eq(expected_error)
       end
     end
-
-    context "and dep-selector times out looking for a solution" do
-      let(:selector) { double(DepSelector::Selector) }
-
-      before do
-        graph.stub(:artifacts).and_return([])
-        DepSelector::Selector.stub(:new).and_return(selector)
-        selector.stub(:find_solution).and_raise(DepSelector::Exceptions::TimeBoundExceeded)
-      end
-
-      it "raises an error explaining no solution could be found" do
-        error.to_s.should include("The dependency constraints could not be solved in the time allotted.")
-      end
-    end
-
-    context "and dep-selector times out looking for dependency conflicts" do
-      let(:selector) { double(DepSelector::Selector) }
-
-      before do
-        graph.stub(:artifacts).and_return([])
-        DepSelector::Selector.stub(:new).and_return(selector)
-        selector.stub(:find_solution).and_raise(DepSelector::Exceptions::TimeBoundExceededNoSolution)
-      end
-
-      it "raises a NoSolutionCauseUnknown error to indicate that no debug info was generated" do
-        error.should be_a_kind_of(Solve::Errors::NoSolutionCauseUnknown)
-      end
-
-      it "raises an error explaining that no solution exists but the cause could not be determined" do
-        error.to_s.should include("There is a dependency conflict, but the solver could not determine the precise cause in the time allotted.")
-      end
-    end
-  end
-
-  describe "finding unsatisfiable demands" do
-    it "partitions demands into satisfiable and not satisfiable"
   end
 
   describe "supporting Serializer interface" do
@@ -162,7 +151,8 @@ describe Solve::Solver do
     end
 
     it "implements the required interface" do
-      json_string = serializer.serialize(solver)
+      problem = Solve::Problem.from_solver(solver)
+      json_string = serializer.serialize(problem)
       problem_data = JSON.parse(json_string)
       expected_demands = [
         {"name" => "mysql", "constraint" => ">= 0.0.0"},

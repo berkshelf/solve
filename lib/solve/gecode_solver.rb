@@ -1,9 +1,9 @@
-require 'dep_selector'
 require 'set'
+require 'solve/errors'
 require_relative 'solver/serializer'
 
 module Solve
-  class Solver
+  class GecodeSolver
     class << self
       # The timeout (in seconds) to use when resolving graphs. Default is 10. This can be
       # configured by setting the SOLVE_TIMEOUT environment variable.
@@ -12,6 +12,13 @@ module Solve
       def timeout
         seconds = 30 unless seconds = ENV["SOLVE_TIMEOUT"]
         seconds.to_i * 1_000
+      end
+
+      # Attemp to load the dep_selector gem which this solver engine requires.
+      def activate
+        require 'dep_selector'
+      rescue LoadError => e
+        raise Errors::EngineNotAvailable, "dep_selector is not installed, GecodeSolver cannot be used (#{e})"
       end
     end
 
@@ -30,10 +37,11 @@ module Solve
     #   graph = Solve::Graph.new
     #   graph.artifacts("mysql", "1.2.0")
     #   demands = [["mysql"]]
-    #   Solver.new(graph, demands)
+    #   GecodeSolver.new(graph, demands)
     # @param [Solve::Graph] graph
     # @param [Array<String>, Array<Array<String, String>>] demands
-    def initialize(graph, demands)
+    # @param [Hash] options - unused, only present for API compatibility with RubySolver
+    def initialize(graph, demands, options = {})
       @ds_graph      = DepSelector::DependencyGraph.new
       @graph         = graph
       @demands_array = demands
