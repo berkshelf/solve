@@ -2,6 +2,10 @@ source 'https://rubygems.org'
 
 gemspec
 
+group :gecode do
+  gem "dep_selector", "~> 1.0"
+end
+
 group :development do
   gem 'fuubar'
   gem 'yard'

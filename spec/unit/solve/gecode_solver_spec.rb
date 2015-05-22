@@ -2,7 +2,7 @@ require 'spec_helper'
 
 require 'solve/gecode_solver'
 
-describe Solve::GecodeSolver do
+describe Solve::GecodeSolver, :gecode do
   describe "ClassMethods" do
     describe "::timeout" do
       subject { described_class.timeout }
