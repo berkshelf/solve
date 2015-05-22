@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe "Solutions" do
+describe "Solutions", :gecode do
 
   before do
     Solve.engine = :gecode

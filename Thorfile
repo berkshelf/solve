@@ -28,4 +28,9 @@ class Default < Thor
   def spec
     exec "rspec --color --format=documentation spec"
   end
+
+  desc "spec", "Run RSpec code examples"
+  def nogecode_spec
+    exec "rspec -t '~gecode' --color --format=documentation spec"
+  end
 end
