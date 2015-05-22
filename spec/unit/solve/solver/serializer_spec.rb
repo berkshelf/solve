@@ -1,25 +1,33 @@
 require 'spec_helper'
+require 'solve/ruby_solver'
 
 describe Solve::Solver::Serializer do
-  it "deserializes a serialized solver to an equivalent solver" do
-    graph = Solve::Graph.new
 
-    graph.artifact("A", "1.0.0").depends("B", "1.0.0")
-    graph.artifact("B", "1.0.0").depends("C", "1.0.0")
-    graph.artifact("C", "1.0.0")
+  let(:graph) do
+    Solve::Graph.new.tap do |g|
+      g.artifact("A", "1.0.0").depends("B", "1.0.0")
+      g.artifact("B", "1.0.0").depends("C", "1.0.0")
+      g.artifact("C", "1.0.0")
+    end
+  end
 
-    demands = [["A", "1.0.0"]]
+  let(:demands) { [["A", "1.0.0"]] }
 
-    solver = Solve::Solver.new(graph, demands)
-    serializer = Solve::Solver::Serializer.new
-    serialized = serializer.serialize(solver)
+  let(:serializer) { Solve::Solver::Serializer.new }
+
+  it "deserializes a serialized problem to an equivalent problem" do
+    problem = Solve::Problem.new(graph, demands)
+    serialized = serializer.serialize(problem)
     deserialized = serializer.deserialize(serialized)
 
-    solver.graph.should eql(deserialized.graph)
-    solver.demands.should eql(deserialized.demands)
+    problem.graph.should eql(deserialized.graph)
+    problem.demands.should eql(deserialized.demands)
+  end
 
-    result = solver.resolve
-    deserialized_result = deserialized.resolve
-    result.should eql(deserialized_result)
+  it "creates a problem from a solver" do
+    solver = Solve::RubySolver.new(graph, demands)
+    problem = Solve::Problem.from_solver(solver)
+    expect(problem.demands).to eq([["A", "= 1.0.0"]])
+    expect(problem.graph).to eq(graph)
   end
 end

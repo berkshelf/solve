@@ -1,37 +1,59 @@
 require 'json'
+require 'solve/graph'
 
 module Solve
+
+  Problem = Struct.new(:graph, :demands)
+
+  # Simple struct class that contains a #graph and #demands (in Array form)
+  #
+  # Can be serialized via Solver::Serializer to create a json representation of
+  # a dependency solving problem.
+  class Problem
+
+    # Create a Problem from a given Solver.
+    #
+    # @param [Solve::GecodeSolver,Solve::RubySolver] dependency solver
+    # @return [Problem]
+    def self.from_solver(solver)
+      demands_data = solver.demands.map do |demand|
+        [ demand.name, demand.constraint.to_s ]
+      end
+      new(solver.graph, demands_data)
+    end
+  end
+
   class Solver
     class Serializer
-      # @param [Solve::Solver] solver
+      # @param [Solve::Problem] problem struct
       #
       # @return [String]
-      def serialize(solver)
-        graph = solver.graph
-        demands = solver.demands
+      def serialize(problem)
+        graph = problem.graph
+        demands = problem.demands
 
         graph_hash = format_graph(graph)
         demands_hash = format_demands(demands)
 
-        problem = graph_hash.merge(demands_hash)
-        problem.to_json
+        problem_data = graph_hash.merge(demands_hash)
+        problem_data.to_json
       end
 
       # @param [Hash, #to_s] solver a json string or a hash representing a solver
       #
-      # @return [Solve::Solver]
-      def deserialize(solver)
-        unless solver.is_a?(Hash)
-          solver = JSON.parse(solver.to_s)
+      # @return [Solve::Problem]
+      def deserialize(problem_data)
+        unless problem_data.is_a?(Hash)
+          problem_data = JSON.parse(problem_data.to_s)
         end
 
-        graph_spec = solver["graph"]
-        demands_spec = solver["demands"]
+        graph_spec = problem_data["graph"]
+        demands_spec = problem_data["demands"]
 
         graph = load_graph(graph_spec)
         demands = load_demands(demands_spec)
 
-        Solve::Solver.new(graph, demands)
+        Solve::Problem.new(graph, demands)
       end
 
       private
@@ -71,8 +93,8 @@ module Solve
 
         def format_demand(demand)
           {
-            "name" => demand.name,
-            "constraint" => demand.constraint.to_s
+            "name" => demand[0],
+            "constraint" => demand[1]
           }
         end
 

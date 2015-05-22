@@ -164,7 +164,8 @@ describe Solve::Solver do
     end
 
     it "implements the required interface" do
-      json_string = serializer.serialize(solver)
+      problem = Solve::Problem.from_solver(solver)
+      json_string = serializer.serialize(problem)
       problem_data = JSON.parse(json_string)
       expected_demands = [
         {"name" => "mysql", "constraint" => ">= 0.0.0"},
