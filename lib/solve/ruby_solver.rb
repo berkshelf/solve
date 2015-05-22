@@ -13,6 +13,12 @@ module Solve
         seconds = 30 unless seconds = ENV["SOLVE_TIMEOUT"]
         seconds.to_i * 1_000
       end
+
+      # For optinal solver engines, this attempts to load depenencies. The
+      # RubySolver is a non-optional component, so this is a no-op
+      def activate
+        true
+      end
     end
 
     # Graph object with references to all known artifacts and dependency

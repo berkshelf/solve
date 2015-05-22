@@ -8,6 +8,7 @@ module Solve
   require_relative 'solve/errors'
   require_relative 'solve/graph'
   require_relative 'solve/ruby_solver'
+  require_relative 'solve/gecode_solver'
 
   class << self
     # @return [Solve::Formatter]
@@ -30,14 +31,14 @@ module Solve
     #
     # @param [Symbol] selected_engine
     # @return [Symbol] selected_engine
+    # @raise [Solve::Errors::EngineNotAvailable] when the selected engine's deps aren't installed.
+    # @raise [Solve::Errors::InvalidEngine] when `selected_engine` is invalid.
     def engine=(selected_engine)
-      case selected_engine
-      when :gecode
-        require_relative 'solve/gecode_solver'
-      when :ruby
-        # we're good.
-      else
+      engine_class = solver_for_engine(selected_engine)
+      if engine_class.nil?
         raise Errors::InvalidEngine, "Engine `#{selected_engine}` is not supported. Valid values are `:ruby`, `:gecode`"
+      else
+        engine_class.activate
       end
       @engine = selected_engine
     end
@@ -58,11 +59,11 @@ module Solve
     #
     # @return [Hash]
     def it!(graph, demands, options = {})
-      solver_for_engine.new(graph, demands, options).resolve(options)
+      solver_for_engine(engine).new(graph, demands, options).resolve(options)
     end
 
-    def solver_for_engine
-      case engine
+    def solver_for_engine(engine_name)
+      case engine_name
       when :ruby
         RubySolver
       when :gecode

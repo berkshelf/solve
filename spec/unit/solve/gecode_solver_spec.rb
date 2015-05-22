@@ -3,6 +3,11 @@ require 'spec_helper'
 require 'solve/gecode_solver'
 
 describe Solve::GecodeSolver, :gecode do
+
+  before(:all) do
+    described_class.activate
+  end
+
   describe "ClassMethods" do
     describe "::timeout" do
       subject { described_class.timeout }
@@ -18,6 +23,28 @@ describe Solve::GecodeSolver, :gecode do
           expect(subject).to eql(30_000)
         end
       end
+    end
+
+    describe "::activate" do
+
+      context "when dep_selector is not installed" do
+
+        it "raises EngineNotAvailable" do
+          exception = LoadError.new("cannot load such file -- dep_selector")
+          allow(described_class).to receive(:require).with("dep_selector").and_raise(exception)
+          expect { described_class.activate }.to raise_error(Solve::Errors::EngineNotAvailable)
+        end
+
+      end
+
+      context "when dep_selector is installed" do
+
+        it "requires dep_selector" do
+          expect(described_class).to receive(:require).with("dep_selector").and_call_original
+          described_class.activate
+        end
+      end
+
     end
   end
 

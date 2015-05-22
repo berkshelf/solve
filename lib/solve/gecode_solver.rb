@@ -1,5 +1,5 @@
-require 'dep_selector'
 require 'set'
+require 'solve/errors'
 require_relative 'solver/serializer'
 
 module Solve
@@ -12,6 +12,13 @@ module Solve
       def timeout
         seconds = 30 unless seconds = ENV["SOLVE_TIMEOUT"]
         seconds.to_i * 1_000
+      end
+
+      # Attemp to load the dep_selector gem which this solver engine requires.
+      def activate
+        require 'dep_selector'
+      rescue LoadError => e
+        raise Errors::EngineNotAvailable, "dep_selector is not installed, GecodeSolver cannot be used (#{e})"
       end
     end
 

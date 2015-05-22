@@ -17,6 +17,14 @@ describe Solve::RubySolver do
         end
       end
     end
+
+    describe "::activate" do
+
+      it "is a no-op" do
+        described_class.activate
+      end
+
+    end
   end
 
   let(:graph) { double(Solve::Graph) }
