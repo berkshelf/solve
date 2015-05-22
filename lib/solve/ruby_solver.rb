@@ -85,6 +85,15 @@ module Solve
       end
     end
 
+    ###
+    # Molinillo Callbacks
+    #
+    # Molinillo calls back to this class to get information about our
+    # dependency model objects. An abstract implementation is provided at
+    # https://github.com/CocoaPods/Molinillo/blob/master/lib/molinillo/modules/specification_provider.rb
+    #
+    ###
+
     # Callback required by Molinillo, called when the solve starts
     # @return [Integer]
     def progress_rate
@@ -106,10 +115,8 @@ module Solve
     # Callback required by Molinillo, gives debug information about the solution
     # @return nil
     def debug(current_resolver_depth)
-      # debug_info = yield
-      # debug_info = debug_info.inspect unless debug_info.is_a?(String)
-      # STDERR.puts debug_info.split("\n").map { |s| '  ' * current_resolver_depth + s }
-
+      # debug info will be returned if you call yield here, but it seems to be
+      # broken in current Molinillo
       nil
     end
 
@@ -120,6 +127,7 @@ module Solve
     end
 
     # Callback required by Molinillo
+    # @return [Array<Solve::Dependency>] the dependencies sorted by preference.
     def sort_dependencies(dependencies, activated, conflicts)
       dependencies.sort_by do |dependency|
         name = name_for(dependency)
@@ -132,18 +140,21 @@ module Solve
     end
 
     # Callback required by Molinillo
+    # @return [Array<Solve::Artifact>] the artifacts that match the dependency.
     def search_for(dependency)
-      # TODO: ensure results are sorted, highest version number last
-      # NOTE: This array gets mutated by Molinillo, hence we must dup
-      graph.versions(dependency.name, dependency.constraint).dup.sort
+      # This array gets mutated by Molinillo; it's okay because sort returns a
+      # new array.
+      graph.versions(dependency.name, dependency.constraint).sort
     end
 
     # Callback required by Molinillo
+    # @return [Boolean]
     def requirement_satisfied_by?(requirement, activated, spec)
       requirement.constraint.satisfies?(spec.version)
     end
 
     # Callback required by Molinillo
+    # @return [Array<Solve::Dependency>] the dependencies of the given artifact
     def dependencies_for(specification)
       specification.dependencies
     end
@@ -168,7 +179,6 @@ module Solve
         raise Solve::Errors::NoSolutionError.new(e.message)
       end
 
-      # TODO: copypasta from gecode solver
       def build_sorted_solution(unsorted_solution)
         nodes = Hash.new
         unsorted_solution.each do |name, version|
