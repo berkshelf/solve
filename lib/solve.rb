@@ -10,11 +10,13 @@ module Solve
   require_relative 'solve/ruby_solver'
   require_relative 'solve/gecode_solver'
 
+  # We have to set the default engine here, it gets set on the wrong object if
+  # we put this in the metaclass context below.
+  @engine = :ruby
+
   class << self
     # @return [Solve::Formatter]
     attr_reader :tracer
-
-    @engine = :ruby
 
     # Returns the currently configured engine.
     # @see #engine=
@@ -73,4 +75,6 @@ module Solve
 
     private :solver_for_engine
   end
+
 end
+
