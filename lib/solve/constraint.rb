@@ -195,11 +195,11 @@ module Solve
     # Returns true or false if the given version would be satisfied by
     # the version constraint.
     #
-    # @param [Version, #to_s] target
+    # @param [Semverse::Version, #to_s] target
     #
     # @return [Boolean]
     def satisfies?(target)
-      target = Version.coerce(target)
+      target = Semverse::Version.coerce(target)
 
       return false if !version.zero? && greedy_match?(target)
 
