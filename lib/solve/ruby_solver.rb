@@ -112,6 +112,12 @@ module Solve
       nil
     end
 
+    # Callback required by Molinillo, called when resolving every progress_rate
+    # @return nil
+    def indicate_progress
+      nil
+    end
+
     # Callback required by Molinillo, gives debug information about the solution
     # @return nil
     def debug(current_resolver_depth)
