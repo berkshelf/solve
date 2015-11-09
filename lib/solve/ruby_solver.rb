@@ -44,6 +44,7 @@ module Solve
       @demands_array = demands
       @timeout_ms    = self.class.timeout
 
+      @ui = options[:ui] # could be nil, but that's okay
       @dependency_source = options[:dependency_source] || 'user-specified dependency'
 
       @molinillo_graph = Molinillo::DependencyGraph.new
@@ -69,6 +70,8 @@ module Solve
     #   and the demands have a solution, but the solution contains a cyclic
     #   dependency
     def resolve(options = {})
+      @ui = options[:ui] if options[:ui]
+
       solved_graph = resolve_with_error_wrapping
 
       solution =  solved_graph.map(&:payload)
@@ -103,13 +106,13 @@ module Solve
     # Callback required by Molinillo, called when the solve starts
     # @return nil
     def before_resolution
-      nil
+      @ui.say('Starting dependency resolution') if @ui
     end
 
     # Callback required by Molinillo, called when the solve is complete.
     # @return nil
     def after_resolution
-      nil
+      @ui.say('Finished dependency resolution') if @ui
     end
 
     # Callback required by Molinillo, called when resolving every progress_rate
@@ -123,7 +126,7 @@ module Solve
     def debug(current_resolver_depth)
       # debug info will be returned if you call yield here, but it seems to be
       # broken in current Molinillo
-      nil
+      @ui.say(yield) if @ui
     end
 
     # Callback required by Molinillo
