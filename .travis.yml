@@ -1,17 +1,29 @@
+language: ruby
+
+rvm:
+  - 2.1
+
 before_install:
   - sudo apt-get update
   - sudo apt-get install libgecode-dev
+  - gem install bundler --no-ri --no-rdoc
+
 script: "bundle exec thor spec"
-language: ruby
 env: USE_SYSTEM_GECODE=1
 bundler_args: --without dev
+
+# prevent PR branches from running travis twice
+branches:
+  only:
+    - master
 
 matrix:
   include:
     - rvm: 1.9.3
     - rvm: 2.0.0
-    - rvm: 2.1.0
     - rvm: jruby-19mode
     - rvm: 2.1
       gemfile: NoGecode.gemfile
       script: "bundle exec thor nogecode_spec"
+
+
