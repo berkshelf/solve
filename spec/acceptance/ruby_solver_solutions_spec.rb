@@ -247,6 +247,61 @@ describe "Solutions when using the ruby solver" do
     })
   end
 
+  fit "repro case?" do
+    graph = Solve::Graph.new
+
+    ###
+    #graph.artifact("python", "1.4.6").depends("build-essential", ">= 0.0.0")
+    #graph.artifact("python", "1.4.6").depends("yum-epel", ">= 0.0.0")
+
+    ##
+    graph.artifact("nginx", "2.7.6").depends("yum-epel", "~> 0.3")
+    graph.artifact("nginx", "2.7.6").depends("build-essential", "~> 2.0")
+
+    #
+    graph.artifact("nginx", "0.1.0").depends("build-essential", "~> 2.0")
+    graph.artifact("nginx", "0.1.0").depends("build-essential", "~> 2.0")
+    #
+    graph.artifact("nginx", "0.2.0").depends("build-essential", "~> 2.0")
+    graph.artifact("nginx", "0.2.0").depends("build-essential", "~> 2.0")
+
+    ##
+    graph.artifact("build-essential", "3.2.0").depends("seven_zip", ">= 0.0.0")
+    #
+    graph.artifact("build-essential", "2.4.0").depends("7-zip", ">= 0.0.0")
+
+    ##
+    graph.artifact("7-zip", "1.0.0").depends("windows", ">= 1.2.2")
+
+    ##
+    graph.artifact("seven_zip", "2.0.0").depends("windows", ">= 1.2.2")
+
+    ##
+    graph.artifact("yum-epel", "0.6.6").depends("yum", "~> 3.10.0")
+
+    ##
+    graph.artifact("yum", "3.10.0")
+
+    ##
+    graph.artifact("windows", "1.39.2").depends("chef-handler", ">= 0.0.0")
+
+    #
+    graph.artifact("windows", "0.0.4").depends("chef-handler", ">= 0.0.0")
+    graph.artifact("windows", "0.0.3").depends("chef-handler", ">= 0.0.0")
+    graph.artifact("windows", "0.0.2").depends("chef-handler", ">= 0.0.0")
+    graph.artifact("windows", "0.0.1").depends("chef-handler", ">= 0.0.0")
+    ##
+    graph.artifact("chef-handler", "1.3.0")
+
+
+    demands = [["build-essential"],["nginx"]]
+
+    require 'pp'
+    pp solve: Solve.it!(graph, demands)
+
+
+  end
+
   describe "when options[:sorted] is true" do
     describe "with a simple list of dependencies" do
       it "returns a sorted list of dependencies" do
