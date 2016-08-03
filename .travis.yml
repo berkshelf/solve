@@ -1,7 +1,6 @@
+sudo: true
 language: ruby
-
-rvm:
-  - 2.1
+cache: bundler
 
 before_install:
   - sudo apt-get update
@@ -19,11 +18,10 @@ branches:
 
 matrix:
   include:
-    - rvm: 1.9.3
-    - rvm: 2.0.0
-    - rvm: jruby-19mode
-    - rvm: 2.1
-      gemfile: NoGecode.gemfile
-      script: "bundle exec thor nogecode_spec"
+    - rvm: 2.1.9
+    - rvm: 2.2.5
+    - rvm: 2.3.1
+  allow_failures:
+    - rvm: 2.3.1
 
 
