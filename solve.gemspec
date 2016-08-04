@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.version               = Solve::VERSION
   s.required_ruby_version = ">= 2.1.0"
 
-  s.add_dependency "semverse",     "~> 1.1"
+  s.add_dependency "semverse",     ">= 1.1", "< 3"
   s.add_dependency "molinillo",    "~> 0.4"
 
   s.add_development_dependency 'thor', '>= 0.16.0'
