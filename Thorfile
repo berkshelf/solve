@@ -11,17 +11,17 @@ class Default < Thor
 
   desc "build", "Build Solve-#{Solve::VERSION}.gem into the pkg directory"
   def build
-    Rake::Task["build"].execute
+    Rake::Task["build"].invoke
   end
 
   desc "install", "Build and install Solve-#{Solve::VERSION}.gem into system gems"
   def install
-    Rake::Task["install"].execute
+    Rake::Task["install"].invoke
   end
 
   desc "release", "Create tag v#{Solve::VERSION} and build and push Solve-#{Solve::VERSION}.gem to Rubygems"
   def release
-    Rake::Task["release"].execute
+    Rake::Task["release"].invoke
   end
 
   desc "spec", "Run RSpec code examples"
