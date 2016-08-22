@@ -6,7 +6,7 @@ A Ruby versioning constraint solver implementing [Semantic Versioning 2.0.0](htt
 
 ## Installation
 
-```
+```shell
 $ gem install solve
 ```
 
@@ -14,37 +14,37 @@ $ gem install solve
 
 Create a new graph
 
-```
+```ruby
 graph = Solve::Graph.new
 ```
 
 Add an artifact to the graph
 
-```
+```ruby
 graph.artifact("nginx", "1.0.0")
 ```
 
 Now add another artifact that has a dependency
 
-```
+```ruby
 graph.artifact("mysql", "1.2.4-alpha.1").depends("openssl", "~> 1.0.0")
 ```
 
 Dependencies can be chained, too
 
-```
+```ruby
 graph.artifact("ntp", "1.0.0").depends("build-essential").depends("yum")
 ```
 
 And now solve the graph with some demands
 
-```
+```ruby
 Solve.it!(graph, [['nginx', '>= 0.100.0']])
 ```
 
 Or, if you want a topologically sorted solution NOTE: This will raise Solve::Errors::UnsortableSolutionError if the solution contains a cycle (which can happen with ruby packages)
 
-```
+```ruby
 Solve.it!(graph, [['nginx', '>= 0.100.0']], sorted: true)
 ```
 
@@ -55,13 +55,13 @@ Solve supports two different resolvers. A pure Ruby solver implemented using [Mo
 You can set the resolver by calling `Solver.engine=` with the symbol `:ruby` or `:gecode`.
 
 ```ruby
-    Solver.engine = :ruby
-    Solver.engine = :gecode
+Solver.engine = :ruby
+Solver.engine = :gecode
 ```
 
 The Ruby solver is installed and enabled by default. If you'd like to use the Gecode solver you can do so by installing the dep-selector gem or adding it to your Gemfile:
 
-```
+```shell
 $ gem install dep_selector
 ```
 
@@ -69,7 +69,7 @@ $ gem install dep_selector
 
 By default the solver will wait 30 seconds before giving up on finding a solution. Under certain conditions a graph may be too complicated to solve within the alotted time. To increase the timeout you can set the "SOLVE_TIMEOUT" environment variable to the amount of seconds desired.
 
-```
+```shell
 $ export SOLVE_TIMEOUT=60
 ```
 
