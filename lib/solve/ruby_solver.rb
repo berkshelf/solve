@@ -77,7 +77,7 @@ module Solve
       solution =  solved_graph.map(&:payload)
 
       unsorted_solution = solution.inject({}) do |stringified_soln, artifact|
-        stringified_soln[artifact.name] = artifact.version.to_s
+        stringified_soln[artifact.name] = artifact.version.to_s if artifact
         stringified_soln
       end
 
