@@ -17,7 +17,7 @@ Gem::Specification.new do |s|
   s.required_ruby_version = ">= 2.1.0"
 
   s.add_dependency "semverse",     ">= 1.1", "< 3.0"
-  s.add_dependency "molinillo",    ">= 0.5"
+  s.add_dependency "molinillo",    ">= 0.5", "< 0.6.0"
 
   s.add_development_dependency 'thor'
   s.add_development_dependency 'rake'
