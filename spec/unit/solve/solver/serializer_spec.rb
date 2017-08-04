@@ -1,5 +1,5 @@
-require 'spec_helper'
-require 'solve/ruby_solver'
+require "spec_helper"
+require "solve/ruby_solver"
 
 describe Solve::Solver::Serializer do
 

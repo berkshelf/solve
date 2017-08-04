@@ -72,12 +72,12 @@ describe Solve::Graph do
 
   describe "#versions" do
     before do
-      subject.artifact('nginx', '1.0.0')
-      subject.artifact('nginx', '2.0.0')
-      subject.artifact('nginx', '3.0.0')
-      subject.artifact('nginx', '4.0.0')
+      subject.artifact("nginx", "1.0.0")
+      subject.artifact("nginx", "2.0.0")
+      subject.artifact("nginx", "3.0.0")
+      subject.artifact("nginx", "4.0.0")
 
-      subject.artifact('other', '1.0.0')
+      subject.artifact("other", "1.0.0")
     end
 
     it "returns all the artifacts matching the given name" do
@@ -98,8 +98,8 @@ describe Solve::Graph do
   describe "==" do
     def make_graph
       graph = Solve::Graph.new
-      graph.artifact("A" ,"1.0.0").depends("B", "1.0.0")
-      graph.artifact("A" ,"2.0.0").depends("C", "1.0.0")
+      graph.artifact("A" , "1.0.0").depends("B", "1.0.0")
+      graph.artifact("A" , "2.0.0").depends("C", "1.0.0")
       graph
     end
 

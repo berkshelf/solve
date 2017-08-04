@@ -1,9 +1,9 @@
 # encoding: utf-8
 $:.push File.expand_path("../lib", __FILE__)
 
-require 'bundler'
-require 'bundler/setup'
-require 'thor/rake_compat'
+require "bundler"
+require "bundler/setup"
+require "thor/rake_compat"
 
 class Default < Thor
   include Thor::RakeCompat

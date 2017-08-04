@@ -1,4 +1,4 @@
-require 'spec_helper'
+require "spec_helper"
 
 describe "Solutions", :gecode do
 
@@ -12,7 +12,7 @@ describe "Solutions", :gecode do
     graph.artifact("mysql", "1.2.0")
     graph.artifact("nginx", "1.0.0").depends("mysql", "= 1.2.0")
 
-    result = Solve.it!(graph, [['nginx', '= 1.0.0'], ['mysql']])
+    result = Solve.it!(graph, [["nginx", "= 1.0.0"], ["mysql"]])
 
     result.should eql("nginx" => "1.0.0", "mysql" => "1.2.0")
   end
@@ -23,7 +23,7 @@ describe "Solutions", :gecode do
     graph.artifact("mysql", "1.2.0")
     graph.artifact("nginx", "1.0.0").depends("mysql", ">= 1.2.0")
 
-    result = Solve.it!(graph, [['nginx', '= 1.0.0'], ['mysql']])
+    result = Solve.it!(graph, [["nginx", "= 1.0.0"], ["mysql"]])
 
     result.should eql("nginx" => "1.0.0", "mysql" => "2.0.0")
   end
@@ -33,7 +33,7 @@ describe "Solutions", :gecode do
     graph.artifact("mysql", "1.2.0")
 
     lambda {
-      Solve.it!(graph, ['mysql', '>= 2.0.0'])
+      Solve.it!(graph, ["mysql", ">= 2.0.0"])
     }.should raise_error(Solve::Errors::NoSolutionError)
   end
 
@@ -62,8 +62,7 @@ describe "Solutions", :gecode do
     graph.artifact("A", "1.0.2").depends("B", "> 1.0.0")
     graph.artifact("A", "1.0.2").depends("C", "= 2.0.0")
 
-    result = Solve.it!(graph, [['A', '~> 1.0.0'], ['D', ">= 2.0.0"]])
-
+    result = Solve.it!(graph, [["A", "~> 1.0.0"], ["D", ">= 2.0.0"]])
 
     result.should eql("A" => "1.0.1",
                       "B" => "2.1.0",
@@ -159,9 +158,9 @@ describe "Solutions", :gecode do
     graph.artifact("bottom", "1.0.0")
     graph.artifact("middle", "1.0.0").depends("top", "= 1.0.0").depends("middle")
 
-    demands = [["bottom", "1.0.0"],["middle", "1.0.0"]]
+    demands = [["bottom", "1.0.0"], ["middle", "1.0.0"]]
 
-    expect { Solve.it!(graph, demands, { :sorted => true  } ) }.to raise_error { |error|
+    expect { Solve.it!(graph, demands, { :sorted => true } ) }.to raise_error { |error|
       error.should be_a(Solve::Errors::NoSolutionError)
     }
   end
@@ -206,7 +205,7 @@ describe "Solutions", :gecode do
     result.should eql({ "A" => "0.0.0",
                         "B" => "0.0.0",
                         "C" => "0.0.0",
-                        "D" => "0.0.0"})
+                        "D" => "0.0.0" })
 
   end
 
@@ -246,7 +245,7 @@ describe "Solutions", :gecode do
       "get-the-old-one" => "1.0.0",
       "locked-mid-1" => "1.0.0",
       "locked-mid-2" => "2.0.0",
-      "old-bottom" => "2.1.0"
+      "old-bottom" => "2.1.0",
     })
   end
 
@@ -266,7 +265,7 @@ describe "Solutions", :gecode do
         result.should eql([
           ["C", "1.0.0"],
           ["B", "1.0.0"],
-          ["A", "1.0.0"]
+          ["A", "1.0.0"],
         ])
       end
     end
@@ -281,14 +280,14 @@ describe "Solutions", :gecode do
         graph.artifact("A", "1.0.0").depends("C", "= 1.0.0")
         graph.artifact("C", "1.0.0")
 
-        demands = [["A"],["B"]]
+        demands = [["A"], ["B"]]
 
-        result = Solve.it!(graph, demands, { :sorted => true  } )
+        result = Solve.it!(graph, demands, { :sorted => true } )
 
         result.should eql([
           ["C", "1.0.0"],
           ["A", "1.0.0"],
-          ["B", "1.0.0"]
+          ["B", "1.0.0"],
         ])
       end
     end
@@ -303,7 +302,7 @@ describe "Solutions", :gecode do
 
         demands = [["A"]]
 
-        expect { Solve.it!(graph, demands, { :sorted => true  } ) }.to raise_error { |error|
+        expect { Solve.it!(graph, demands, { :sorted => true } ) }.to raise_error { |error|
           error.should be_a(Solve::Errors::UnsortableSolutionError)
           error.unsorted_solution.should eql({
             "A" => "1.0.0",

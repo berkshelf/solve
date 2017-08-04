@@ -67,7 +67,7 @@ module Solve
       return false unless other.is_a?(Graph)
       return false unless artifacts.size == other.artifacts.size
 
-      self_artifacts = self.artifacts
+      self_artifacts = artifacts
       other_artifacts = other.artifacts
 
       self_dependencies = self_artifacts.inject([]) do |list, artifact|
@@ -79,8 +79,8 @@ module Solve
       end.flatten
 
       self_dependencies.size == other_dependencies.size &&
-      self_artifacts.all? { |artifact| other_artifacts.include?(artifact) } &&
-      self_dependencies.all? { |dependency| other_dependencies.include?(dependency) }
+        self_artifacts.all? { |artifact| other_artifacts.include?(artifact) } &&
+        self_dependencies.all? { |dependency| other_dependencies.include?(dependency) }
     end
     alias_method :eql?, :==
   end

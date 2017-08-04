@@ -1,6 +1,6 @@
-require 'spec_helper'
+require "spec_helper"
 
-require 'solve/gecode_solver'
+require "solve/gecode_solver"
 
 describe Solve::GecodeSolver, :gecode do
 
@@ -59,7 +59,7 @@ describe Solve::GecodeSolver, :gecode do
   it "has a list of demands as model objects" do
     expected = [
       Solve::Demand.new(solver, "mysql"),
-      Solve::Demand.new(solver, "nginx")
+      Solve::Demand.new(solver, "nginx"),
     ]
     solver.demands.should == expected
   end
@@ -79,7 +79,7 @@ describe Solve::GecodeSolver, :gecode do
     let(:demands) { [["A"], ["B"]] }
 
     it "gives the solution as a Hash" do
-      solver.resolve.should == {"A"=>"1.0.0", "B"=>"1.0.0"}
+      solver.resolve.should == { "A" => "1.0.0", "B" => "1.0.0" }
     end
 
     it "gives the solution in sorted form" do
@@ -195,12 +195,11 @@ describe Solve::GecodeSolver, :gecode do
       json_string = serializer.serialize(problem)
       problem_data = JSON.parse(json_string)
       expected_demands = [
-        {"name" => "mysql", "constraint" => ">= 0.0.0"},
-        {"name" => "nginx", "constraint" => ">= 0.0.0"}
+        { "name" => "mysql", "constraint" => ">= 0.0.0" },
+        { "name" => "nginx", "constraint" => ">= 0.0.0" },
       ]
 
       problem_data["demands"].should =~ expected_demands
     end
   end
 end
-

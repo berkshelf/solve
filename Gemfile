@@ -1,4 +1,4 @@
-source 'https://rubygems.org'
+source "https://rubygems.org"
 
 gemspec
 
@@ -10,24 +10,24 @@ end
 # development` automagically excludes development dependencies that are listed
 # in the gemspec, which will skip installing rspec and then we can't run tests.
 group :dev do
-  gem 'fuubar'
-  gem 'yard'
-  gem 'redcarpet'
-  gem 'guard-rspec'
-  gem 'guard-spork'
-  gem 'guard-yard'
-  gem 'coolline'
+  gem "fuubar"
+  gem "yard"
+  gem "redcarpet"
+  gem "guard-rspec"
+  gem "guard-spork"
+  gem "guard-yard"
+  gem "coolline"
+  gem "chefstyle", git: "https://github.com/chef/chefstyle"
 
-  require 'rbconfig'
+  require "rbconfig"
 
-  if RbConfig::CONFIG['target_os'] =~ /darwin/i
-    gem 'ruby_gntp', require: false
+  if RbConfig::CONFIG["target_os"] =~ /darwin/i
+    gem "ruby_gntp", require: false
 
-  elsif RbConfig::CONFIG['target_os'] =~ /linux/i
-    gem 'libnotify', require: false
+  elsif RbConfig::CONFIG["target_os"] =~ /linux/i
+    gem "libnotify", require: false
 
-  elsif RbConfig::CONFIG['target_os'] =~ /mswin|mingw/i
-    gem 'win32console', require: false
+  elsif RbConfig::CONFIG["target_os"] =~ /mswin|mingw/i
+    gem "win32console", require: false
   end
 end
-
