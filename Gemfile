@@ -9,15 +9,18 @@ end
 # If this group is named "development", then `bundle install --without
 # development` automagically excludes development dependencies that are listed
 # in the gemspec, which will skip installing rspec and then we can't run tests.
-group :dev do
+group :development do
   gem "fuubar"
   gem "yard"
   gem "redcarpet"
+  gem "chefstyle", git: "https://github.com/chef/chefstyle"
+end
+
+group :guard do
   gem "guard-rspec"
   gem "guard-spork"
   gem "guard-yard"
   gem "coolline"
-  gem "chefstyle", git: "https://github.com/chef/chefstyle"
 
   require "rbconfig"
 
