@@ -48,17 +48,17 @@ module Solve
         end
 
         split_version = case version.to_s
-        when /^(\d+)\.(\d+)\.(\d+)(-([0-9a-z\-\.]+))?(\+([0-9a-z\-\.]+))?$/i
-          [ $1.to_i, $2.to_i, $3.to_i, $5, $7 ]
-        when /^(\d+)\.(\d+)\.(\d+)?$/
-          [ $1.to_i, $2.to_i, $3.to_i, nil, nil ]
-        when /^(\d+)\.(\d+)?$/
-          [ $1.to_i, $2.to_i, nil, nil, nil ]
-        when /^(\d+)$/
-          [ $1.to_i, nil, nil, nil, nil ]
-        else
-          raise Errors::InvalidConstraintFormat.new(constraint)
-        end
+                        when /^(\d+)\.(\d+)\.(\d+)(-([0-9a-z\-\.]+))?(\+([0-9a-z\-\.]+))?$/i
+                          [ $1.to_i, $2.to_i, $3.to_i, $5, $7 ]
+                        when /^(\d+)\.(\d+)\.(\d+)?$/
+                          [ $1.to_i, $2.to_i, $3.to_i, nil, nil ]
+                        when /^(\d+)\.(\d+)?$/
+                          [ $1.to_i, $2.to_i, nil, nil, nil ]
+                        when /^(\d+)$/
+                          [ $1.to_i, nil, nil, nil, nil ]
+                        else
+                          raise Errors::InvalidConstraintFormat.new(constraint)
+                        end
 
         [ operator, split_version ].flatten
       end
@@ -110,18 +110,18 @@ module Solve
       def compare_approx(constraint, target_version)
         min = constraint.version
         max = if constraint.patch.nil?
-          Semverse::Version.new([min.major + 1, 0, 0, 0])
-        elsif constraint.build
-          identifiers = constraint.version.identifiers(:build)
-          replace     = identifiers.last.to_i.to_s == identifiers.last.to_s ? "-" : nil
-          Semverse::Version.new([min.major, min.minor, min.patch, min.pre_release, identifiers.fill(replace, -1).join('.')])
-        elsif constraint.pre_release
-          identifiers = constraint.version.identifiers(:pre_release)
-          replace     = identifiers.last.to_i.to_s == identifiers.last.to_s ? "-" : nil
-          Semverse::Version.new([min.major, min.minor, min.patch, identifiers.fill(replace, -1).join('.')])
-        else
-          Semverse::Version.new([min.major, min.minor + 1, 0, 0])
-        end
+                Semverse::Version.new([min.major + 1, 0, 0, 0])
+              elsif constraint.build
+                identifiers = constraint.version.identifiers(:build)
+                replace = identifiers.last.to_i.to_s == identifiers.last.to_s ? "-" : nil
+                Semverse::Version.new([min.major, min.minor, min.patch, min.pre_release, identifiers.fill(replace, -1).join(".")])
+              elsif constraint.pre_release
+                identifiers = constraint.version.identifiers(:pre_release)
+                replace = identifiers.last.to_i.to_s == identifiers.last.to_s ? "-" : nil
+                Semverse::Version.new([min.major, min.minor, min.patch, identifiers.fill(replace, -1).join(".")])
+              else
+                Semverse::Version.new([min.major, min.minor + 1, 0, 0])
+              end
         min <= target_version && target_version < max
       end
     end
@@ -142,7 +142,7 @@ module Solve
       greater_than: method(:compare_gt),
       less_than_equal: method(:compare_lte),
       less_than: method(:compare_lt),
-      equal: method(:compare_equal)
+      equal: method(:compare_equal),
     }.freeze
 
     REGEXP = /^(#{OPERATOR_TYPES.keys.join('|')})\s?(.+)$/
@@ -164,7 +164,7 @@ module Solve
     def initialize(constraint = nil)
       constraint = constraint.to_s
       if constraint.nil? || constraint.empty?
-        constraint = '>= 0.0.0'
+        constraint = ">= 0.0.0"
       end
 
       @operator, @major, @minor, @patch, @pre_release, @build = self.class.split(constraint)
@@ -175,18 +175,18 @@ module Solve
       end
 
       @version = Semverse::Version.new([
-        self.major,
-        self.minor,
-        self.patch,
-        self.pre_release,
-        self.build,
+        major,
+        minor,
+        patch,
+        pre_release,
+        build,
       ])
     end
 
     # @return [Symbol]
     def operator_type
       unless type = OPERATOR_TYPES.fetch(operator)
-        raise RuntimeError, "unknown operator type: #{operator}"
+        raise "unknown operator type: #{operator}"
       end
 
       type
@@ -201,7 +201,7 @@ module Solve
     def satisfies?(target)
       target = Semverse::Version.coerce(target)
 
-      return false if !version.zero? && greedy_match?(target)
+      return false if !(version == 0) && greedy_match?(target)
 
       compare(target)
     end
@@ -215,13 +215,13 @@ module Solve
     # @return [Boolean]
     def ==(other)
       other.is_a?(self.class) &&
-        self.operator == other.operator &&
-        self.version == other.version
+        operator == other.operator &&
+        version == other.version
     end
     alias_method :eql?, :==
 
     def inspect
-      "#<#{self.class.to_s} #{to_s}>"
+      "#<#{self.class} #{self}>"
     end
 
     def to_s
@@ -241,15 +241,15 @@ module Solve
       #
       # @param [Semverse::Version] target_version
       #
-      def greedy_match?(target_version)
-        operator_type !~ /less/ && target_version.pre_release? && !version.pre_release?
-      end
+    def greedy_match?(target_version)
+      operator_type !~ /less/ && target_version.pre_release? && !version.pre_release?
+    end
 
       # @param [Semverse::Version] target
       #
       # @return [Boolean]
-      def compare(target)
-        COMPARE_FUNS.fetch(operator_type).call(self, target)
-      end
+    def compare(target)
+      COMPARE_FUNS.fetch(operator_type).call(self, target)
+    end
   end
 end

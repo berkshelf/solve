@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-require File.expand_path('../lib/solve/version', __FILE__)
+require File.expand_path("../lib/solve/version", __FILE__)
 
 Gem::Specification.new do |s|
   s.authors               = ["Jamie Winsor", "Andrew Garson", "Thibaud Guillaume-Gentil"]
@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.homepage              = "https://github.com/berkshelf/solve"
   s.license               = "Apache 2.0"
   s.files                 = `git ls-files`.split($\)
-  s.executables           = s.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
+  s.executables           = s.files.grep(%r{^bin/}).map { |f| File.basename(f) }
   s.test_files            = s.files.grep(%r{^spec/})
   s.name                  = "solve"
   s.require_paths         = ["lib"]
@@ -19,8 +19,8 @@ Gem::Specification.new do |s|
   s.add_dependency "semverse",     ">= 1.1", "< 3.0"
   s.add_dependency "molinillo",    ">= 0.5"
 
-  s.add_development_dependency 'thor'
-  s.add_development_dependency 'rake'
-  s.add_development_dependency 'spork'
-  s.add_development_dependency 'rspec'
+  s.add_development_dependency "thor"
+  s.add_development_dependency "rake"
+  s.add_development_dependency "spork"
+  s.add_development_dependency "rspec"
 end

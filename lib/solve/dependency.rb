@@ -33,8 +33,8 @@ module Solve
     # @return [Boolean]
     def ==(other)
       other.is_a?(self.class) &&
-      self.artifact == other.artifact &&
-      self.constraint == other.constraint
+        artifact == other.artifact &&
+        constraint == other.constraint
     end
     alias_method :eql?, :==
   end

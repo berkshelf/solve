@@ -1,5 +1,5 @@
-require 'json'
-require 'solve/graph'
+require "json"
+require "solve/graph"
 
 module Solve
 
@@ -58,71 +58,71 @@ module Solve
 
       private
 
-        def format_graph(graph)
-          artifacts = graph.artifacts.inject([]) do |list, artifact|
-            list << format_artifact(artifact)
-          end
-          { "graph" => artifacts }
+      def format_graph(graph)
+        artifacts = graph.artifacts.inject([]) do |list, artifact|
+          list << format_artifact(artifact)
+        end
+        { "graph" => artifacts }
+      end
+
+      def format_artifact(artifact)
+        dependencies = artifact.dependencies.inject([]) do |list, dependency|
+          list << format_dependency(dependency)
         end
 
-        def format_artifact(artifact)
-          dependencies = artifact.dependencies.inject([]) do |list, dependency|
-            list << format_dependency(dependency)
-          end
+        {
+          "name" => artifact.name,
+          "version" => artifact.version.to_s,
+          "dependencies" => dependencies,
+        }
+      end
 
-          {
-            "name" => artifact.name,
-            "version" => artifact.version.to_s,
-            "dependencies" => dependencies
-          }
-        end
+      def format_dependency(dependency)
+        {
+          "name" => dependency.name,
+          "constraint" => dependency.constraint.to_s,
+        }
+      end
 
-        def format_dependency(dependency)
-          {
-            "name" => dependency.name,
-            "constraint" => dependency.constraint.to_s
-          }
+      def format_demands(demands)
+        demands_list = demands.inject([]) do |list, demand|
+          list << format_demand(demand)
         end
+        { "demands" => demands_list }
+      end
 
-        def format_demands(demands)
-          demands_list = demands.inject([]) do |list, demand|
-            list << format_demand(demand)
-          end
-          { "demands" => demands_list }
-        end
+      def format_demand(demand)
+        {
+          "name" => demand[0],
+          "constraint" => demand[1],
+        }
+      end
 
-        def format_demand(demand)
-          {
-            "name" => demand[0],
-            "constraint" => demand[1]
-          }
+      def load_graph(artifacts_list)
+        graph = Solve::Graph.new
+        artifacts_list.each do |artifact_spec|
+          load_artifact(graph, artifact_spec)
         end
+        graph
+      end
 
-        def load_graph(artifacts_list)
-          graph = Solve::Graph.new
-          artifacts_list.each do |artifact_spec|
-            load_artifact(graph, artifact_spec)
-          end
-          graph
+      def load_artifact(graph, artifact_spec)
+        artifact = graph.artifact(artifact_spec["name"], artifact_spec["version"])
+        artifact_spec["dependencies"].each do |dependency_spec|
+          load_dependency(artifact, dependency_spec)
         end
+        artifact
+      end
 
-        def load_artifact(graph, artifact_spec)
-          artifact = graph.artifact(artifact_spec["name"], artifact_spec["version"])
-          artifact_spec["dependencies"].each do |dependency_spec|
-            load_dependency(artifact, dependency_spec)
-          end
-          artifact
-        end
+      def load_dependency(artifact, dependency_spec)
+        artifact.depends(dependency_spec["name"], dependency_spec["constraint"])
+      end
 
-        def load_dependency(artifact, dependency_spec)
-          artifact.depends(dependency_spec["name"], dependency_spec["constraint"])
+      def load_demands(demand_specs)
+        demand_specs.inject([]) do |list, demand_spec|
+          list << [demand_spec["name"], demand_spec["constraint"]]
         end
-
-        def load_demands(demand_specs)
-          demand_specs.inject([]) do |list, demand_spec|
-            list << [demand_spec["name"], demand_spec["constraint"]]
-          end
-        end
+      end
     end
   end
 end

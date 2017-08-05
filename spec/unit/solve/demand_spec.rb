@@ -1,7 +1,7 @@
-require 'spec_helper'
+require "spec_helper"
 
 describe Solve::Demand do
-  let(:solver) { double('solver') }
+  let(:solver) { double("solver") }
   let(:name) { "league" }
 
   describe "#initialize" do

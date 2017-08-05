@@ -30,8 +30,8 @@ module Solve
 
     def ==(other)
       other.is_a?(self.class) &&
-        self.name == other.name &&
-        self.constraint == other.constraint
+        name == other.name &&
+        constraint == other.constraint
     end
     alias_method :eql?, :==
   end

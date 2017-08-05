@@ -1,12 +1,12 @@
-require 'spec_helper'
+require "spec_helper"
 
 describe Solve::Artifact do
   let(:graph) do
-    package = double('package')
-    package_version = double('package_version')
+    package = double("package")
+    package_version = double("package_version")
     package_version.stub(:dependencies).and_return([])
     package.stub(:add_version).and_return(package_version)
-    double('graph', dep_graph: double('dep_graph', package: package))
+    double("graph", dep_graph: double("dep_graph", package: package))
   end
 
   let(:name) { "league" }
@@ -51,7 +51,7 @@ describe Solve::Artifact do
       [
         one,
         two,
-        three
+        three,
       ].shuffle
     end
 

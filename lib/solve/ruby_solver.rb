@@ -1,6 +1,6 @@
-require 'set'
-require 'molinillo'
-require_relative 'solver/serializer'
+require "set"
+require "molinillo"
+require_relative "solver/serializer"
 
 module Solve
   class RubySolver
@@ -45,7 +45,7 @@ module Solve
       @timeout_ms    = self.class.timeout
 
       @ui = options[:ui] # could be nil, but that's okay
-      @dependency_source = options[:dependency_source] || 'user-specified dependency'
+      @dependency_source = options[:dependency_source] || "user-specified dependency"
 
       @molinillo_graph = Molinillo::DependencyGraph.new
       @resolver = Molinillo::Resolver.new(self, self)
@@ -74,7 +74,7 @@ module Solve
 
       solved_graph = resolve_with_error_wrapping
 
-      solution =  solved_graph.map(&:payload)
+      solution = solved_graph.map(&:payload)
 
       unsorted_solution = solution.inject({}) do |stringified_soln, artifact|
         stringified_soln[artifact.name] = artifact.version.to_s if artifact
@@ -106,13 +106,13 @@ module Solve
     # Callback required by Molinillo, called when the solve starts
     # @return nil
     def before_resolution
-      @ui.say('Starting dependency resolution') if @ui
+      @ui.say("Starting dependency resolution") if @ui
     end
 
     # Callback required by Molinillo, called when the solve is complete.
     # @return nil
     def after_resolution
-      @ui.say('Finished dependency resolution') if @ui
+      @ui.say("Finished dependency resolution") if @ui
     end
 
     # Callback required by Molinillo, called when resolving every progress_rate
@@ -177,7 +177,7 @@ module Solve
     # @return [String] the name of the source of 'locked' dependencies, i.e.
     #   those passed to {Resolver#resolve} directly as the `base`
     def name_for_locking_dependency_source
-      'Lockfile'
+      "Lockfile"
     end
 
     # Returns whether this dependency, which has no possible matching
@@ -191,35 +191,35 @@ module Solve
 
     private
 
-      def resolve_with_error_wrapping
-        @resolver.resolve(demands, @molinillo_graph)
-      rescue Molinillo::VersionConflict, Molinillo::CircularDependencyError => e
-        raise Solve::Errors::NoSolutionError.new(e.message)
+    def resolve_with_error_wrapping
+      @resolver.resolve(demands, @molinillo_graph)
+    rescue Molinillo::VersionConflict, Molinillo::CircularDependencyError => e
+      raise Solve::Errors::NoSolutionError.new(e.message)
+    end
+
+    def build_sorted_solution(unsorted_solution)
+      nodes = Hash.new
+      unsorted_solution.each do |name, version|
+        nodes[name] = @graph.artifact(name, version).dependencies.map(&:name)
       end
 
-      def build_sorted_solution(unsorted_solution)
-        nodes = Hash.new
-        unsorted_solution.each do |name, version|
-          nodes[name] = @graph.artifact(name, version).dependencies.map(&:name)
-        end
-
-        # Modified from http://ruby-doc.org/stdlib-1.9.3/libdoc/tsort/rdoc/TSort.html
-        class << nodes
-          include TSort
-          alias tsort_each_node each_key
-          def tsort_each_child(node, &block)
-            fetch(node).each(&block)
-          end
-        end
-        begin
-          sorted_names = nodes.tsort
-        rescue TSort::Cyclic => e
-          raise Solve::Errors::UnsortableSolutionError.new(e, unsorted_solution)
-        end
-
-        sorted_names.map do |artifact|
-          [artifact, unsorted_solution[artifact]]
+      # Modified from http://ruby-doc.org/stdlib-1.9.3/libdoc/tsort/rdoc/TSort.html
+      class << nodes
+        include TSort
+        alias tsort_each_node each_key
+        def tsort_each_child(node, &block)
+          fetch(node).each(&block)
         end
       end
+      begin
+        sorted_names = nodes.tsort
+      rescue TSort::Cyclic => e
+        raise Solve::Errors::UnsortableSolutionError.new(e, unsorted_solution)
+      end
+
+      sorted_names.map do |artifact|
+        [artifact, unsorted_solution[artifact]]
+      end
+    end
   end
 end

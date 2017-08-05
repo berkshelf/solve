@@ -1,6 +1,6 @@
-require 'set'
-require 'solve/errors'
-require_relative 'solver/serializer'
+require "set"
+require "solve/errors"
+require_relative "solver/serializer"
 
 module Solve
   class GecodeSolver
@@ -16,7 +16,7 @@ module Solve
 
       # Attemp to load the dep_selector gem which this solver engine requires.
       def activate
-        require 'dep_selector'
+        require "dep_selector"
       rescue LoadError => e
         raise Errors::EngineNotAvailable, "dep_selector is not installed, GecodeSolver cannot be used (#{e})"
       end
@@ -84,126 +84,126 @@ module Solve
     private
 
       # DepSelector::DependencyGraph object representing the problem.
-      attr_reader :ds_graph
+    attr_reader :ds_graph
 
       # Timeout in milliseconds. Hardcoded to 1s for now.
-      attr_reader :timeout_ms
+    attr_reader :timeout_ms
 
       # Runs the solver with the set of demands given. If any DepSelector
       # exceptions are raised, they are rescued and re-raised
-      def solve_demands(demands_as_constraints)
-        selector = DepSelector::Selector.new(ds_graph, (timeout_ms / 1000.0))
-        selector.find_solution(demands_as_constraints, all_artifacts)
-      rescue DepSelector::Exceptions::InvalidSolutionConstraints => e
-        report_invalid_constraints_error(e)
-      rescue DepSelector::Exceptions::NoSolutionExists => e
-        report_no_solution_error(e)
-      rescue DepSelector::Exceptions::TimeBoundExceeded
-        # DepSelector timed out trying to find the solution. There may or may
-        # not be a solution.
-        raise Solve::Errors::NoSolutionError.new(
-          "The dependency constraints could not be solved in the time allotted.")
-      rescue DepSelector::Exceptions::TimeBoundExceededNoSolution
-        # DepSelector determined there wasn't a solution to the problem, then
-        # timed out trying to determine which constraints cause the conflict.
-        raise Solve::Errors::NoSolutionCauseUnknown.new(
-          "There is a dependency conflict, but the solver could not determine the precise cause in the time allotted.")
-      end
+    def solve_demands(demands_as_constraints)
+      selector = DepSelector::Selector.new(ds_graph, (timeout_ms / 1000.0))
+      selector.find_solution(demands_as_constraints, all_artifacts)
+    rescue DepSelector::Exceptions::InvalidSolutionConstraints => e
+      report_invalid_constraints_error(e)
+    rescue DepSelector::Exceptions::NoSolutionExists => e
+      report_no_solution_error(e)
+    rescue DepSelector::Exceptions::TimeBoundExceeded
+      # DepSelector timed out trying to find the solution. There may or may
+      # not be a solution.
+      raise Solve::Errors::NoSolutionError.new(
+        "The dependency constraints could not be solved in the time allotted.")
+    rescue DepSelector::Exceptions::TimeBoundExceededNoSolution
+      # DepSelector determined there wasn't a solution to the problem, then
+      # timed out trying to determine which constraints cause the conflict.
+      raise Solve::Errors::NoSolutionCauseUnknown.new(
+        "There is a dependency conflict, but the solver could not determine the precise cause in the time allotted.")
+    end
 
       # Maps demands to corresponding DepSelector::SolutionConstraint objects.
-      def demands_as_constraints
-        @demands_as_constraints ||= demands_array.map do |demands_item|
-          item_name, constraint_with_operator = demands_item
-          version_constraint = Semverse::Constraint.new(constraint_with_operator)
-          DepSelector::SolutionConstraint.new(ds_graph.package(item_name), version_constraint)
-        end
+    def demands_as_constraints
+      @demands_as_constraints ||= demands_array.map do |demands_item|
+        item_name, constraint_with_operator = demands_item
+        version_constraint = Semverse::Constraint.new(constraint_with_operator)
+        DepSelector::SolutionConstraint.new(ds_graph.package(item_name), version_constraint)
       end
+    end
 
       # Maps all artifacts in the graph to DepSelector::Package objects. If not
       # already done, artifacts are added to the ds_graph as a necessary side effect.
-      def all_artifacts
-        return @all_artifacts if @all_artifacts
-        populate_ds_graph!
-        @all_artifacts
-      end
+    def all_artifacts
+      return @all_artifacts if @all_artifacts
+      populate_ds_graph!
+      @all_artifacts
+    end
 
       # Converts artifacts to DepSelector::Package objects and adds them to the
       # DepSelector graph. This should only be called once; use #all_artifacts
       # to safely get the set of all artifacts.
-      def populate_ds_graph!
-        @all_artifacts = Set.new
+    def populate_ds_graph!
+      @all_artifacts = Set.new
 
-        graph.artifacts.each do |artifact|
-          add_artifact_to_ds_graph(artifact)
-          @all_artifacts << ds_graph.package(artifact.name)
-        end
+      graph.artifacts.each do |artifact|
+        add_artifact_to_ds_graph(artifact)
+        @all_artifacts << ds_graph.package(artifact.name)
+      end
+    end
+
+    def add_artifact_to_ds_graph(artifact)
+      package_version = ds_graph.package(artifact.name).add_version(artifact.version)
+      artifact.dependencies.each do |dependency|
+        dependency = DepSelector::Dependency.new(ds_graph.package(dependency.name), dependency.constraint)
+        package_version.dependencies << dependency
+      end
+      package_version
+    end
+
+    def report_invalid_constraints_error(e)
+      non_existent_cookbooks = e.non_existent_packages.inject([]) do |list, constraint|
+        list << constraint.package.name
       end
 
-      def add_artifact_to_ds_graph(artifact)
-        package_version = ds_graph.package(artifact.name).add_version(artifact.version)
-        artifact.dependencies.each do |dependency|
-          dependency = DepSelector::Dependency.new(ds_graph.package(dependency.name), dependency.constraint)
-          package_version.dependencies << dependency
-        end
-        package_version
+      constrained_to_no_versions = e.constrained_to_no_versions.inject([]) do |list, constraint|
+        list << [constraint.package.name, constraint.constraint.to_s]
       end
 
-      def report_invalid_constraints_error(e)
-        non_existent_cookbooks = e.non_existent_packages.inject([]) do |list, constraint|
-          list << constraint.package.name
-        end
+      raise Solve::Errors::NoSolutionError.new(
+        "Required artifacts do not exist at the desired version",
+        missing_artifacts: non_existent_cookbooks,
+        constraints_excluding_all_artifacts: constrained_to_no_versions
+      )
+    end
 
-        constrained_to_no_versions = e.constrained_to_no_versions.inject([]) do |list, constraint|
-          list << [constraint.package.name, constraint.constraint.to_s]
-        end
-
-        raise Solve::Errors::NoSolutionError.new(
-          "Required artifacts do not exist at the desired version",
-          missing_artifacts: non_existent_cookbooks,
-          constraints_excluding_all_artifacts: constrained_to_no_versions
-        )
+    def report_no_solution_error(e)
+      most_constrained_cookbooks = e.disabled_most_constrained_packages.inject([]) do |list, package|
+        list << "#{package.name} = #{package.versions.first}"
       end
 
-      def report_no_solution_error(e)
-        most_constrained_cookbooks = e.disabled_most_constrained_packages.inject([]) do |list, package|
-          list << "#{package.name} = #{package.versions.first.to_s}"
-        end
-
-        non_existent_cookbooks = e.disabled_non_existent_packages.inject([]) do |list, package|
-          list << package.name
-        end
-
-        raise Solve::Errors::NoSolutionError.new(
-          e.message,
-          unsatisfiable_demand: e.unsatisfiable_solution_constraint.to_s,
-          missing_artifacts: non_existent_cookbooks,
-          artifacts_with_no_satisfactory_version: most_constrained_cookbooks
-        )
+      non_existent_cookbooks = e.disabled_non_existent_packages.inject([]) do |list, package|
+        list << package.name
       end
 
-      def build_sorted_solution(unsorted_solution)
-        nodes = Hash.new
-        unsorted_solution.each do |name, version|
-          nodes[name] = @graph.artifact(name, version).dependencies.map(&:name)
-        end
+      raise Solve::Errors::NoSolutionError.new(
+        e.message,
+        unsatisfiable_demand: e.unsatisfiable_solution_constraint.to_s,
+        missing_artifacts: non_existent_cookbooks,
+        artifacts_with_no_satisfactory_version: most_constrained_cookbooks
+      )
+    end
 
-        # Modified from http://ruby-doc.org/stdlib-1.9.3/libdoc/tsort/rdoc/TSort.html
-        class << nodes
-          include TSort
-          alias tsort_each_node each_key
-          def tsort_each_child(node, &block)
-            fetch(node).each(&block)
-          end
-        end
-        begin
-          sorted_names = nodes.tsort
-        rescue TSort::Cyclic => e
-          raise Solve::Errors::UnsortableSolutionError.new(e, unsorted_solution)
-        end
+    def build_sorted_solution(unsorted_solution)
+      nodes = Hash.new
+      unsorted_solution.each do |name, version|
+        nodes[name] = @graph.artifact(name, version).dependencies.map(&:name)
+      end
 
-        sorted_names.map do |artifact|
-          [artifact, unsorted_solution[artifact]]
+      # Modified from http://ruby-doc.org/stdlib-1.9.3/libdoc/tsort/rdoc/TSort.html
+      class << nodes
+        include TSort
+        alias tsort_each_node each_key
+        def tsort_each_child(node, &block)
+          fetch(node).each(&block)
         end
       end
+      begin
+        sorted_names = nodes.tsort
+      rescue TSort::Cyclic => e
+        raise Solve::Errors::UnsortableSolutionError.new(e, unsorted_solution)
+      end
+
+      sorted_names.map do |artifact|
+        [artifact, unsorted_solution[artifact]]
+      end
+    end
   end
 end

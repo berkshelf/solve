@@ -1,4 +1,4 @@
-require 'spec_helper'
+require "spec_helper"
 
 describe Solve::Dependency do
   describe "#initialize" do
@@ -10,8 +10,8 @@ describe Solve::Dependency do
     end
   end
 
-  let(:artifact) { double('artifact') }
-  let(:name) { 'nginx' }
+  let(:artifact) { double("artifact") }
+  let(:name) { "nginx" }
   let(:constraint) { "~> 0.0.1" }
 
   subject { Solve::Dependency.new(artifact, name, constraint) }

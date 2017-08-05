@@ -49,7 +49,7 @@ module Solve
         s << "#{@message}\n"
         s << "Missing artifacts: #{missing_artifacts.join(',')}\n" unless missing_artifacts.empty?
         unless constraints_excluding_all_artifacts.empty?
-	  pretty = constraints_excluding_all_artifacts.map { |constraint| "(#{constraint[0]} #{constraint[1]})" }.join(',')
+          pretty = constraints_excluding_all_artifacts.map { |constraint| "(#{constraint[0]} #{constraint[1]})" }.join(",")
           s << "Constraints that match no available version: #{pretty}\n"
         end
         s << "Demand that cannot be met: #{unsatisfiable_demand}\n" if unsatisfiable_demand

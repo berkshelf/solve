@@ -1,13 +1,13 @@
-sudo: true
 language: ruby
-cache: bundler
-dist: precise
+cache:
+  - apt
+  - bundler
 
 before_install:
   - sudo apt-get update
   - gem install bundler --no-ri --no-rdoc
 
-install:  travis_wait bundle install --without dev --jobs 7 --retry=3
+install:  travis_wait bundle install --without guard --jobs 7 --retry=3
 script: "bundle exec thor spec"
 # prevent PR branches from running travis twice
 branches:
@@ -16,7 +16,10 @@ branches:
 
 matrix:
   include:
-    - rvm: 2.1.9
-    - rvm: 2.2.5
-    - rvm: 2.3.1
+    - rvm: 2.3.3
+    - rvm: 2.4.1
     - rvm: ruby-head
+    - rvm: 2.4.1
+      env:
+        CHEFSTYLE: 1
+      script: bundle exec rake style

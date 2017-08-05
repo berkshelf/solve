@@ -1,14 +1,14 @@
-require 'semverse'
+require "semverse"
 
 module Solve
-  require_relative 'solve/artifact'
-  require_relative 'solve/demand'
-  require_relative 'solve/dependency'
-  require_relative 'solve/version'
-  require_relative 'solve/errors'
-  require_relative 'solve/graph'
-  require_relative 'solve/ruby_solver'
-  require_relative 'solve/gecode_solver'
+  require_relative "solve/artifact"
+  require_relative "solve/demand"
+  require_relative "solve/dependency"
+  require_relative "solve/version"
+  require_relative "solve/errors"
+  require_relative "solve/graph"
+  require_relative "solve/ruby_solver"
+  require_relative "solve/gecode_solver"
 
   # We have to set the default engine here, it gets set on the wrong object if
   # we put this in the metaclass context below.
@@ -22,7 +22,6 @@ module Solve
     # @see #engine=
     # @return [Symbol]
     attr_reader :engine
-
 
     # Sets the solving backend engine. Solve supports 2 engines:
     # * `:ruby` - Molinillo, a pure ruby solver
@@ -77,4 +76,3 @@ module Solve
   end
 
 end
-

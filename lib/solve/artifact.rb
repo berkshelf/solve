@@ -74,7 +74,7 @@ module Solve
     #     .depends('ntp', '~> 1.3')
     #
     # @return [Solve::Artifact]
-    def depends(name, constraint = '>= 0.0.0')
+    def depends(name, constraint = ">= 0.0.0")
       unless dependency?(name, constraint)
         set_dependency(name, constraint)
       end
@@ -91,8 +91,8 @@ module Solve
     # @return [Boolean]
     def ==(other)
       other.is_a?(self.class) &&
-      self.name == other.name &&
-      self.version == other.version
+        name == other.name &&
+        version == other.version
     end
     alias_method :eql?, :==
 
@@ -100,17 +100,17 @@ module Solve
     #
     # @return [Integer]
     def <=>(other)
-      self.version <=> other.version
+      version <=> other.version
     end
 
     private
 
-      def get_dependency(name, constraint)
-        @dependencies["#{name}-#{constraint}"]
-      end
+    def get_dependency(name, constraint)
+      @dependencies["#{name}-#{constraint}"]
+    end
 
-      def set_dependency(name, constraint)
-        @dependencies["#{name}-#{constraint}"] = Dependency.new(self, name, constraint)
-      end
+    def set_dependency(name, constraint)
+      @dependencies["#{name}-#{constraint}"] = Dependency.new(self, name, constraint)
+    end
   end
 end
