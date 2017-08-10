@@ -1,5 +1,6 @@
 require "set"
 require "molinillo"
+require "molinillo/modules/specification_provider"
 require_relative "solver/serializer"
 
 module Solve
@@ -14,7 +15,7 @@ module Solve
         seconds.to_i * 1_000
       end
 
-      # For optinal solver engines, this attempts to load depenencies. The
+      # For optional solver engines, this attempts to load depenencies. The
       # RubySolver is a non-optional component, so this is a no-op
       def activate
         true
@@ -51,6 +52,8 @@ module Solve
       @resolver = Molinillo::Resolver.new(self, self)
     end
 
+    include Molinillo::SpecificationProvider
+
     # The problem demands given as Demand model objects
     # @return [Array<Solve::Demand>]
     def demands
@@ -77,7 +80,7 @@ module Solve
       solution = solved_graph.map(&:payload)
 
       unsorted_solution = solution.inject({}) do |stringified_soln, artifact|
-        stringified_soln[artifact.name] = artifact.version.to_s if artifact
+        stringified_soln[artifact.name] = artifact.version.to_s
         stringified_soln
       end
 
@@ -123,7 +126,7 @@ module Solve
 
     # Callback required by Molinillo, gives debug information about the solution
     # @return nil
-    def debug(current_resolver_depth)
+    def debug(current_resolver_depth = 0)
       # debug info will be returned if you call yield here, but it seems to be
       # broken in current Molinillo
       @ui.say(yield) if @ui
@@ -143,7 +146,7 @@ module Solve
         [
           activated.vertex_named(name).payload ? 0 : 1,
           conflicts[name] ? 0 : 1,
-          activated.vertex_named(name).payload ? 0 : graph.versions(dependency.name).count,
+          search_for(dependency).count,
         ]
       end
     end
@@ -159,8 +162,28 @@ module Solve
     # Callback required by Molinillo
     # @return [Boolean]
     def requirement_satisfied_by?(requirement, activated, spec)
-      requirement.constraint.satisfies?(spec.version)
+      version = spec.version
+      return false unless requirement.constraint.satisfies?(version)
+      shared_possibility_versions = possibility_versions(requirement, activated)
+      return false if !shared_possibility_versions.empty? && !shared_possibility_versions.include?(version)
+      true
     end
+
+    def possibility_versions(requirement, activated)
+      activated.vertices.values.flat_map do |vertex|
+
+        next unless vertex.payload
+
+        next unless vertex.name == requirement.name
+
+        if vertex.payload.respond_to?(:possibilities)
+          vertex.payload.possibilities.map(&:version)
+        else
+          vertex.payload.version
+        end
+      end.compact
+    end
+    private :possibility_versions
 
     # Callback required by Molinillo
     # @return [Array<Solve::Dependency>] the dependencies of the given artifact
@@ -172,12 +195,6 @@ module Solve
     #   those passed to {Resolver#resolve} directly.
     def name_for_explicit_dependency_source
       @dependency_source
-    end
-
-    # @return [String] the name of the source of 'locked' dependencies, i.e.
-    #   those passed to {Resolver#resolve} directly as the `base`
-    def name_for_locking_dependency_source
-      "Lockfile"
     end
 
     # Returns whether this dependency, which has no possible matching
