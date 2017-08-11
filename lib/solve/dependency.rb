@@ -27,12 +27,14 @@ module Solve
     def to_s
       "#{name} (#{constraint})"
     end
+    alias :inspect :to_s
 
     # @param [Object] other
     #
     # @return [Boolean]
     def ==(other)
       other.is_a?(self.class) &&
+        name == other.name &&
         artifact == other.artifact &&
         constraint == other.constraint
     end

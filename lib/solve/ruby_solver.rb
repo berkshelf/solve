@@ -1,5 +1,6 @@
 require "set"
 require "molinillo"
+require "molinillo/modules/specification_provider"
 require_relative "solver/serializer"
 
 module Solve
@@ -14,7 +15,7 @@ module Solve
         seconds.to_i * 1_000
       end
 
-      # For optinal solver engines, this attempts to load depenencies. The
+      # For optional solver engines, this attempts to load depenencies. The
       # RubySolver is a non-optional component, so this is a no-op
       def activate
         true
@@ -77,7 +78,7 @@ module Solve
       solution = solved_graph.map(&:payload)
 
       unsorted_solution = solution.inject({}) do |stringified_soln, artifact|
-        stringified_soln[artifact.name] = artifact.version.to_s if artifact
+        stringified_soln[artifact.name] = artifact.version.to_s
         stringified_soln
       end
 
@@ -123,32 +124,22 @@ module Solve
 
     # Callback required by Molinillo, gives debug information about the solution
     # @return nil
-    def debug(current_resolver_depth)
+    def debug(current_resolver_depth = 0)
       # debug info will be returned if you call yield here, but it seems to be
       # broken in current Molinillo
       @ui.say(yield) if @ui
     end
 
-    # Callback required by Molinillo
-    # @return [String] the dependency's name
-    def name_for(dependency)
-      dependency.name
-    end
+    include Molinillo::SpecificationProvider
 
     # Callback required by Molinillo
-    # @return [Array<Solve::Dependency>] the dependencies sorted by preference.
-    def sort_dependencies(dependencies, activated, conflicts)
-      dependencies.sort_by do |dependency|
-        name = name_for(dependency)
-        [
-          activated.vertex_named(name).payload ? 0 : 1,
-          conflicts[name] ? 0 : 1,
-          activated.vertex_named(name).payload ? 0 : graph.versions(dependency.name).count,
-        ]
-      end
-    end
-
-    # Callback required by Molinillo
+    # Search for the specifications that match the given dependency.
+    # The specifications in the returned array will be considered in reverse
+    # order, so the latest version ought to be last.
+    # @note This method should be 'pure', i.e. the return value should depend
+    #   only on the `dependency` parameter.
+    #
+    # @param [Object] dependency
     # @return [Array<Solve::Artifact>] the artifacts that match the dependency.
     def search_for(dependency)
       # This array gets mutated by Molinillo; it's okay because sort returns a
@@ -157,29 +148,101 @@ module Solve
     end
 
     # Callback required by Molinillo
-    # @return [Boolean]
-    def requirement_satisfied_by?(requirement, activated, spec)
-      requirement.constraint.satisfies?(spec.version)
-    end
-
-    # Callback required by Molinillo
+    # Returns the dependencies of `specification`.
+    # @note This method should be 'pure', i.e. the return value should depend
+    #   only on the `specification` parameter.
+    #
+    # @param [Object] specification
     # @return [Array<Solve::Dependency>] the dependencies of the given artifact
     def dependencies_for(specification)
       specification.dependencies
     end
 
+    # Callback required by Molinillo
+    # Determines whether the given `requirement` is satisfied by the given
+    # `spec`, in the context of the current `activated` dependency graph.
+    #
+    # @param [Object] requirement
+    # @param [DependencyGraph] activated the current dependency graph in the
+    #   resolution process.
+    # @param [Object] spec
+    # @return [Boolean] whether `requirement` is satisfied by `spec` in the
+    #   context of the current `activated` dependency graph.
+    def requirement_satisfied_by?(requirement, activated, spec)
+      version = spec.version
+      return false unless requirement.constraint.satisfies?(version)
+      shared_possibility_versions = possibility_versions(requirement, activated)
+      return false if !shared_possibility_versions.empty? && !shared_possibility_versions.include?(version)
+      true
+    end
+
+    # Searches the current dependency graph to find previously activated
+    # requirements for the current artifact.
+    #
+    # @param [Object] requirement
+    # @param [DependencyGraph] activated the current dependency graph in the
+    #   resolution process.
+    # @return [Array<Semverse::Version> the list of currently activated versions
+    # of this requirement
+    def possibility_versions(requirement, activated)
+      activated.vertices.values.flat_map do |vertex|
+
+        next unless vertex.payload
+
+        next unless vertex.name == requirement.name
+
+        if vertex.payload.respond_to?(:possibilities)
+          vertex.payload.possibilities.map(&:version)
+        else
+          vertex.payload.version
+        end
+      end.compact
+    end
+    private :possibility_versions
+
+    # Callback required by Molinillo
+    # Returns the name for the given `dependency`.
+    # @note This method should be 'pure', i.e. the return value should depend
+    #   only on the `dependency` parameter.
+    #
+    # @param [Object] dependency
+    # @return [String] the name for the given `dependency`.
+    def name_for(dependency)
+      dependency.name
+    end
+
+    # Callback required by Molinillo
     # @return [String] the name of the source of explicit dependencies, i.e.
     #   those passed to {Resolver#resolve} directly.
     def name_for_explicit_dependency_source
       @dependency_source
     end
 
-    # @return [String] the name of the source of 'locked' dependencies, i.e.
-    #   those passed to {Resolver#resolve} directly as the `base`
-    def name_for_locking_dependency_source
-      "Lockfile"
+    # Callback required by Molinillo
+    # Sort dependencies so that the ones that are easiest to resolve are first.
+    # Easiest to resolve is (usually) defined by:
+    #   1) Is this dependency already activated?
+    #   2) How relaxed are the requirements?
+    #   3) Are there any conflicts for this dependency?
+    #   4) How many possibilities are there to satisfy this dependency?
+    #
+    # @param [Array<Object>] dependencies
+    # @param [DependencyGraph] activated the current dependency graph in the
+    #   resolution process.
+    # @param [{String => Array<Conflict>}] conflicts
+    # @return [Array<Solve::Dependency>] the dependencies sorted by preference.
+    def sort_dependencies(dependencies, activated, conflicts)
+      dependencies.sort_by do |dependency|
+        name = name_for(dependency)
+        [
+          activated.vertex_named(name).payload ? 0 : 1,
+          conflicts[name] ? 0 : 1,
+          search_for(dependency).count,
+        ]
+      end
     end
 
+    # Callback required by Molinillo
     # Returns whether this dependency, which has no possible matching
     # specifications, can safely be ignored.
     #
