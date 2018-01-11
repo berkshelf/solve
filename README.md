@@ -52,11 +52,11 @@ Solve.it!(graph, [['nginx', '>= 0.100.0']], sorted: true)
 
 Solve supports two different resolvers. A pure Ruby solver implemented using [Molinillo](https://github.com/CocoaPods/Molinillo) and the same dependency resolver the Chef Server uses, [dep-selector](https://github.com/chef/dep-selector), which is a Ruby C extension for [Gecode](https://github.com/ampl/gecode).
 
-You can set the resolver by calling `Solver.engine=` with the symbol `:ruby` or `:gecode`.
+You can set the resolver by calling `Solve.engine=` with the symbol `:ruby` or `:gecode`.
 
 ```ruby
-Solver.engine = :ruby
-Solver.engine = :gecode
+Solve.engine = :ruby
+Solve.engine = :gecode
 ```
 
 The Ruby solver is installed and enabled by default. If you'd like to use the Gecode solver you can do so by installing the dep-selector gem or adding it to your Gemfile:
