@@ -10,7 +10,7 @@ module Solve
       #
       # @return [Integer]
       def timeout
-        seconds = 30 unless seconds = ENV["SOLVE_TIMEOUT"]
+        seconds = 30 unless ( seconds = ENV["SOLVE_TIMEOUT"] )
         seconds.to_i * 1_000
       end
 

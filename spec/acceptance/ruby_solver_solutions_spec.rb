@@ -152,9 +152,9 @@ describe "Solutions when using the ruby solver" do
 
     demands = [["bottom", "1.0.0"], ["middle", "1.0.0"]]
 
-    expect { Solve.it!(graph, demands, { sorted: true } ) }.to raise_error { |error|
+    expect { Solve.it!(graph, demands, { sorted: true } ) }.to raise_error do |error|
       error.should be_a(Solve::Errors::NoSolutionError)
-    }
+    end
   end
 
   it "gives an empty solution when there are no demands" do

@@ -160,9 +160,9 @@ describe "Solutions", :gecode do
 
     demands = [["bottom", "1.0.0"], ["middle", "1.0.0"]]
 
-    expect { Solve.it!(graph, demands, { sorted: true } ) }.to raise_error { |error|
+    expect { Solve.it!(graph, demands, { sorted: true } ) }.to raise_error do |error|
       error.should be_a(Solve::Errors::NoSolutionError)
-    }
+    end
   end
 
   it "gives an empty solution when there are no demands" do
@@ -302,14 +302,14 @@ describe "Solutions", :gecode do
 
         demands = [["A"]]
 
-        expect { Solve.it!(graph, demands, { sorted: true } ) }.to raise_error { |error|
+        expect { Solve.it!(graph, demands, { sorted: true } ) }.to raise_error do |error|
           error.should be_a(Solve::Errors::UnsortableSolutionError)
           error.unsorted_solution.should eql({
             "A" => "1.0.0",
             "B" => "1.0.0",
             "C" => "1.0.0",
           })
-        }
+        end
       end
     end
   end

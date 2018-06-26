@@ -185,7 +185,7 @@ module Solve
 
     # @return [Symbol]
     def operator_type
-      unless type = OPERATOR_TYPES.fetch(operator)
+      unless ( type = OPERATOR_TYPES.fetch(operator) )
         raise "unknown operator type: #{operator}"
       end
 
