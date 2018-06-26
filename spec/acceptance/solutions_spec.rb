@@ -160,7 +160,7 @@ describe "Solutions", :gecode do
 
     demands = [["bottom", "1.0.0"], ["middle", "1.0.0"]]
 
-    expect { Solve.it!(graph, demands, { :sorted => true } ) }.to raise_error { |error|
+    expect { Solve.it!(graph, demands, { sorted: true } ) }.to raise_error { |error|
       error.should be_a(Solve::Errors::NoSolutionError)
     }
   end
@@ -260,7 +260,7 @@ describe "Solutions", :gecode do
 
         demands = [["A"]]
 
-        result = Solve.it!(graph, demands, { :sorted => true })
+        result = Solve.it!(graph, demands, { sorted: true })
 
         result.should eql([
           ["C", "1.0.0"],
@@ -282,7 +282,7 @@ describe "Solutions", :gecode do
 
         demands = [["A"], ["B"]]
 
-        result = Solve.it!(graph, demands, { :sorted => true } )
+        result = Solve.it!(graph, demands, { sorted: true } )
 
         result.should eql([
           ["C", "1.0.0"],
@@ -302,7 +302,7 @@ describe "Solutions", :gecode do
 
         demands = [["A"]]
 
-        expect { Solve.it!(graph, demands, { :sorted => true } ) }.to raise_error { |error|
+        expect { Solve.it!(graph, demands, { sorted: true } ) }.to raise_error { |error|
           error.should be_a(Solve::Errors::UnsortableSolutionError)
           error.unsorted_solution.should eql({
             "A" => "1.0.0",
