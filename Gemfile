@@ -13,7 +13,7 @@ group :development do
   gem "fuubar"
   gem "yard"
   gem "redcarpet"
-  gem "chefstyle", git: "https://github.com/chef/chefstyle"
+  gem "chefstyle", git: "https://github.com/chef/chefstyle.git", branch: "master"
 end
 
 group :guard do

@@ -5,7 +5,7 @@ require File.expand_path("../large_graph_no_solution", __FILE__)
 require File.expand_path("../opscode_ci_graph", __FILE__)
 
 PROBLEM = OpscodeCiGraph
-#PROBLEM = LargeGraphNoSolution
+# PROBLEM = LargeGraphNoSolution
 N = 100
 
 def demands
@@ -40,7 +40,7 @@ def solve_gecode
   Solve::GecodeSolver.new(STATIC_GRAPH, demands).resolve({})
 rescue Solve::Errors::NoSolutionError => e
   # Uncomment to look at the error messages. Probably only useful if N == 1
-  #puts e
+  # puts e
   e
 end
 
@@ -48,7 +48,7 @@ def solve_ruby
   Solve::RubySolver.new(STATIC_GRAPH, demands).resolve({})
 rescue Solve::Errors::NoSolutionError => e
   # Uncomment to look at the error messages. Probably only useful if N == 1
-  #puts e
+  # puts e
   e
 end
 

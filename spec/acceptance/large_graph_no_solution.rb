@@ -49,7 +49,7 @@ module LargeGraphNoSolution
              ["vim", "= 1.1.3"],
              ["virtualbox-cookbook", "= 1.0.3"],
              ["windows", "= 1.30.1"],
-             ["yum", "= 2.4.5"]]
+             ["yum", "= 2.4.5"]].freeze
   ARTIFACTS =
     { "nodejs" =>
       [{ name: "nodejs", version: "0.1.0", dependencies: [] },
@@ -17441,5 +17441,5 @@ module LargeGraphNoSolution
          version: "0.2.0",
          dependencies: [["erlang", ">= 1.2.0"], ["apt", ">= 1.7.0"]] },
        { name: "zotonic", version: "0.1.0", dependencies: [] }],
-      "zpool" => [{ name: "zpool", version: "0.0.1", dependencies: [] }] }
+      "zpool" => [{ name: "zpool", version: "0.0.1", dependencies: [] }] }.freeze
 end
