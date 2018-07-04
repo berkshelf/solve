@@ -26,7 +26,7 @@ module OpscodeCiGraph
      ["windows", ">= 0.0.0"],
      ["wix", ">= 0.0.0"],
      ["yum", ">= 0.0.0"],
-     ["yum-epel", ">= 0.0.0"]]
+     ["yum-epel", ">= 0.0.0"]].freeze
   ARTIFACTS =
     { "7-zip" =>
       [{ name: "7-zip",
@@ -17322,5 +17322,5 @@ module OpscodeCiGraph
          version: "0.2.0",
          dependencies: [["erlang", ">= 1.2.0"], ["apt", ">= 1.7.0"]] },
        { name: "zotonic", version: "0.1.0", dependencies: [] }],
-      "zpool" => [{ name: "zpool", version: "0.0.1", dependencies: [] }] }
+      "zpool" => [{ name: "zpool", version: "0.0.1", dependencies: [] }] }.freeze
 end

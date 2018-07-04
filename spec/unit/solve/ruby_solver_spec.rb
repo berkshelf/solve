@@ -88,10 +88,10 @@ describe Solve::RubySolver do
 
       it "raises an error detailing the missing artifacts" do
         expect(error).to be_a_kind_of(Solve::Errors::NoSolutionError)
-        expected_error = <<-ERROR_MESSAGE
-Unable to satisfy the following requirements:
+        expected_error = <<~ERROR_MESSAGE
+          Unable to satisfy the following requirements:
 
-- `Z (>= 0.0.0)` required by `Berksfile`
+          - `Z (>= 0.0.0)` required by `Berksfile`
 ERROR_MESSAGE
         expect(error.to_s).to eq(expected_error)
       end
@@ -108,10 +108,10 @@ ERROR_MESSAGE
 
       it "raises an error detailing the missing artifacts" do
         expect(error).to be_a_kind_of(Solve::Errors::NoSolutionError)
-        expected_error = <<-ERROR_MESSAGE
-Unable to satisfy the following requirements:
+        expected_error = <<~ERROR_MESSAGE
+          Unable to satisfy the following requirements:
 
-- `A (> 1.0.0)` required by `Berksfile`
+          - `A (> 1.0.0)` required by `Berksfile`
 ERROR_MESSAGE
         expect(error.to_s).to eq(expected_error)
       end
@@ -132,11 +132,11 @@ ERROR_MESSAGE
 
       it "raises an error detailing the missing artifacts" do
         expect(error).to be_a_kind_of(Solve::Errors::NoSolutionError)
-        expected_error = <<-ERROR_MESSAGE
-Unable to satisfy the following requirements:
+        expected_error = <<~ERROR_MESSAGE
+          Unable to satisfy the following requirements:
 
-- `D (= 1.0.0)` required by `B-1.0.0`
-- `D (= 2.0.0)` required by `C-1.0.0`
+          - `D (= 1.0.0)` required by `B-1.0.0`
+          - `D (= 2.0.0)` required by `C-1.0.0`
 ERROR_MESSAGE
         expect(error.to_s).to eq(expected_error)
       end
