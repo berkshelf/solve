@@ -7,10 +7,8 @@ Gem::Specification.new do |s|
   s.description           = %q{A Ruby version constraint solver}
   s.summary               = %q{A Ruby version constraint solver implementing Semantic Versioning 2.0.0-rc.1}
   s.homepage              = "https://github.com/berkshelf/solve"
-  s.license               = "Apache 2.0"
-  s.files                 = `git ls-files`.split($\)
-  s.executables           = s.files.grep(%r{^bin/}).map { |f| File.basename(f) }
-  s.test_files            = s.files.grep(%r{^spec/})
+  s.license               = "Apache-2.0"
+  s.files                 = %w{LICENSE} + Dir.glob("lib/**/*")
   s.name                  = "solve"
   s.require_paths         = ["lib"]
   s.version               = Solve::VERSION
