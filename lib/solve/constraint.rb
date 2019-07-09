@@ -128,12 +128,12 @@ module Solve
 
     OPERATOR_TYPES = {
       "~>" => :approx,
-      "~"  => :approx,
+      "~" => :approx,
       ">=" => :greater_than_equal,
       "<=" => :less_than_equal,
-      "="  => :equal,
-      ">"  => :greater_than,
-      "<"  => :less_than,
+      "=" => :equal,
+      ">" => :greater_than,
+      "<" => :less_than,
     }.freeze
 
     COMPARE_FUNS = {
@@ -145,7 +145,7 @@ module Solve
       equal: method(:compare_equal),
     }.freeze
 
-    REGEXP = /^(#{OPERATOR_TYPES.keys.join('|')})\s?(.+)$/
+    REGEXP = /^(#{OPERATOR_TYPES.keys.join('|')})\s?(.+)$/.freeze
 
     attr_reader :operator
     attr_reader :major

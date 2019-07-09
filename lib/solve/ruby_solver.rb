@@ -171,8 +171,10 @@ module Solve
     def requirement_satisfied_by?(requirement, activated, spec)
       version = spec.version
       return false unless requirement.constraint.satisfies?(version)
+
       shared_possibility_versions = possibility_versions(requirement, activated)
       return false if !shared_possibility_versions.empty? && !shared_possibility_versions.include?(version)
+
       true
     end
 
@@ -261,7 +263,7 @@ module Solve
     end
 
     def build_sorted_solution(unsorted_solution)
-      nodes = Hash.new
+      nodes = {}
       unsorted_solution.each do |name, version|
         nodes[name] = @graph.artifact(name, version).dependencies.map(&:name)
       end

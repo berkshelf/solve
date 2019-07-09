@@ -102,12 +102,14 @@ module Solve
       # DepSelector timed out trying to find the solution. There may or may
       # not be a solution.
       raise Solve::Errors::NoSolutionError.new(
-        "The dependency constraints could not be solved in the time allotted.")
+        "The dependency constraints could not be solved in the time allotted."
+      )
     rescue DepSelector::Exceptions::TimeBoundExceededNoSolution
       # DepSelector determined there wasn't a solution to the problem, then
       # timed out trying to determine which constraints cause the conflict.
       raise Solve::Errors::NoSolutionCauseUnknown.new(
-        "There is a dependency conflict, but the solver could not determine the precise cause in the time allotted.")
+        "There is a dependency conflict, but the solver could not determine the precise cause in the time allotted."
+      )
     end
 
       # Maps demands to corresponding DepSelector::SolutionConstraint objects.
@@ -123,6 +125,7 @@ module Solve
       # already done, artifacts are added to the ds_graph as a necessary side effect.
     def all_artifacts
       return @all_artifacts if @all_artifacts
+
       populate_ds_graph!
       @all_artifacts
     end
@@ -182,7 +185,7 @@ module Solve
     end
 
     def build_sorted_solution(unsorted_solution)
-      nodes = Hash.new
+      nodes = {}
       unsorted_solution.each do |name, version|
         nodes[name] = @graph.artifact(name, version).dependencies.map(&:name)
       end

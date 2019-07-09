@@ -41,6 +41,7 @@ module Solve
       else
         engine_class.activate
       end
+
       @engine = selected_engine
     end
 
