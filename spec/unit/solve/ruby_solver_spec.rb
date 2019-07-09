@@ -92,7 +92,7 @@ describe Solve::RubySolver do
           Unable to satisfy the following requirements:
 
           - `Z (>= 0.0.0)` required by `Berksfile`
-ERROR_MESSAGE
+        ERROR_MESSAGE
         expect(error.to_s).to eq(expected_error)
       end
     end
@@ -112,7 +112,7 @@ ERROR_MESSAGE
           Unable to satisfy the following requirements:
 
           - `A (> 1.0.0)` required by `Berksfile`
-ERROR_MESSAGE
+        ERROR_MESSAGE
         expect(error.to_s).to eq(expected_error)
       end
     end
@@ -137,7 +137,7 @@ ERROR_MESSAGE
 
           - `D (= 1.0.0)` required by `B-1.0.0`
           - `D (= 2.0.0)` required by `C-1.0.0`
-ERROR_MESSAGE
+        ERROR_MESSAGE
         expect(error.to_s).to eq(expected_error)
       end
     end
