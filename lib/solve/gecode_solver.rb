@@ -1,5 +1,5 @@
 require "set"
-require "solve/errors"
+require_relative "errors"
 require_relative "solver/serializer"
 
 module Solve

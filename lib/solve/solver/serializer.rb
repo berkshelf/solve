@@ -1,5 +1,5 @@
 require "json"
-require "solve/graph"
+require_relative "../graph"
 
 module Solve
 
