@@ -1,4 +1,4 @@
-require "json"
+require "json" unless defined?(JSON)
 require_relative "../graph"
 
 module Solve

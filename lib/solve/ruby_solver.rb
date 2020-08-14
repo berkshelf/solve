@@ -1,4 +1,4 @@
-require "set"
+require "set" unless defined?(Set)
 require "molinillo"
 require "molinillo/modules/specification_provider"
 require_relative "solver/serializer"
