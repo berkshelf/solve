@@ -1,4 +1,4 @@
-require "benchmark"
+require "benchmark" unless defined?(Benchmark)
 require "solve"
 require "solve/gecode_solver"
 require File.expand_path("../large_graph_no_solution", __FILE__)
@@ -16,7 +16,7 @@ def artifacts
   PROBLEM::ARTIFACTS
 end
 
-require "pp"
+require "pp" unless defined?(PP)
 
 def create_graph
   graph = Solve::Graph.new

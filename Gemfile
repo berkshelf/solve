@@ -22,7 +22,7 @@ group :guard do
   gem "guard-yard"
   gem "coolline"
 
-  require "rbconfig"
+  require "rbconfig" unless defined?(RbConfig)
 
   if RbConfig::CONFIG["target_os"] =~ /darwin/i
     gem "ruby_gntp", require: false
