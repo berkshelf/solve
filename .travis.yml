@@ -16,11 +16,11 @@ branches:
 
 matrix:
   include:
-    - rvm: 2.3.8
-    - rvm: 2.4.5
-    - rvm: 2.5.3
+    - rvm: 2.3
+    - rvm: 2.4
+    - rvm: 2.5
     - rvm: ruby-head
-    - rvm: 2.5.3
+    - rvm: 2.5
       env:
         CHEFSTYLE: 1
       script: bundle exec rake style
