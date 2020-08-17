@@ -1,4 +1,4 @@
-require "set"
+require "set" unless defined?(Set)
 require_relative "errors"
 require_relative "solver/serializer"
 
