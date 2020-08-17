@@ -1,8 +1,8 @@
 require "benchmark"
 require "solve"
 require "solve/gecode_solver"
-require File.expand_path("../large_graph_no_solution", __FILE__)
-require File.expand_path("../opscode_ci_graph", __FILE__)
+require_relative "large_graph_no_solution"
+require_relative "opscode_ci_graph"
 
 PROBLEM = OpscodeCiGraph
 # PROBLEM = LargeGraphNoSolution
